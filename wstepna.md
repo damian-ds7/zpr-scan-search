@@ -21,6 +21,25 @@ Program będzie składał się z nastepujących komponentów.
 
 ### OCR
 
+Moduł OCR zostanie zaimplementowany w języku Python i będzie oparty na silniku
+Tesseract (wykorzystując bibliotekę `pytesseract`). Jego zadaniem jest
+przekształcenie materiałów wejściowych (skanów, zdjęć, PDF-ów) w tekst możliwy
+do późniejszego indeksowania i przeszukiwania.
+
+- **Przetwarzanie obrazów**: Surowe skany lub zdjęcia będą poddawane wstępnej
+  obróbce przy użyciu biblioteki `OpenCV`. Celem jest optymalizacja jakości
+  obrazu (np. poprzez odszumianie czy poprawę kontrastu), co bezpośrednio
+  przekłada się na wyższą skuteczność rozpoznawania znaków.
+- **Obsługa plików PDF**: Moduł będzie oferował dwa podejścia do plików PDF. W
+  pierwszej kolejności spróbuje wyodrębnić tekst bezpośrednio z warstwy
+  tekstowej dokumentu (przy użyciu bibliotek takich jak `PyMuPDF` lub
+  `pdfplumber`). Jeśli plik okaże się skanem (zawierającym jedynie obrazy),
+  system automatycznie skonwertuje strony na format graficzny (np. za pomocą
+  `pdf2image`) i podda je pełnemu procesowi OCR.
+- **Ekstrakcja metadanych**: Poza samym tekstem, moduł będzie odpowiedzialny za
+  wyznaczanie pozycji słów na stronie. Dane te są niezbędne dla modułu
+  przeszukiwania, aby mógł on wskazać dokładną lokalizację trafień.
+
 ### Cache
 
 Program będzie cachował informacje w plikach ukrytych za pomocą
