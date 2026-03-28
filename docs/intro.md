@@ -6,8 +6,6 @@ Tomasz Smoleń
 
 Damian D'Souza
 
-______________________________________________________________________
-
 ## 1. Opis zadania
 
 Celem projektu jest stworzenie narzędzia terminalowego umożliwiającego
@@ -31,8 +29,6 @@ Program będzie udostępniał trzy główne funkcjonalności:
 | Indeksowanie i przeszukiwanie | Rust                                                     |
 | Ekstrakcja tekstu i OCR       | Python (`pytesseract`, `OpenCV`, `PyMuPDF`, `pdf2image`) |
 
-______________________________________________________________________
-
 ## 2. Podział na podproblemy
 
 ### 2.1 Klasyfikacja i wczytanie pliku wejściowego
@@ -46,8 +42,6 @@ przekazuje ją do modułu Pythona, który klasyfikuje każdy plik – sprawdza, 
 PDF zawiera warstwę tekstową, czy jest skanem wymagającym OCR. Użyta biblioteka:
 `PyMuPDF`.
 
-______________________________________________________________________
-
 ### 2.2 Ekstrakcja tekstu z pliku PDF z warstwą tekstową
 
 **Problem:** Pliki PDF tworzone cyfrowo zawierają wbudowaną warstwę tekstową,
@@ -55,8 +49,6 @@ którą można odczytać bezpośrednio – bez angażowania OCR.
 
 **Rozwiązanie:** Tekst wraz z pozycjami słów na stronie zostanie wydobyty
 bezpośrednio z warstwy tekstowej dokumentu. Użyta biblioteka: `PyMuPDF`.
-
-______________________________________________________________________
 
 ### 2.3 Ekstrakcja tekstu z obrazów i skanów PDF (OCR)
 
@@ -69,8 +61,6 @@ wraz z pozycjami słów za pomocą OCR. W przypadku skanów w formacie PDF stron
 zostaną uprzednio skonwertowane do formatu graficznego. Użyte biblioteki:
 `OpenCV`, `pdf2image`, `pytesseract` (silnik Tesseract).
 
-______________________________________________________________________
-
 ### 2.4 Obsługa dokumentów mieszanych (PDF z osadzonymi obrazami)
 
 **Problem:** Dokumenty mogą zawierać zarówno strony z warstwą tekstową, jak i
@@ -80,8 +70,6 @@ strony będące skanami lub zawierające osadzone obrazy z tekstem.
 na odpowiednią ścieżkę przetwarzania – bezpośrednią ekstrakcję tekstu lub OCR.
 Wyniki z obu ścieżek są scalane w ujednolicony format. Użyta biblioteka:
 `PyMuPDF`.
-
-______________________________________________________________________
 
 ### 2.5 Indeksowanie i cache
 
@@ -108,8 +96,6 @@ Przykładowa struktura indeksu pozycyjnego w pliku cache:
 Gdzie pierwsza wartość to liczba wystąpień, a druga to lista pozycji w
 dokumencie.
 
-______________________________________________________________________
-
 ### 2.6 Przeszukiwanie tekstu
 
 **Problem:** Użytkownik podaje zapytanie (jedno lub kilka słów) i oczekuje listy
@@ -123,8 +109,6 @@ wystąpień, minimalizując tym samym liczbę porównań. Tokeny zapytania są
 normalizowane (małe litery, opcjonalnie sprowadzanie polskich znaków
 diakrytycznych do ich odpowiedników ASCII). Wynikiem jest lista trafień z nazwą
 pliku, numerem strony i koordynatami.
-
-______________________________________________________________________
 
 ### 2.7 Interfejs wiersza poleceń (CLI)
 
