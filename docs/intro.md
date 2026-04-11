@@ -2,8 +2,7 @@
 
 **Dokumentacja wstępna projektu**
 
-Tomasz Smoleń
-
+Tomasz Smoleń\
 Damian D'Souza
 
 ## 1. Opis zadania
@@ -23,11 +22,10 @@ Program będzie udostępniał trzy główne funkcjonalności:
 
 ### Stos technologiczny
 
-| Warstwa                       | Technologia                                              |
-| ----------------------------- | -------------------------------------------------------- |
-| Interfejs CLI i logika główna | Rust (`clap`)                                            |
-| Indeksowanie i przeszukiwanie | Rust                                                     |
-| Ekstrakcja tekstu i OCR       | Python (`pytesseract`, `OpenCV`, `PyMuPDF`, `pdf2image`) |
+| Warstwa              | Technologia                            |
+| -------------------- | -------------------------------------- |
+| Interfejs CLI        | Python (`clip`)                        |
+| Logika przetwarzania | Rust (biblioteka wywoływana z Pythona) |
 
 ## 2. Podział na podproblemy
 
@@ -37,39 +35,36 @@ Program będzie udostępniał trzy główne funkcjonalności:
 katalogi zawierające wiele dokumentów. Plik PDF może zawierać tekst, obrazy lub
 jedno i drugie – sposób przetwarzania zależy od tej klasyfikacji.
 
-**Rozwiązanie:** Moduł wejściowy (Rust) zbiera listę obsługiwanych plików i
-przekazuje ją do modułu Pythona, który klasyfikuje każdy plik – sprawdza, czy
-PDF zawiera warstwę tekstową, czy jest skanem wymagającym OCR. Użyta biblioteka:
-`PyMuPDF`.
+**Rozwiązanie:** Warstwa Python odpowiada za wczytanie plików i ich przekazanie
+do biblioteki w Rust. Klasyfikacja pliku oraz wybór ścieżki przetwarzania
+realizowane są w Rust.
 
 ### 2.2 Ekstrakcja tekstu z pliku PDF z warstwą tekstową
 
 **Problem:** Pliki PDF tworzone cyfrowo zawierają wbudowaną warstwę tekstową,
 którą można odczytać bezpośrednio – bez angażowania OCR.
 
-**Rozwiązanie:** Tekst wraz z pozycjami słów na stronie zostanie wydobyty
-bezpośrednio z warstwy tekstowej dokumentu. Użyta biblioteka: `PyMuPDF`.
+**Rozwiązanie:** Ekstrakcja tekstu oraz pozycji słów realizowana jest w Rust
+jako część biblioteki przetwarzającej dokumenty (np. z wykorzystaniem bibliotek
+takich jak `lopdf`, `pdfium-render` lub `poppler`).
 
 ### 2.3 Ekstrakcja tekstu z obrazów i skanów PDF (OCR)
 
 **Problem:** Skany i zdjęcia dokumentów nie zawierają warstwy tekstowej; tekst
 musi zostać rozpoznany automatycznie.
 
-**Rozwiązanie:** Strony skanów zostaną poddane wstępnej obróbce obrazu w celu
-poprawy jakości (odszumianie, poprawa kontrastu), a następnie rozpoznaniu tekstu
-wraz z pozycjami słów za pomocą OCR. W przypadku skanów w formacie PDF strony
-zostaną uprzednio skonwertowane do formatu graficznego. Użyte biblioteki:
-`OpenCV`, `pdf2image`, `pytesseract` (silnik Tesseract).
+**Rozwiązanie:** Przetwarzanie obrazów oraz OCR realizowane są w Rust. Proces
+obejmuje wstępne przetwarzanie obrazu oraz rozpoznawanie tekstu (np. z
+wykorzystaniem `tesseract-rs` oraz bibliotek do przetwarzania obrazu takich jak
+`image` lub `opencv`).
 
 ### 2.4 Obsługa dokumentów mieszanych (PDF z osadzonymi obrazami)
 
 **Problem:** Dokumenty mogą zawierać zarówno strony z warstwą tekstową, jak i
 strony będące skanami lub zawierające osadzone obrazy z tekstem.
 
-**Rozwiązanie:** Każda strona dokumentu jest analizowana niezależnie i kierowana
-na odpowiednią ścieżkę przetwarzania – bezpośrednią ekstrakcję tekstu lub OCR.
-Wyniki z obu ścieżek są scalane w ujednolicony format. Użyta biblioteka:
-`PyMuPDF`.
+**Rozwiązanie:** Każda strona dokumentu jest analizowana w Rust i kierowana na
+odpowiednią ścieżkę przetwarzania. Wyniki są scalane w ujednolicony format.
 
 ### 2.5 Indeksowanie i cache
 
@@ -77,13 +72,12 @@ Wyniki z obu ścieżek są scalane w ujednolicony format. Użyta biblioteka:
 czasowo. Wyniki powinny być przechowywane lokalnie i inwalidowane przy zmianie
 pliku źródłowego.
 
-**Rozwiązanie:** Dla każdego przetworzonego pliku tworzony jest ukryty plik
-cache (`.nazwa_pliku.cache`) w formacie JSON, zawierający wyekstrahowany tekst,
-indeks pozycyjny (mapa słowo → pozycje wystąpień w danym pliku) oraz sumę
-kontrolną pliku źródłowego. Przy kolejnym uruchomieniu program weryfikuje sumę
-kontrolną i pomija ponowne przetwarzanie, jeśli plik nie uległ zmianie.
+**Rozwiązanie:** Mechanizm cache oraz indeksowania jest zaimplementowany w Rust
+(jako biblioteka). Dla każdego pliku tworzony jest plik cache zawierający
+wyekstrahowany tekst, indeks pozycyjny oraz sumę kontrolną pliku. Przy kolejnym
+uruchomieniu weryfikowana jest zgodność sumy kontrolnej.
 
-Przykładowa struktura indeksu pozycyjnego w pliku cache:
+Przykładowa struktura indeksu pozycyjnego:
 
 ```json
 {
@@ -93,28 +87,20 @@ Przykładowa struktura indeksu pozycyjnego w pliku cache:
 }
 ```
 
-Gdzie pierwsza wartość to liczba wystąpień, a druga to lista pozycji w
-dokumencie.
-
 ### 2.6 Przeszukiwanie tekstu
 
-**Problem:** Użytkownik podaje zapytanie (jedno lub kilka słów) i oczekuje listy
-dokumentów oraz lokalizacji, gdzie te słowa wystąpiły.
+**Problem:** Użytkownik podaje zapytanie i oczekuje listy dokumentów oraz
+lokalizacji wystąpień.
 
-**Rozwiązanie:** Przy wyszukiwaniu Rust wczytuje pliki cache wszystkich
-zaindeksowanych dokumentów i łączy indeksy pozycyjne w jeden indeks odwrócony w
-pamięci – mapujący słowo na listę plików i pozycji wystąpień w każdym z nich.
-Dla zapytań wielosłownych algorytm startuje od tokenu z najmniejszą liczbą
-wystąpień, minimalizując tym samym liczbę porównań. Tokeny zapytania są
-normalizowane (małe litery, opcjonalnie sprowadzanie polskich znaków
-diakrytycznych do ich odpowiedników ASCII). Wynikiem jest lista trafień z nazwą
-pliku, numerem strony i koordynatami.
+**Rozwiązanie:** Logika przeszukiwania znajduje się w Rust. System korzysta z
+indeksów zapisanych w cache i wykonuje wyszukiwanie na podstawie zapytania. Dla
+zapytań wielosłownych możliwa jest optymalizacja poprzez wybór tokenu o
+najmniejszej liczbie wystąpień.
 
-### 2.7 Interfejs wiersza poleceń (CLI)
+### 2.7 Interfejs CLI
 
-**Problem:** Użytkownik potrzebuje prostego sposobu na korzystanie z programu z
-linii poleceń.
+**Problem:** Użytkownik potrzebuje prostego sposobu korzystania z programu.
 
-**Rozwiązanie:** Interfejs napisany w Rust z użyciem biblioteki `clap`. Program
-udostępnia polecenia do skanowania plików lub katalogów, przeszukiwania
-zaindeksowanych dokumentów oraz czyszczenia cache'u.
+**Rozwiązanie:** Interfejs CLI zaimplementowany w Pythonie. Odpowiada za
+przyjmowanie poleceń użytkownika oraz wywoływanie funkcji biblioteki Rust
+odpowiedzialnej za całe przetwarzanie (ekstrakcję, cache i przeszukiwanie).
