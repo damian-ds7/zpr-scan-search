@@ -1,6 +1,5 @@
-from .scan_search import *
+from .scan_search import *  # noqa: F403
 
-
-__doc__ = scan_search.__doc__
-if hasattr(scan_search, "__all__"):
-    __all__ = scan_search.__all__
+__doc__ = scan_search.__doc__  # noqa: F405
+if hasattr(scan_search, "__all__"):  # noqa: F405
+    __all__ = scan_search.__all__  # noqa: F405
