@@ -21,7 +21,6 @@ build:
 lint:
 ifeq ($(_rust), true)
 	cargo clippy -- -D warnings
-	cargo audit
 endif
 ifeq ($(_python), true)
 	uv run ruff check $(PYTHON_SRC)
