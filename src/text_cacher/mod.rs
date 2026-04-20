@@ -10,20 +10,20 @@ const DELIMITER: &str = "-----EOF-----";
 
 pub fn cache_text<P: AsRef<Path>>(text: &str, path: P) -> std::io::Result<PathBuf> {
     let map = create_word_map(text);
-    Ok(save_text_and_map(text, &map, path)?)
+    save_text_and_map(text, &map, path)
 }
 
 fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
     let mut cache_map: HashMap<String, Vec<i32>> = HashMap::new();
     let mut i = 0;
-    for word in text.split_whitespace() {
+    text.split_whitespace().for_each(|word| {
         if let Some(v) = cache_map.get_mut(word) {
             v.push(i);
         } else {
             cache_map.insert(word.parse().unwrap(), vec![i]);
         }
         i += 1;
-    }
+    });
     cache_map
 }
 
