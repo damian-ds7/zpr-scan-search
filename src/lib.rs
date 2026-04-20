@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
-mod text_cacher;
+// TODO: get rid of pub later
+pub mod text_cacher;
 
 /// A Python module implemented in Rust.
 #[pymodule]
