@@ -1,0 +1,11 @@
+[package]
+name = "file"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "file"
+path = "src/file.rs"
+
+[dependencies]
+filetime = "0.2"
