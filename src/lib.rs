@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 // TODO: get rid of pub later
 pub mod text_cacher;
+mod file;
 
 /// A Python module implemented in Rust.
 #[pymodule]
