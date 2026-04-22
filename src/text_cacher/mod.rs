@@ -2,9 +2,8 @@
 mod tests;
 
 use std::collections::HashMap;
-use std::fs;
 use std::fs::File;
-use std::io::{Bytes, Read, Write};
+use std::io::{Write};
 use std::path::{Path, PathBuf};
 use std::io::{self, BufRead, BufReader};
 use crate::file::file::TextFile;

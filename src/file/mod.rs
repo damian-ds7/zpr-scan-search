@@ -4,7 +4,6 @@ use std::io;
 use std::collections::HashMap;
 pub mod file {
     use std::io::BufReader;
-    use pyo3::pyclass::boolean_struct::True;
     use super::*;    pub struct TextFile {
     pub path: PathBuf,
     pub text: String,
@@ -14,6 +13,14 @@ pub mod file {
 
 
     impl TextFile {
+        #[cfg(test)]
+        pub fn new_test(path: PathBuf, text: String) -> io::Result<Self> {
+            Ok(TextFile {
+                path,
+                text: text.clone(),
+                map: HashMap::new(),
+            })
+        }
         pub fn new(path: PathBuf) ->io::Result<TextFile> {
             let mut file = TextFile {
                 path,
