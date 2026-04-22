@@ -5,7 +5,6 @@ use std::io;
 
 pub mod file {
     use super::*;
-
     pub struct File<'a> {
         pub path: PathBuf,
         text: &'a str,
@@ -18,7 +17,7 @@ pub mod file {
         }
         fn check_cache(&self) -> io::Result<bool>{
             let read_content = fs::read_to_string(self.path)?;
-            let
+            let inverted_idx = process_map(read_content)
         }
 
     }
