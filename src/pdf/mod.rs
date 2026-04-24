@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use image::DynamicImage;
 use pdf_oxide::PdfDocument;
 use std::path::Path;
