@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 mod constants;
 mod error;
 mod file;
+mod pdf;
 mod text_cacher;
 
 /// A Python module implemented in Rust.
