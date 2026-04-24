@@ -9,6 +9,8 @@ name = "scan_search"
 crate-type = ["cdylib"]
 
 [dependencies]
+image = "0.25.10"
+pdf_oxide = "0.3.38"
 pyo3 = "0.28.2"
 serde_json = "1.0.149"
 tempfile = "3.27.0"
