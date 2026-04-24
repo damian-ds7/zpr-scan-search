@@ -3,6 +3,7 @@
 use pyo3::prelude::*;
 
 mod constants;
+mod error;
 mod file;
 mod text_cacher;
 
