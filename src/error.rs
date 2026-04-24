@@ -14,3 +14,5 @@ pub enum ScanSearchError {
     #[error("JSON error: {0}")]
     Json(#[from] serde_json::Error),
 }
+
+pub type Result<T> = std::result::Result<T, ScanSearchError>;
