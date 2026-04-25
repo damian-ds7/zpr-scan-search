@@ -9,7 +9,7 @@ pub enum ScanSearchError {
     Io(#[from] std::io::Error),
 
     #[error("OCR error: {0}")]
-    Ocr(String),
+    Ocr(#[from] tesseract_rs::TesseractError),
 
     #[error("JSON error: {0}")]
     Json(#[from] serde_json::Error),
