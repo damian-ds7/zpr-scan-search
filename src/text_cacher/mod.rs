@@ -1,14 +1,13 @@
 #[cfg(test)]
 mod tests;
 
+use crate::constants::DELIMITER;
 use crate::file::TextFile;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
 use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
-
-const DELIMITER: u8 = b'\x1E';
 
 pub fn cache_text<P: AsRef<Path>>(
     text: &str,
