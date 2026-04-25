@@ -20,7 +20,7 @@ impl TextFile {
             map: HashMap::new(),
         };
         let text = file.read_pdf();
-        if let Err(_) = file.check_cache() {
+        if file.check_cache().is_err() {
             cache_text(&text, &file.path.clone(), &mut file)?;
         }
         Ok(file)
