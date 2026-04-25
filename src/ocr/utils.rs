@@ -24,7 +24,7 @@ fn get_default_tessdata_dir() -> PathBuf {
     }
 }
 
-fn get_tessdata_dir() -> PathBuf {
+pub fn get_tessdata_dir() -> PathBuf {
     match std::env::var("TESSDATA_PREFIX") {
         Ok(dir) => {
             let path = PathBuf::from(dir);
