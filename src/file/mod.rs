@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests;
+use crate::error::Result;
 use crate::text_cacher::{cache_text, process_map, process_text};
 use std::collections::HashMap;
 use std::fs;
@@ -14,7 +15,7 @@ pub struct TextFile {
 }
 
 impl TextFile {
-    pub fn new(path: PathBuf) -> io::Result<TextFile> {
+    pub fn new(path: PathBuf) -> Result<TextFile> {
         let mut file = TextFile {
             path,
             text: String::new(),
@@ -27,7 +28,7 @@ impl TextFile {
         Ok(file)
     }
 
-    fn check_cache(&mut self) -> io::Result<()> {
+    fn check_cache(&mut self) -> Result<()> {
         let mut cache_path = self.path.clone();
 
         if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {
