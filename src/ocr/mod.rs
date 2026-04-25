@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+mod utils;
 
 use image::DynamicImage;
 use tesseract_rs::TesseractAPI;
@@ -49,4 +52,3 @@ impl OcrEngine for TesseractEngine {
         Ok(text)
     }
 }
-
