@@ -1,12 +1,21 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Read;
+use std::io::{self, Read};
+use std::path::PathBuf;
 use tempfile::tempdir;
 
 use crate::file::TextFile;
 use crate::text_cacher::cache_text;
 
 const DELIMITER: &str = "\x1E";
+
+fn new_file(path: PathBuf, text: String) -> io::Result<TextFile> {
+    Ok(TextFile {
+        path,
+        text: text.clone(),
+        map: HashMap::new(),
+    })
+}
 
 #[test]
 fn test_cache_text_multiple_cases() {
@@ -24,9 +33,11 @@ fn test_cache_text_multiple_cases() {
         let dir = tempdir().expect("Failed to create temp dir");
         let file_path = dir.path().join("my_document.pdf");
 
-        let mut text_file_struct = TextFile::new_test(file_path.clone(), text.parse().unwrap()).expect("Failed to create TextFile");
+        let mut text_file_struct =
+            new_file(file_path.clone(), text.parse().unwrap()).expect("Failed to create TextFile");
 
-        let cache_path = cache_text(text, &file_path, &mut text_file_struct).expect("Failed to cache text");
+        let cache_path =
+            cache_text(text, &file_path, &mut text_file_struct).expect("Failed to cache text");
         let mut file = File::open(cache_path).expect("Failed to open cache file");
         let mut a = String::new();
         file.read_to_string(&mut a).expect("Failed to read");
@@ -41,3 +52,4 @@ fn test_cache_text_multiple_cases() {
         assert_eq!(text_str, text, "Text mismatch on input: {}", text);
     }
 }
+

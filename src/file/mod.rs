@@ -13,15 +13,6 @@ pub struct TextFile {
 }
 
 impl TextFile {
-    #[cfg(test)]
-    pub fn new_test(path: PathBuf, text: String) -> io::Result<Self> {
-        Ok(TextFile {
-            path,
-            text: text.clone(),
-            map: HashMap::new(),
-        })
-    }
-
     pub fn new(path: PathBuf) -> io::Result<TextFile> {
         let mut file = TextFile {
             path,
