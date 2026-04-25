@@ -4,10 +4,9 @@ use std::io::{self, Read};
 use std::path::PathBuf;
 use tempfile::tempdir;
 
+use crate::constants::DELIMITER;
 use crate::file::TextFile;
 use crate::text_cacher::cache_text;
-
-const DELIMITER: &str = "\x1E";
 
 fn new_file(path: PathBuf, text: String) -> io::Result<TextFile> {
     Ok(TextFile {
@@ -42,7 +41,9 @@ fn test_cache_text_multiple_cases() {
         let mut a = String::new();
         file.read_to_string(&mut a).expect("Failed to read");
 
-        let (json_str, text_str) = a.split_once(DELIMITER).expect("Delimiter not found");
+        let (json_str, text_str) = a
+            .split_once(DELIMITER as char)
+            .expect("Delimiter not found");
         let parsed_map: HashMap<String, Vec<i32>> =
             serde_json::from_str(json_str).expect("Failed to parse map");
         let expected_map: HashMap<String, Vec<i32>> =
