@@ -1,4 +1,5 @@
-use super::*;
+#[cfg(test)]
+mod tests;
 use crate::text_cacher::{cache_text, process_map, process_text};
 use std::collections::HashMap;
 use std::fs;
