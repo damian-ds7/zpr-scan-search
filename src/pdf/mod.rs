@@ -3,11 +3,12 @@ mod tests;
 
 use image::DynamicImage;
 use pdf_oxide::PdfDocument;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::path::Path;
 
 use crate::error::Result;
 
-pub trait OcrEngine {
+pub trait OcrEngine: Sync {
     fn extract_text_from_image(&self, image_data: DynamicImage) -> Result<String>;
 }
 
@@ -34,8 +35,16 @@ impl PdfExtractor {
             }
 
             let images = self.document.extract_images(i)?;
-            for img in images {
-                let ocr_text = ocr_engine.extract_text_from_image(img.to_dynamic_image()?)?;
+
+            let ocr_results: Result<Vec<String>> = images
+                .into_par_iter()
+                .map(|img| {
+                    let dynamic_image = img.to_dynamic_image()?;
+                    ocr_engine.extract_text_from_image(dynamic_image)
+                })
+                .collect();
+
+            for ocr_text in ocr_results? {
                 full_text.push_str(&ocr_text);
                 full_text.push('\n');
             }
