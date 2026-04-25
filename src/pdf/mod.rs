@@ -6,11 +6,7 @@ use pdf_oxide::PdfDocument;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::path::Path;
 
-use crate::error::Result;
-
-pub trait OcrEngine: Sync {
-    fn extract_text_from_image(&self, image_data: DynamicImage) -> Result<String>;
-}
+use crate::{error::Result, ocr::OcrEngine};
 
 pub struct PdfExtractor {
     document: PdfDocument,
