@@ -28,7 +28,10 @@ impl TextFile {
 
     fn check_cache(&mut self) -> io::Result<()> {
         let mut cache_path = self.path.clone();
-        cache_path.push(".cache");
+
+        if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {
+            cache_path.set_file_name(format!("{}.cache", file_name));
+        }
         let file = fs::File::open(cache_path.as_path())?;
         let mut reader = BufReader::new(file);
         let inverted_index_map = process_map(&mut reader)?;
