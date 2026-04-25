@@ -3,8 +3,8 @@ use std::fs::File;
 use std::io::Read;
 use tempfile::tempdir;
 
+use crate::file::TextFile;
 use crate::text_cacher::cache_text;
-use crate::file::file::TextFile;
 
 const DELIMITER: &str = "\x1E";
 
