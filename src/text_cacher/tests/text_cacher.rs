@@ -52,4 +52,3 @@ fn test_cache_text_multiple_cases() {
         assert_eq!(text_str, text, "Text mismatch on input: {}", text);
     }
 }
-
