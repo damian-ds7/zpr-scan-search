@@ -1,4 +1,7 @@
-use crate::pdf::{OcrEngine, PdfExtractor, Result};
+use crate::{
+    ocr::OcrEngine,
+    pdf::{PdfExtractor, Result},
+};
 use image::DynamicImage;
 
 struct MockOcr;

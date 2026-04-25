@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 mod constants;
 mod error;
 mod file;
+mod ocr;
 mod pdf;
 mod text_cacher;
 
