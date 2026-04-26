@@ -41,6 +41,3 @@ pub fn get_tessdata_dir() -> PathBuf {
         }
     }
 }
-
-
-
