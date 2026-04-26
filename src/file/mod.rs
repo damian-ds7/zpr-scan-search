@@ -2,6 +2,7 @@
 mod tests;
 use crate::error::Result;
 use crate::text_cacher::{load_parts, process_and_cache};
+use crate::text_extractor::TextExtractor;
 use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io;
@@ -16,7 +17,7 @@ pub struct TextFile {
 }
 
 impl TextFile {
-    pub fn new(path: PathBuf) -> Result<TextFile> {
+    pub fn new<E: TextExtractor>(path: PathBuf, extractor: &E) -> Result<TextFile> {
         if let Ok((text, map)) = Self::try_load_cache(&path) {
             return Ok(Self {
                 path,
@@ -25,7 +26,7 @@ impl TextFile {
             });
         }
 
-        let text = Self::read_pdf(&path)?;
+        let text = extractor.extract_from(&path)?;
         let (text, map) = process_and_cache(text, path.clone());
         Ok(Self { path, text, map })
     }
@@ -40,9 +41,5 @@ impl TextFile {
         let file = File::open(cache_path.as_path())?;
         let mut reader = BufReader::new(file);
         load_parts(&mut reader)
-    }
-
-    fn read_pdf(path: &Path) -> Result<String> {
-        unimplemented!()
     }
 }
