@@ -3,66 +3,67 @@ mod tests;
 
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::file::TextFile;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Write;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
-pub fn cache_text<P: AsRef<Path>>(text: &str, path: &P, file: &mut TextFile) -> Result<PathBuf> {
-    let map = create_word_map(text);
-    file.map = map;
-    file.text = text.to_string();
-    save_text_and_map(text, &file.map, path)
-}
+/// Processes text into a map and triggers a background save to disk.
+pub fn process_and_cache(
+    text: String,
+    path: PathBuf,
+) -> (Arc<String>, Arc<HashMap<String, Vec<i32>>>) {
+    let map = Arc::new(create_word_map(&text));
+    let text = Arc::new(text);
 
-pub fn process_map(reader: &mut BufReader<File>) -> Result<HashMap<String, Vec<i32>>> {
-    let mut buf = vec![];
-    reader.read_until(DELIMITER, &mut buf)?;
-    if buf.ends_with(&[DELIMITER]) {
-        buf.pop();
-    }
+    let map_for_thread = Arc::clone(&map);
+    let text_for_thread = Arc::clone(&text);
+    let path_for_thread = path.clone();
 
-    Ok(serde_json::from_slice(&buf)?)
-}
-
-pub fn process_text(reader: &mut BufReader<File>) -> Result<String> {
-    let mut buf = vec![];
-    reader.read_until(DELIMITER, &mut buf)?;
-    if buf.ends_with(&[DELIMITER]) {
-        buf.pop();
-    }
-    let text = String::from_utf8(buf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-    Ok(text)
-}
-
-fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
-    let mut cache_map: HashMap<String, Vec<i32>> = HashMap::new();
-    let mut i = 0;
-    text.split_whitespace().for_each(|word| {
-        if let Some(v) = cache_map.get_mut(word) {
-            v.push(i);
-        } else {
-            cache_map.insert(word.parse().unwrap(), vec![i]);
+    std::thread::spawn(move || {
+        if let Err(e) = save_to_disk(&text_for_thread, &map_for_thread, &path_for_thread) {
+            eprintln!("Cache error for {:?}: {}", path_for_thread, e);
         }
-        i += 1;
     });
-    cache_map
+    (text, map)
 }
 
-fn save_text_and_map<P: AsRef<Path>>(
-    text: &str,
-    map: &HashMap<String, Vec<i32>>,
-    path: P,
-) -> Result<PathBuf> {
-    let mut map_string = serde_json::to_string(map)?;
-    map_string.push(DELIMITER as char);
-    let text_and_map = map_string + text;
-    let mut cache_path_string = path.as_ref().as_os_str().to_os_string();
-    cache_path_string.push(".cache");
-    let final_path = PathBuf::from(cache_path_string);
-    let mut file = File::create(&final_path)?;
-    file.write_all(text_and_map.as_bytes())?;
-    Ok(final_path)
+pub fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
+    text.split_whitespace()
+        .enumerate()
+        .fold(HashMap::new(), |mut acc, (i, word)| {
+            acc.entry(word.to_string()).or_default().push(i as i32);
+            acc
+        })
+}
+
+fn save_to_disk(text: &str, map: &HashMap<String, Vec<i32>>, path: &Path) -> Result<()> {
+    let mut cache_path = path.to_path_buf();
+    if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {
+        cache_path.set_file_name(format!("{}.cache", file_name));
+    }
+
+    let mut file = File::create(cache_path)?;
+    serde_json::to_writer(&mut file, map)?;
+    file.write_all(&[DELIMITER])?;
+    file.write_all(text.as_bytes())?;
+    Ok(())
+}
+
+/// Loads map and text parts from given cache file reader
+pub fn load_parts(reader: &mut BufReader<File>) -> Result<(String, HashMap<String, Vec<i32>>)> {
+    let mut buf = vec![];
+
+    reader.read_until(DELIMITER, &mut buf)?;
+    if buf.ends_with(&[DELIMITER]) {
+        buf.pop();
+    }
+    let map = serde_json::from_slice(&buf)?;
+
+    buf.clear();
+    reader.read_to_end(&mut buf)?;
+    let text = String::from_utf8(buf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+
+    Ok((text, map))
 }
