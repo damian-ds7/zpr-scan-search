@@ -1,55 +1,56 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{self, Read};
-use std::path::PathBuf;
+use std::io::BufReader;
 use tempfile::tempdir;
 
-use crate::constants::DELIMITER;
-use crate::file::TextFile;
-use crate::text_cacher::cache_text;
+use crate::text_cacher::{create_word_map, load_parts, process_and_cache};
 
-fn new_file(path: PathBuf, text: String) -> io::Result<TextFile> {
-    Ok(TextFile {
-        path,
-        text: text.clone(),
-        map: HashMap::new(),
-    })
+#[test]
+fn test_create_word_map_logic() {
+    let test_cases = [
+        (
+            "Ala ma kota",
+            vec![("Ala", vec![0]), ("ma", vec![1]), ("kota", vec![2])],
+        ),
+        ("kota kota", vec![("kota", vec![0, 1])]),
+        ("", vec![]),
+    ];
+
+    for (text, expected) in test_cases {
+        let map = create_word_map(text);
+        assert_eq!(map.len(), expected.len());
+        for (word, indices) in expected {
+            assert_eq!(map.get(word).unwrap(), &indices);
+        }
+    }
 }
 
 #[test]
-fn test_cache_text_multiple_cases() {
-    let test_cases = [
-        ("Ala ma kota", "{\"Ala\":[0],\"kota\":[2],\"ma\":[1]}"),
-        (
-            "Ala ma kota kota",
-            "{\"Ala\":[0],\"kota\":[2,3],\"ma\":[1]}",
-        ),
-        ("hello hello hello", "{\"hello\":[0,1,2]}"),
-        ("", "{}"),
-    ];
+fn test_process_and_cache_async() {
+    let dir = tempdir().expect("Failed to create temp dir");
+    let file_path = dir.path().join("document.pdf");
+    let text = "hello world".to_string();
 
-    for (text, expected_json_str) in test_cases {
-        let dir = tempdir().expect("Failed to create temp dir");
-        let file_path = dir.path().join("my_document.pdf");
+    let (returned_text, returned_map) = process_and_cache(text.clone(), file_path.clone());
 
-        let mut text_file_struct =
-            new_file(file_path.clone(), text.parse().unwrap()).expect("Failed to create TextFile");
+    assert!(returned_map.contains_key("hello"));
+    assert!(returned_map.contains_key("world"));
 
-        let cache_path =
-            cache_text(text, &file_path, &mut text_file_struct).expect("Failed to cache text");
-        let mut file = File::open(cache_path).expect("Failed to open cache file");
-        let mut a = String::new();
-        file.read_to_string(&mut a).expect("Failed to read");
-
-        let (json_str, text_str) = a
-            .split_once(DELIMITER as char)
-            .expect("Delimiter not found");
-        let parsed_map: HashMap<String, Vec<i32>> =
-            serde_json::from_str(json_str).expect("Failed to parse map");
-        let expected_map: HashMap<String, Vec<i32>> =
-            serde_json::from_str(expected_json_str).expect("Failed to parse expected map");
-
-        assert_eq!(parsed_map, expected_map, "Failed on input: {}", text);
-        assert_eq!(text_str, text, "Text mismatch on input: {}", text);
+    let cache_path = dir.path().join("document.pdf.cache");
+    let mut attempts = 0;
+    while !cache_path.exists() && attempts < 50 {
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        attempts += 1;
     }
+    assert!(
+        cache_path.exists(),
+        "Cache file was not created in background"
+    );
+
+    let file = File::open(cache_path).expect("Failed to open cache");
+    let mut reader = BufReader::new(file);
+    let (loaded_text, loaded_map) = load_parts(&mut reader).expect("Failed to load parts");
+
+    assert_eq!(*returned_map, loaded_map);
+    assert_eq!(*returned_text, loaded_text);
 }
