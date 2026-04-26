@@ -1,3 +1,5 @@
+use std::ffi::OsString;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -13,6 +15,9 @@ pub enum ScanSearchError {
 
     #[error("JSON error: {0}")]
     Json(#[from] serde_json::Error),
+
+    #[error("Path is not valid UTF-8: {0}")]
+    InvalidPath(String),
 }
 
 pub type Result<T> = std::result::Result<T, ScanSearchError>;
