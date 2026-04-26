@@ -8,19 +8,27 @@ use std::path::Path;
 
 use crate::{error::Result, ocr::OcrEngine};
 
-pub struct PdfExtractor {
-    document: PdfDocument,
+pub trait TextExtractor {
+    fn extract(&mut self) -> Result<String>;
 }
 
-impl PdfExtractor {
-    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self> {
+pub struct PdfExtractor<'a, E: OcrEngine> {
+    document: PdfDocument,
+    ocr_engine: &'a E,
+}
+
+impl<'a, E: OcrEngine> PdfExtractor<'a, E> {
+    pub fn open<P: AsRef<Path>>(path: P, ocr_engine: &'a E) -> Result<Self> {
         let document = PdfDocument::open(path.as_ref().to_str().ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid path")
         })?)?;
-        Ok(Self { document })
+        Ok(Self {
+            document,
+            ocr_engine,
+        })
     }
 
-    pub fn extract_all_text<E: OcrEngine>(&mut self, ocr_engine: &E) -> Result<String> {
+    fn extract_all_text(&mut self, ocr_engine: &E) -> Result<String> {
         let mut full_text = String::new();
         let page_count = self.document.page_count()?;
 
@@ -47,5 +55,11 @@ impl PdfExtractor {
         }
 
         Ok(full_text)
+    }
+}
+
+impl<'a, E: OcrEngine> TextExtractor for PdfExtractor<'a, E> {
+    fn extract(&mut self) -> Result<String> {
+        self.extract_all_text(self.ocr_engine)
     }
 }
