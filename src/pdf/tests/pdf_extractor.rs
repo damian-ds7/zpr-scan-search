@@ -17,8 +17,8 @@ fn test_pdf_extraction_with_text() {
         "{}/src/pdf/tests/resources/text.pdf",
         env!("CARGO_MANIFEST_DIR")
     );
-    let mut extractor = PdfExtractor::open(&path).unwrap();
     let ocr = MockOcr;
+    let mut extractor = PdfExtractor::open(&path, &ocr).unwrap();
     let text = extractor.extract_all_text(&ocr).unwrap();
 
     assert!(text.contains("This is a test pdf"));
@@ -30,8 +30,8 @@ fn test_pdf_extraction_with_text_and_image() {
         "{}/src/pdf/tests/resources/text_and_image.pdf",
         env!("CARGO_MANIFEST_DIR")
     );
-    let mut extractor = PdfExtractor::open(&path).unwrap();
     let ocr = MockOcr;
+    let mut extractor = PdfExtractor::open(&path, &ocr).unwrap();
     let text = extractor.extract_all_text(&ocr).unwrap();
 
     assert!(text.contains("This is a test pdf with an image\nmocked ocr text\n"));
@@ -39,6 +39,7 @@ fn test_pdf_extraction_with_text_and_image() {
 
 #[test]
 fn test_open_non_existent_file() {
-    let result = PdfExtractor::open("non_existent_file.pdf");
+    let ocr = MockOcr;
+    let result = PdfExtractor::open("non_existent_file.pdf", &ocr);
     assert!(result.is_err());
 }
