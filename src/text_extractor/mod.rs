@@ -12,5 +12,5 @@ use std::path::Path;
 use crate::{error::Result, ocr::OcrEngine};
 
 pub trait TextExtractor {
-    fn extract(&mut self) -> Result<String>;
+    fn extract_from(&self, path: &Path) -> Result<String>;
 }
