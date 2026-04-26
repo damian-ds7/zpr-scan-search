@@ -6,8 +6,8 @@ mod constants;
 mod error;
 mod file;
 mod ocr;
-mod pdf;
 mod text_cacher;
+mod text_extractor;
 
 /// A Python module implemented in Rust.
 #[pymodule]
