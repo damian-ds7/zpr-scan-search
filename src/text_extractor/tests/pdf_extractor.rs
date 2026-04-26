@@ -1,6 +1,6 @@
 use crate::{
     ocr::OcrEngine,
-    pdf::{PdfExtractor, Result},
+    text_extractor::{PdfExtractor, Result},
 };
 use image::DynamicImage;
 
@@ -13,10 +13,7 @@ impl OcrEngine for MockOcr {
 
 #[test]
 fn test_pdf_extraction_with_text() {
-    let path = format!(
-        "{}/src/pdf/tests/resources/text.pdf",
-        env!("CARGO_MANIFEST_DIR")
-    );
+    let path = format!("{}/resources/text.pdf", env!("CARGO_MANIFEST_DIR"));
     let ocr = MockOcr;
     let mut extractor = PdfExtractor::open(&path, &ocr).unwrap();
     let text = extractor.extract_all_text(&ocr).unwrap();
@@ -27,7 +24,7 @@ fn test_pdf_extraction_with_text() {
 #[test]
 fn test_pdf_extraction_with_text_and_image() {
     let path = format!(
-        "{}/src/pdf/tests/resources/text_and_image.pdf",
+        "{}/resources/text_and_image.pdf",
         env!("CARGO_MANIFEST_DIR")
     );
     let ocr = MockOcr;
