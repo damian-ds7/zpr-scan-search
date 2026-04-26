@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Tesseract
+        uses: ./.github/actions/setup-deps
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
@@ -33,6 +35,8 @@ jobs:
     needs: [ rust-lint ]
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Tesseract
+        uses: ./.github/actions/setup-deps
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
@@ -43,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Depenencies
+        uses: ./.github/actions/setup-deps
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -60,6 +66,8 @@ jobs:
     needs: [ python-lint, rust-lint ]
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Depenencies
+        uses: ./.github/actions/setup-deps
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-python@v6

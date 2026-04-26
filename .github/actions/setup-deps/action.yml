@@ -1,0 +1,9 @@
+name: 'Setup Dependencies'
+runs:
+  using: "composite"
+  steps:
+    - name: Install System Dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake python3-dev
