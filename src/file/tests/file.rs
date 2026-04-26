@@ -6,7 +6,7 @@ use std::io::Write;
 use tempfile::tempdir;
 
 #[test]
-fn test_check_cache_loading() {
+fn test_try_load_cache() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("test.pdf");
     let cache_path = dir.path().join("test.pdf.cache");
@@ -20,16 +20,11 @@ fn test_check_cache_loading() {
     file.write_all(&[DELIMITER]).unwrap();
     file.write_all(b"test content").unwrap();
 
-    let mut text_file = TextFile {
-        path: file_path,
-        text: String::new(),
-        map: HashMap::new(),
-    };
-
-    let result = text_file.check_cache();
+    let result = TextFile::try_load_cache(&file_path);
     assert!(result.is_ok());
-    assert_eq!(text_file.text, "test content");
-    assert_eq!(text_file.map.get("test").unwrap(), &vec![0]);
+    let (text, map_loaded) = result.unwrap();
+    assert_eq!(text, "test content");
+    assert_eq!(map_loaded.get("test").unwrap(), &vec![0]);
 }
 
 #[test]
