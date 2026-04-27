@@ -6,7 +6,10 @@ use image::DynamicImage;
 use tesseract_rs::TesseractAPI;
 use thread_local::ThreadLocal;
 
-use crate::error::{Result, ScanSearchError};
+use crate::{
+    error::{Result, ScanSearchError},
+    ocr::utils::get_tessdata_dir,
+};
 
 pub trait OcrEngine: Sync {
     fn extract_text_from_image(&self, image_data: DynamicImage) -> Result<String>;
@@ -19,12 +22,17 @@ pub struct TesseractEngine {
 }
 
 impl TesseractEngine {
-    pub fn new(tessdata_path: &str, lang: &str) -> Self {
-        Self {
+    pub fn new(lang: &str) -> Result<Self> {
+        let tessdata_path = get_tessdata_dir()
+            .into_os_string()
+            .into_string()
+            .map_err(|e| ScanSearchError::InvalidPath(e.to_string_lossy().into_owned()))?;
+
+        Ok(Self {
             tess_pool: ThreadLocal::new(),
-            tessdata_path: tessdata_path.to_string(),
+            tessdata_path,
             lang: lang.to_string(),
-        }
+        })
     }
 }
 

@@ -28,11 +28,13 @@ pub fn get_tessdata_dir() -> PathBuf {
     match std::env::var("TESSDATA_PREFIX") {
         Ok(dir) => {
             let path = PathBuf::from(dir);
+            #[cfg(debug_assertions)]
             println!("Using TESSDATA_PREFIX directory: {:?}", path);
             path
         }
         Err(_) => {
             let default_dir = get_default_tessdata_dir();
+            #[cfg(debug_assertions)]
             println!(
                 "TESSDATA_PREFIX not set, using default directory: {:?}",
                 default_dir

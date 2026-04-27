@@ -23,14 +23,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: |
-            ~/.tesseract-rs
+      - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Check formatting
         run: cargo fmt --check
       - name: Clippy
         run: cargo clippy -- -D warnings
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
 
   rust-test:
     name: Rust Test
@@ -41,30 +41,26 @@ jobs:
       - name: Setup Tesseract
         uses: ./.github/actions/setup-deps
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: |
-            ~/.tesseract-rs
+      - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Run tests
         run: cargo test
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
 
   python-lint:
     name: Python Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Setup Depenencies
+      - name: Setup Dependencies
         uses: ./.github/actions/setup-deps
-      - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: |
-            ~/.tesseract-rs
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@v8.1.0
       - name: Install dev dependencies
-        run: uv sync --group dev
+        run: uv tool install ruff
       - name: Ruff check
         run: uv run ruff check python/
       - name: Ruff format
@@ -76,13 +72,10 @@ jobs:
     needs: [ python-lint, rust-lint ]
     steps:
       - uses: actions/checkout@v6
-      - name: Setup Depenencies
+      - name: Setup Dependencies
         uses: ./.github/actions/setup-deps
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: |
-            ~/.tesseract-rs
+      - uses: mozilla-actions/sccache-action@v0.0.10
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -91,5 +84,8 @@ jobs:
         run: uv sync --group dev
       - name: Build Rust extension
         run: uv run maturin develop
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
       - name: Run pytest
         run: uv run pytest
