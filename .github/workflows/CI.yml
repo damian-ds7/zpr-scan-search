@@ -25,6 +25,7 @@ jobs:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
         with:
+          shared-key: "rust"
           cache-directories: |
             ~/.tesseract-rs
       - name: Check formatting
@@ -43,6 +44,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
+          shared-key: "rust"
           cache-directories: |
             ~/.tesseract-rs
       - name: Run tests
@@ -81,6 +83,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
+          shared-key: "rust"
           cache-directories: |
             ~/.tesseract-rs
       - uses: actions/setup-python@v6
