@@ -1,5 +1,4 @@
 import click
-
 from scan_search import process_file
 
 
