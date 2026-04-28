@@ -17,6 +17,9 @@ pub enum ScanSearchError {
     #[error("{0}")]
     Json(#[from] serde_json::Error),
 
+    #[error("{0}")]
+    PersistError(#[from] tempfile::PersistError),
+
     #[error("Path is not valid UTF-8: {0}")]
     InvalidPath(String),
 }
