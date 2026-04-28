@@ -16,7 +16,8 @@ mod scan_search {
     use pyo3::prelude::*;
 
     use crate::{
-        error::ScanSearchError, file::TextFile, ocr::TesseractEngine, text_extractor::PdfExtractor,
+        error::ScanSearchError, file::TextFile, ocr::TesseractEngine, text_cacher::flush_cache,
+        text_extractor::PdfExtractor,
     };
 
     /// Processes given pdf file and saves data to cache file and returns word map
@@ -27,5 +28,10 @@ mod scan_search {
         let file = TextFile::new(PathBuf::from(path), &text_extractor)?;
         let word_map = serde_json::to_string(&*file.map).map_err(ScanSearchError::from)?;
         Ok(word_map)
+    }
+
+    #[pyfunction]
+    fn flush_cache_writer() {
+        flush_cache();
     }
 }
