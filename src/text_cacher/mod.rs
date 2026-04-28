@@ -1,13 +1,27 @@
+mod cache_writer;
 #[cfg(test)]
 mod tests;
 
 use crate::constants::DELIMITER;
 use crate::error::Result;
+use crate::text_cacher::cache_writer::{CacheWriter, Job, Msg};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
+
+static WRITER: OnceLock<CacheWriter> = OnceLock::new();
+
+fn get_writer() -> &'static CacheWriter {
+    WRITER.get_or_init(CacheWriter::new)
+}
+
+pub fn flush_cache() {
+    if let Some(w) = WRITER.get() {
+        w.flush();
+    }
+}
 
 /// Processes text into a map and triggers a background save to disk.
 pub fn process_and_cache(
@@ -17,15 +31,14 @@ pub fn process_and_cache(
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
 
-    let map_for_thread = Arc::clone(&map);
-    let text_for_thread = Arc::clone(&text);
-    let path_for_thread = path.clone();
+    get_writer().submit(Msg::Write(
+        (Job {
+            text: Arc::clone(&text),
+            map: Arc::clone(&map),
+            path,
+        }),
+    ));
 
-    std::thread::spawn(move || {
-        if let Err(e) = save_to_disk(&text_for_thread, &map_for_thread, &path_for_thread) {
-            eprintln!("Cache error for {:?}: {}", path_for_thread, e);
-        }
-    });
     (text, map)
 }
 
@@ -36,19 +49,6 @@ pub fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
             acc.entry(word.to_string()).or_default().push(i as i32);
             acc
         })
-}
-
-fn save_to_disk(text: &str, map: &HashMap<String, Vec<i32>>, path: &Path) -> Result<()> {
-    let mut cache_path = path.to_path_buf();
-    if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {
-        cache_path.set_file_name(format!("{}.cache", file_name));
-    }
-
-    let mut file = File::create(cache_path)?;
-    serde_json::to_writer(&mut file, map)?;
-    file.write_all(&[DELIMITER])?;
-    file.write_all(text.as_bytes())?;
-    Ok(())
 }
 
 /// Loads map and text parts from given cache file reader
