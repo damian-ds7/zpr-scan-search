@@ -61,15 +61,21 @@ impl CacheWriter {
     }
 }
 
-pub fn save_to_disk(text: &str, map: &HashMap<String, Vec<i32>>, path: &Path) -> Result<()> {
-    let mut cache_path = path.to_path_buf();
-    if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {
-        cache_path.set_file_name(format!("{}.cache", file_name));
-    }
+fn save_to_disk(text: &str, map: &HashMap<String, Vec<i32>>, path: &Path) -> Result<()> {
+    let cache_path = path.with_file_name(
+        path.file_name()
+            .and_then(|f| f.to_str())
+            .map(|name| format!("{}.cache", name))
+            .unwrap_or_default(),
+    );
 
-    let mut file = File::create(cache_path)?;
-    serde_json::to_writer(&mut file, map)?;
-    file.write_all(&[DELIMITER])?;
-    file.write_all(text.as_bytes())?;
+    let dir = path.parent().unwrap_or(Path::new("."));
+    let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
+
+    serde_json::to_writer(&mut tmp, map)?;
+    tmp.write_all(&[DELIMITER])?;
+    tmp.write_all(text.as_bytes())?;
+
+    tmp.persist(&cache_path)?;
     Ok(())
 }
