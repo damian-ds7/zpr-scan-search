@@ -14,6 +14,7 @@ impl<'a, E: OcrEngine> PdfExtractor<'a, E> {
     pub fn new(ocr_engine: &'a E) -> Self {
         Self { ocr_engine }
 }
+}
 
 impl<'a, E: OcrEngine> TextExtractor for PdfExtractor<'a, E> {
     fn extract_from(&self, path: &Path) -> Result<String> {
