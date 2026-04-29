@@ -4,16 +4,14 @@ mod tests;
 
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::text_cacher::cache_writer::{CacheWriter, Job, Msg};
+use crate::text_cacher::cache_writer::{Job, Msg};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 
-pub fn flush_cache() {
-    CacheWriter::get().flush();
-}
+pub use cache_writer::CacheWriter;
 
 /// Processes text into a map and triggers a background save to disk.
 pub fn process_and_cache(

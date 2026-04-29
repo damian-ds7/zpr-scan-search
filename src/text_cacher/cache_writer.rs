@@ -59,7 +59,9 @@ impl CacheWriter {
         let _ = self.tx.send(msg);
     }
 
-    pub fn flush(&self) {
+    /// Blocks until all pending write jobs have been processed.
+    /// Call once before process exit to ensure no writes are lost.
+    pub fn shutdown(&self) {
         let (done_tx, done_rx) = mpsc::channel();
         let _ = self.tx.send(Msg::Flush(done_tx));
         let _ = done_rx.recv();
