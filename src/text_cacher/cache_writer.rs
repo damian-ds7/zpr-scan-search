@@ -14,7 +14,7 @@ use crate::{constants::DELIMITER, error::Result};
 
 pub enum Msg {
     Write(Job),
-    Flush(Sender<()>),
+    Shutdown(Sender<()>),
 }
 
 pub struct CacheWriter {
@@ -40,7 +40,7 @@ impl CacheWriter {
                         }
                     }
 
-                    Msg::Flush(done_tx) => {
+                    Msg::Shutdown(done_tx) => {
                         let _ = done_tx.send(());
                     }
                 }
@@ -59,9 +59,11 @@ impl CacheWriter {
         let _ = self.tx.send(msg);
     }
 
-    pub fn flush(&self) {
+    /// Blocks until all pending write jobs have been processed.
+    /// Call once before process exit to ensure no writes are lost.
+    pub fn shutdown(&self) {
         let (done_tx, done_rx) = mpsc::channel();
-        let _ = self.tx.send(Msg::Flush(done_tx));
+        let _ = self.tx.send(Msg::Shutdown(done_tx));
         let _ = done_rx.recv();
     }
 }

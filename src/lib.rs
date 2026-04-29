@@ -16,7 +16,7 @@ mod scan_search {
     use pyo3::prelude::*;
 
     use crate::{
-        error::ScanSearchError, file::TextFile, ocr::TesseractEngine, text_cacher::flush_cache,
+        error::ScanSearchError, file::TextFile, ocr::TesseractEngine, text_cacher::CacheWriter,
         text_extractor::PdfExtractor,
     };
 
@@ -31,7 +31,7 @@ mod scan_search {
     }
 
     #[pyfunction]
-    fn flush_cache_writer() {
-        flush_cache();
+    fn _cache_shutdown() {
+        CacheWriter::get().shutdown();
     }
 }
