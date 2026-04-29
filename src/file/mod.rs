@@ -10,6 +10,7 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+/// Represents a processed document containing its text content and a word occurrence map.
 pub struct TextFile {
     pub path: PathBuf,
     pub text: Arc<String>,
@@ -17,6 +18,7 @@ pub struct TextFile {
 }
 
 impl TextFile {
+    /// Creates a new TextFile by either loading from cache or extracting from source using the provided extractor.
     pub fn new<E: TextExtractor>(path: PathBuf, extractor: &E) -> Result<TextFile> {
         if let Ok((text, map)) = Self::try_load_cache(&path) {
             return Ok(Self {
@@ -31,6 +33,7 @@ impl TextFile {
         Ok(Self { path, text, map })
     }
 
+    /// Attempts to load the document content and word map from a local .cache file.
     fn try_load_cache(path: &Path) -> Result<(String, HashMap<String, Vec<i32>>)> {
         let mut cache_path = path.to_path_buf();
 
