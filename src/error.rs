@@ -3,6 +3,7 @@ use std::ffi::OsString;
 use pyo3::{PyErr, exceptions::PyRuntimeError};
 use thiserror::Error;
 
+/// Central error type for the scan-search project, wrapping external library errors.
 #[derive(Error, Debug)]
 pub enum ScanSearchError {
     #[error("{0}")]
@@ -30,4 +31,5 @@ impl From<ScanSearchError> for PyErr {
     }
 }
 
+/// A specialized Result type for scan-search operations.
 pub type Result<T> = std::result::Result<T, ScanSearchError>;

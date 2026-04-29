@@ -12,15 +12,20 @@ use std::{
 
 use crate::{constants::DELIMITER, error::Result};
 
+/// Messages sent to the background cache writer thread.
 pub enum Msg {
+    /// Write a new cache job to disk.
     Write(Job),
+    /// Block until all previous messages are processed.
     Shutdown(Sender<()>),
 }
 
+/// A background worker that handles non-blocking cache persistence.
 pub struct CacheWriter {
     tx: Sender<Msg>,
 }
 
+/// Represents a single cache write task.
 pub struct Job {
     pub text: Arc<String>,
     pub map: Arc<HashMap<String, Vec<i32>>>,
@@ -28,6 +33,7 @@ pub struct Job {
 }
 
 impl CacheWriter {
+    /// Spawns the background thread and returns the writer handle.
     fn new() -> Self {
         let (tx, rx) = mpsc::channel::<Msg>();
 
@@ -50,11 +56,13 @@ impl CacheWriter {
         Self { tx }
     }
 
+    /// Returns the global singleton instance of the CacheWriter.
     pub fn get() -> &'static CacheWriter {
         static INSTANCE: OnceLock<CacheWriter> = OnceLock::new();
         INSTANCE.get_or_init(Self::new)
     }
 
+    /// Submits a message to the background thread without blocking.
     pub fn submit(&self, msg: Msg) {
         let _ = self.tx.send(msg);
     }
@@ -68,6 +76,7 @@ impl CacheWriter {
     }
 }
 
+/// Atomically saves the word map and text to a .cache file using a temporary file.
 fn save_to_disk(text: &str, map: &HashMap<String, Vec<i32>>, path: &Path) -> Result<()> {
     let cache_path = path.with_file_name(
         path.file_name()

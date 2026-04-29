@@ -32,6 +32,7 @@ pub fn process_and_cache(
     (text, map)
 }
 
+/// Creates a map of words and their occurrence indices in the text.
 pub fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
     text.split_whitespace()
         .enumerate()

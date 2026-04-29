@@ -11,10 +11,13 @@ use crate::{
     ocr::utils::get_tessdata_dir,
 };
 
+/// Interface for OCR engines capable of extracting text from images.
 pub trait OcrEngine: Sync {
+    /// Extracts text from the provided image.
     fn extract_text_from_image(&self, image_data: DynamicImage) -> Result<String>;
 }
 
+/// Engine that uses Tesseract OCR for text extraction.
 pub struct TesseractEngine {
     tess_pool: ThreadLocal<TesseractAPI>,
     tessdata_path: String,
@@ -22,6 +25,7 @@ pub struct TesseractEngine {
 }
 
 impl TesseractEngine {
+    /// Creates a new TesseractEngine for the specified language.
     pub fn new(lang: &str) -> Result<Self> {
         let tessdata_path = get_tessdata_dir()
             .into_os_string()

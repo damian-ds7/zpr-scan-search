@@ -6,11 +6,13 @@ use std::path::Path;
 
 use crate::{error::Result, ocr::OcrEngine};
 
+/// Extractor specifically designed for PDF documents.
 pub struct PdfExtractor<'a, E: OcrEngine> {
     ocr_engine: &'a E,
 }
 
 impl<'a, E: OcrEngine> PdfExtractor<'a, E> {
+    /// Creates a new PdfExtractor using the provided OCR engine.
     pub fn new(ocr_engine: &'a E) -> Self {
         Self { ocr_engine }
     }
