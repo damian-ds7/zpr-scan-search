@@ -4,7 +4,7 @@ use std::{
     io::Write,
     path::{Path, PathBuf},
     sync::{
-        Arc,
+        Arc, OnceLock,
         mpsc::{self, Sender},
     },
     thread,
@@ -28,7 +28,7 @@ pub struct Job {
 }
 
 impl CacheWriter {
-    pub fn new() -> Self {
+    fn new() -> Self {
         let (tx, rx) = mpsc::channel::<Msg>();
 
         thread::spawn(move || {
@@ -48,6 +48,11 @@ impl CacheWriter {
         });
 
         Self { tx }
+    }
+
+    pub fn get() -> &'static CacheWriter {
+        static INSTANCE: OnceLock<CacheWriter> = OnceLock::new();
+        INSTANCE.get_or_init(Self::new)
     }
 
     pub fn submit(&self, msg: Msg) {
