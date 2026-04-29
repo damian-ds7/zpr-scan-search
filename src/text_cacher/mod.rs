@@ -11,16 +11,8 @@ use std::io::{self, BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 
-static WRITER: OnceLock<CacheWriter> = OnceLock::new();
-
-fn get_writer() -> &'static CacheWriter {
-    WRITER.get_or_init(CacheWriter::new)
-}
-
 pub fn flush_cache() {
-    if let Some(w) = WRITER.get() {
-        w.flush();
-    }
+    CacheWriter::get().flush();
 }
 
 /// Processes text into a map and triggers a background save to disk.
@@ -31,7 +23,7 @@ pub fn process_and_cache(
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
 
-    get_writer().submit(Msg::Write(
+    CacheWriter::get().submit(Msg::Write(
         (Job {
             text: Arc::clone(&text),
             map: Arc::clone(&map),
