@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - /app/target
+      - /app/.venv
+    environment:
+      - CXX=clang
+    working_dir: /app
+    stdin_open: true
+    tty: true
