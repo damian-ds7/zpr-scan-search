@@ -7,21 +7,23 @@ pub mod tests;
 
 
 
-pub fn search(file: &TextFile, query: &String) -> Result<i32, &'static str> {
+pub fn search(file: &TextFile, query: &String) -> Vec<i32> {
     let words: Vec<&str> = query.split_whitespace().collect();
     let mut words_vec = vec![];
+    let mut locations: Vec<i32> = vec![];
     for &word in &words {
         if let Some(value) = file.map.get(word) {
         words_vec.push((word, value.clone()));
         }
         else{
-            return Err("Query not found");
+            return locations;
         }
     }
-    words_vec.sort_by(|a, b| b.1.len().cmp(&a.1.len()));
+    words_vec.sort_by(|a, b| a.1.len().cmp(&b.1.len()));
     let rarest = words_vec[0].clone();
     let index = words.iter().position(|&s| s == rarest.0).unwrap();
     let split_text: Vec<&str> = file.text.split_whitespace().collect();
+
     for location in rarest.1{
         let mut i: usize = 0;
         let location_usize = location as usize;
@@ -31,9 +33,12 @@ pub fn search(file: &TextFile, query: &String) -> Result<i32, &'static str> {
                     continue;
                 }
             }
+            else{
+                return locations;
+            }
             i += 1;
         }
-        return Ok(location);
+        locations.push(location);
     }
-    Err("Query not found")
+    locations
 }
