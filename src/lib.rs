@@ -8,6 +8,7 @@ mod file;
 mod ocr;
 mod text_cacher;
 mod text_extractor;
+pub mod text_searcher;
 
 #[pymodule]
 mod scan_search {
