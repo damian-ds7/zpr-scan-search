@@ -45,6 +45,17 @@ fn test_search_non_existent_phrase() {
 }
 
 #[test]
+fn test_search_non_existent_phrase_with_existing_words() {
+    let file = create_test_file(TEST_DOCUMENT);
+    let query = "filler filler forest".to_string();
+    let locations = search(&file, &query);
+    assert!(
+        locations.is_empty(),
+        "Expected empty vector for non-existent phrase with existing words"
+    );
+}
+
+#[test]
 fn test_search_rare_word_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "deep dark forest".to_string();
