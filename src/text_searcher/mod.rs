@@ -12,7 +12,7 @@ pub fn search(file: &TextFile, query: &str) -> Vec<i32> {
     let word_occur = match words
         .iter()
         .enumerate()
-        .map(|(i, &word)| file.map.get(word).map(|occurrences| (i, word, occurrences)))
+        .map(|(i, &word)| file.get(word).map(|occurrences| (i, word, occurrences)))
         .collect::<Option<Vec<(usize, &str, &Vec<i32>)>>>()
     {
         Some(mut valid_words) => {

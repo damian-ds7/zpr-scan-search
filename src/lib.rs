@@ -21,13 +21,13 @@ mod scan_search {
         text_extractor::PdfExtractor,
     };
 
-    /// Processes given pdf file and saves data to cache file and returns word map
+    /// Processes given pdf file and saves data to cache file and returns extracted text
     #[pyfunction]
     fn process_file(path: String) -> PyResult<String> {
         let ocr_engine = TesseractEngine::new("eng")?;
         let text_extractor = PdfExtractor::new(&ocr_engine);
         let file = TextFile::new(PathBuf::from(path), &text_extractor)?;
-        let word_map = serde_json::to_string(&*file.map).map_err(ScanSearchError::from)?;
+        let word_map = serde_json::to_string(file.map()).map_err(ScanSearchError::from)?;
         Ok(word_map)
     }
 
