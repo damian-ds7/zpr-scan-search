@@ -49,8 +49,8 @@ fn test_process_and_cache_async() {
 
     let file = File::open(cache_path).expect("Failed to open cache");
     let mut reader = BufReader::new(file);
-    let (loaded_text, loaded_map) = load_parts(&mut reader).expect("Failed to load parts");
+    let cached_document = load_parts(&mut reader).expect("Failed to load parts");
 
-    assert_eq!(*returned_map, loaded_map);
-    assert_eq!(*returned_text, loaded_text);
+    assert_eq!(*returned_map, cached_document.map);
+    assert_eq!(*returned_text, cached_document.text);
 }

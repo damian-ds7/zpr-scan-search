@@ -1,4 +1,5 @@
 mod cache_writer;
+mod file_fingerprint;
 #[cfg(test)]
 mod tests;
 
@@ -12,6 +13,13 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 
 pub use cache_writer::CacheWriter;
+pub use file_fingerprint::FileFingerprint;
+
+pub struct CachedDocument {
+    pub text: String,
+    pub map: HashMap<String, Vec<i32>>,
+    pub fingerprint: FileFingerprint,
+}
 
 /// Processes text into a map and triggers a background save to disk.
 pub fn process_and_cache(
@@ -51,19 +59,16 @@ fn read_delimited(reader: &mut BufReader<File>) -> io::Result<Vec<u8>> {
     Ok(buf)
 }
 
-/// Loads map and text parts from given cache file reader
-pub fn load_parts(reader: &mut BufReader<File>) -> Result<(String, HashMap<String, Vec<i32>>)> {
-    let mut buf = vec![];
+/// Loads map, text and fingerprint parts from given cache file reader
+pub fn load_parts(reader: &mut BufReader<File>) -> Result<CachedDocument> {
+    let map = serde_json::from_slice(&read_delimited(reader)?)?;
+    let text = String::from_utf8(read_delimited(reader)?)
+        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+    let fingerprint = FileFingerprint::read_from(reader)?;
 
-    reader.read_until(DELIMITER, &mut buf)?;
-    if buf.ends_with(&[DELIMITER]) {
-        buf.pop();
-    }
-    let map = serde_json::from_slice(&buf)?;
-
-    buf.clear();
-    reader.read_to_end(&mut buf)?;
-    let text = String::from_utf8(buf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-
-    Ok((text, map))
+    Ok(CachedDocument {
+        text,
+        map,
+        fingerprint,
+    })
 }
