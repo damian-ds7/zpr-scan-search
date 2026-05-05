@@ -8,6 +8,9 @@ pub enum ScanSearchError {
     #[error("Path is not valid UTF-8: {0}")]
     InvalidPath(String),
 
+    #[error("Image load failed: {0}")]
+    Image(String),
+
     #[error("OCR processing failed: {0}")]
     Ocr(String),
 
