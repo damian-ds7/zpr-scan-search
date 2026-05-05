@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests;
 use crate::error::Result;
+use crate::text_cacher::{CachedDocument, FileFingerprint};
 use crate::text_cacher::{load_parts, process_and_cache};
 use crate::text_extractor::TextExtractor;
 use std::collections::HashMap;
@@ -29,7 +30,9 @@ impl TextFile {
 
     /// Creates a new TextFile by either loading from cache or extracting from source using the provided extractor.
     pub fn new<E: TextExtractor>(path: PathBuf, extractor: &E) -> Result<TextFile> {
-        if let Ok((text, map)) = Self::try_load_cache(&path) {
+        let fp = FileFingerprint::from_path(&path)?;
+
+        if let Some(CachedDocument { text, map, .. }) = Self::try_load_cache(&path, &fp)? {
             return Ok(Self {
                 path,
                 text: Arc::new(text),
@@ -43,7 +46,10 @@ impl TextFile {
     }
 
     /// Attempts to load the document content and word map from a local .cache file.
-    fn try_load_cache(path: &Path) -> Result<(String, HashMap<String, Vec<i32>>)> {
+    fn try_load_cache(
+        path: &Path,
+        fingerprint: &FileFingerprint,
+    ) -> Result<Option<CachedDocument>> {
         let mut cache_path = path.to_path_buf();
 
         if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {
@@ -52,7 +58,13 @@ impl TextFile {
 
         let file = File::open(cache_path.as_path())?;
         let mut reader = BufReader::new(file);
-        load_parts(&mut reader)
+        let cached_file = load_parts(&mut reader)?;
+
+        if cached_file.fingerprint != *fingerprint {
+            return Ok(None);
+        }
+
+        Ok(Some(cached_file))
     }
 
     fn path(&self) -> &Path {
