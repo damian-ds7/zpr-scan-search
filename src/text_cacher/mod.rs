@@ -42,6 +42,15 @@ pub fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
         })
 }
 
+fn read_delimited(reader: &mut BufReader<File>) -> io::Result<Vec<u8>> {
+    let mut buf = vec![];
+    reader.read_until(DELIMITER, &mut buf)?;
+    if buf.ends_with(&[DELIMITER]) {
+        buf.pop();
+    }
+    Ok(buf)
+}
+
 /// Loads map and text parts from given cache file reader
 pub fn load_parts(reader: &mut BufReader<File>) -> Result<(String, HashMap<String, Vec<i32>>)> {
     let mut buf = vec![];
