@@ -1,3 +1,4 @@
+mod image_extractor;
 mod pdf_extractor;
 #[cfg(test)]
 mod tests;
