@@ -12,9 +12,9 @@ use std::sync::Arc;
 
 /// Represents a processed document containing its text content and a word occurrence map.
 pub struct TextFile {
-    pub path: PathBuf,
-    pub text: Arc<String>,
-    pub map: Arc<HashMap<String, Vec<i32>>>,
+    path: PathBuf,
+    text: Arc<String>,
+    map: Arc<HashMap<String, Vec<i32>>>,
 }
 
 impl TextFile {
@@ -53,5 +53,22 @@ impl TextFile {
         let file = File::open(cache_path.as_path())?;
         let mut reader = BufReader::new(file);
         load_parts(&mut reader)
+    }
+
+    fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn get(&self, key: &str) -> Option<&Vec<i32>> {
+        self.map.get(key)
+    }
+
+    // TODO: can probably be removed after preview python function is not needed
+    pub fn map(&self) -> &HashMap<String, Vec<i32>> {
+        &self.map
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.text
     }
 }
