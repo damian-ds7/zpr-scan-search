@@ -18,11 +18,7 @@ fn create_test_file(content: &str) -> TextFile {
         map.entry(word.to_string()).or_default().push(i as i32);
     }
 
-    TextFile {
-        path: PathBuf::from("test.txt"),
-        text: Arc::new(content.to_string()),
-        map: Arc::new(map),
-    }
+    TextFile::new_raw(PathBuf::from("test.txt"), String::from(content), map)
 }
 
 #[test]

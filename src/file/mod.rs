@@ -18,6 +18,15 @@ pub struct TextFile {
 }
 
 impl TextFile {
+    #[cfg(test)]
+    pub fn new_raw(path: PathBuf, text: String, map: HashMap<String, Vec<i32>>) -> Self {
+        Self {
+            path,
+            text: Arc::new(text),
+            map: Arc::new(map),
+        }
+    }
+
     /// Creates a new TextFile by either loading from cache or extracting from source using the provided extractor.
     pub fn new<E: TextExtractor>(path: PathBuf, extractor: &E) -> Result<TextFile> {
         if let Ok((text, map)) = Self::try_load_cache(&path) {
