@@ -17,6 +17,12 @@ pub trait OcrEngine: Sync {
     fn extract_text_from_image(&self, image_data: DynamicImage) -> Result<String>;
 }
 
+impl From<tesseract_rs::TesseractError> for ScanSearchError {
+    fn from(e: tesseract_rs::TesseractError) -> Self {
+        ScanSearchError::Ocr(e.to_string())
+    }
+}
+
 /// Engine that uses Tesseract OCR for text extraction.
 pub struct TesseractEngine {
     tess_pool: ThreadLocal<TesseractAPI>,

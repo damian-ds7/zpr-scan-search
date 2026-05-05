@@ -1,28 +1,27 @@
 use std::ffi::OsString;
 
 use pyo3::{PyErr, exceptions::PyRuntimeError};
-use thiserror::Error;
 
 /// Central error type for the scan-search project, wrapping external library errors.
-#[derive(Error, Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum ScanSearchError {
-    #[error("{0}")]
-    Pdf(#[from] pdf_oxide::error::Error),
-
-    #[error("{0}")]
-    Io(#[from] std::io::Error),
-
-    #[error("{0}")]
-    Ocr(#[from] tesseract_rs::TesseractError),
-
-    #[error("{0}")]
-    Json(#[from] serde_json::Error),
-
-    #[error("{0}")]
-    PersistError(#[from] tempfile::PersistError),
-
     #[error("Path is not valid UTF-8: {0}")]
     InvalidPath(String),
+
+    #[error("OCR processing failed: {0}")]
+    Ocr(String),
+
+    #[error("PDF processing failed: {0}")]
+    Pdf(String),
+
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Serialization error: {0}")]
+    Json(#[from] serde_json::Error),
+
+    #[error("Failed to persist temp file: {0}")]
+    PersistError(#[from] tempfile::PersistError),
 }
 
 impl From<ScanSearchError> for PyErr {
