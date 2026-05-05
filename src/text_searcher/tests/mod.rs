@@ -30,7 +30,7 @@ fn test_search_existing_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "quick brown fox".to_string();
     let locations = search(&file, &query);
-    assert!(!locations.is_empty(), "Expected to find 'quick brown fox'");
+    assert_eq!(locations, vec![1, 20]);
 }
 
 #[test]
@@ -60,7 +60,7 @@ fn test_search_rare_word_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "deep dark forest".to_string();
     let locations = search(&file, &query);
-    assert!(!locations.is_empty(), "Expected to find 'deep dark forest'");
+    assert_eq!(locations, vec![14]);
 }
 
 #[test]
@@ -68,10 +68,7 @@ fn test_search_repeated_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "jumps over the lazy dog".to_string();
     let locations = search(&file, &query);
-    assert!(
-        !locations.is_empty(),
-        "Expected to find repeated phrase 'jumps over the lazy dog'"
-    );
+    assert_eq!(locations, vec![4, 23]);
 }
 
 #[test]
