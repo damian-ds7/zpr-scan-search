@@ -2,12 +2,14 @@ use crate::constants::DELIMITER;
 use crate::error::Result;
 use crate::file::TextFile;
 use crate::ocr::OcrEngine;
-use crate::text_extractor::{PdfExtractor, TextExtractor};
+use crate::text_cacher::{FileFingerprint, Job};
+use crate::text_extractor::TextExtractor;
 use image::DynamicImage;
 use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use tempfile::tempdir;
 
 struct MockExtractor;
@@ -34,22 +36,33 @@ fn test_try_load_cache() {
     map.insert("test".to_string(), vec![0]);
     let json_map = serde_json::to_string(&map).unwrap();
 
-    let mut file = fs::File::create(&cache_path).unwrap();
-    file.write_all(json_map.as_bytes()).unwrap();
-    file.write_all(&[DELIMITER]).unwrap();
-    file.write_all(b"test content").unwrap();
+    let fp = FileFingerprint::new_raw(1, 2, 3);
 
-    let result = TextFile::try_load_cache(&file_path);
+    let mut file = fs::File::create(&cache_path).unwrap();
+    let job = Job {
+        text: Arc::new("test content".to_string()),
+        map: Arc::new(map),
+        fingerprint: fp.clone(),
+        path: file_path.clone(),
+    };
+    let mut file = fs::File::create(&cache_path).unwrap();
+    job.write_to(&mut file).unwrap();
+
+    let result = TextFile::try_load_cache(&file_path, &fp);
     assert!(result.is_ok());
-    let (text, map_loaded) = result.unwrap();
-    assert_eq!(text, "test content");
-    assert_eq!(map_loaded.get("test").unwrap(), &vec![0]);
+    let option = result.unwrap();
+    assert!(option.is_some());
+    let cached_document = option.unwrap();
+    assert_eq!(cached_document.text, "test content");
+    assert_eq!(cached_document.map.get("test").unwrap(), &vec![0]);
+    assert_eq!(cached_document.fingerprint, fp);
 }
 
 #[test]
 fn test_new_with_mock_extractor() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("test.pdf");
+    let file = fs::File::create(&file_path).unwrap();
     let extractor = MockExtractor;
 
     let text_file = TextFile::new(file_path, &extractor).unwrap();

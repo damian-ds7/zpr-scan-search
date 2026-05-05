@@ -32,7 +32,7 @@ impl TextFile {
     pub fn new<E: TextExtractor>(path: PathBuf, extractor: &E) -> Result<TextFile> {
         let fp = FileFingerprint::from_path(&path)?;
 
-        if let Some(CachedDocument { text, map, .. }) = Self::try_load_cache(&path, &fp)? {
+        if let Ok(Some(CachedDocument { text, map, .. })) = Self::try_load_cache(&path, &fp) {
             return Ok(Self {
                 path,
                 text: Arc::new(text),
@@ -41,7 +41,7 @@ impl TextFile {
         }
 
         let text = extractor.extract_from(&path)?;
-        let (text, map) = process_and_cache(text, path.clone());
+        let (text, map) = process_and_cache(text, path.clone(), fp);
         Ok(Self { path, text, map })
     }
 
