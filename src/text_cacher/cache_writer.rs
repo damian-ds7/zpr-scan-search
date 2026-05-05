@@ -10,7 +10,7 @@ use std::{
     thread,
 };
 
-use crate::{constants::DELIMITER, error::Result};
+use crate::{constants::DELIMITER, error::Result, text_cacher::FileFingerprint};
 
 /// Messages sent to the background cache writer thread.
 pub enum Msg {
@@ -26,10 +26,22 @@ pub struct CacheWriter {
 }
 
 /// Represents a single cache write task.
-pub struct Job {
+pub(crate) struct Job {
     pub text: Arc<String>,
     pub map: Arc<HashMap<String, Vec<i32>>>,
+    pub fingerprint: FileFingerprint,
     pub path: PathBuf,
+}
+
+impl Job {
+    pub fn write_to(&self, writer: &mut impl Write) -> Result<()> {
+        serde_json::to_writer(&mut *writer, self.map.as_ref())?;
+        writer.write_all(&[DELIMITER])?;
+        writer.write_all(self.text.as_bytes())?;
+        writer.write_all(&[DELIMITER])?;
+        self.fingerprint.write_to(writer)?;
+        Ok(())
+    }
 }
 
 impl CacheWriter {
@@ -41,7 +53,7 @@ impl CacheWriter {
             while let Ok(msg) = rx.recv() {
                 match msg {
                     Msg::Write(job) => {
-                        if let Err(e) = save_to_disk(&job.text, &job.map, &job.path) {
+                        if let Err(e) = save_to_disk(&job) {
                             eprintln!("Cache error: {}", e);
                         }
                     }
@@ -77,20 +89,19 @@ impl CacheWriter {
 }
 
 /// Atomically saves the word map and text to a .cache file using a temporary file.
-fn save_to_disk(text: &str, map: &HashMap<String, Vec<i32>>, path: &Path) -> Result<()> {
-    let cache_path = path.with_file_name(
-        path.file_name()
+fn save_to_disk(job: &Job) -> Result<()> {
+    let cache_path = job.path.with_file_name(
+        job.path
+            .file_name()
             .and_then(|f| f.to_str())
             .map(|name| format!("{}.cache", name))
             .unwrap_or_default(),
     );
 
-    let dir = path.parent().unwrap_or(Path::new("."));
+    let dir = job.path.parent().unwrap_or(Path::new("."));
     let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
 
-    serde_json::to_writer(&mut tmp, map)?;
-    tmp.write_all(&[DELIMITER])?;
-    tmp.write_all(text.as_bytes())?;
+    job.write_to(&mut tmp)?;
 
     tmp.persist(&cache_path)?;
     Ok(())

@@ -5,7 +5,7 @@ mod tests;
 
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::text_cacher::cache_writer::{Job, Msg};
+use crate::text_cacher::cache_writer::Msg;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read, Write};
@@ -13,6 +13,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 
 pub use cache_writer::CacheWriter;
+pub(crate) use cache_writer::Job;
 pub use file_fingerprint::FileFingerprint;
 
 pub struct CachedDocument {
@@ -25,6 +26,7 @@ pub struct CachedDocument {
 pub fn process_and_cache(
     text: String,
     path: PathBuf,
+    fingerprint: FileFingerprint,
 ) -> (Arc<String>, Arc<HashMap<String, Vec<i32>>>) {
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
@@ -33,6 +35,7 @@ pub fn process_and_cache(
         (Job {
             text: Arc::clone(&text),
             map: Arc::clone(&map),
+            fingerprint,
             path,
         }),
     ));
