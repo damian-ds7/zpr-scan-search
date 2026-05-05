@@ -1,10 +1,16 @@
-use crate::text_extractor::TextExtractor;
+use crate::{error::ScanSearchError, text_extractor::TextExtractor};
 use image::DynamicImage;
 use pdf_oxide::PdfDocument;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::path::Path;
 
 use crate::{error::Result, ocr::OcrEngine};
+
+impl From<pdf_oxide::Error> for ScanSearchError {
+    fn from(e: pdf_oxide::Error) -> Self {
+        Self::Pdf(e.to_string())
+    }
+}
 
 /// Extractor specifically designed for PDF documents.
 pub struct PdfExtractor<'a, E: OcrEngine> {
