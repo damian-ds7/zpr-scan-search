@@ -22,8 +22,6 @@ pub fn search(file: &TextFile, query: &str) -> Vec<i32> {
         None => return locations,
     };
     let rarest = word_occur[0];
-    let split_text: Vec<&str> = file.text.split_whitespace().collect(); // this is nasty, maybe we should consider the `File` object holding a split text
-
     for location in rarest.2 {
         let location_usize = *location as usize;
         if location_usize >= rarest.0 {
