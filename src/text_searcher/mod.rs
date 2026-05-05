@@ -1,40 +1,41 @@
 use crate::file::TextFile;
 use std::collections::HashMap;
+use std::ops::Index;
 
 #[cfg(test)]
 pub mod tests;
 
-pub fn search(file: &TextFile, query: &String) -> Vec<i32> {
+pub fn search(file: &TextFile, query: &str) -> Vec<i32> {
     let words: Vec<&str> = query.split_whitespace().collect();
     let mut locations: Vec<i32> = vec![];
 
-    let word_occur: Option<Vec<(&str, &Vec<i32>)>> = words
-        .clone()
-        .into_iter()
-        .map(|word| file.map.get(word).map(|occurances| (word, occurances)))
-        .collect();
-    let Some(mut valid_words) = word_occur else {
-        return locations;
+    let word_occur = match words
+        .iter()
+        .enumerate()
+        .map(|(i, &word)| file.map.get(word).map(|occurrences| (i, word, occurrences)))
+        .collect::<Option<Vec<(usize, &str, &Vec<i32>)>>>()
+    {
+        Some(mut valid_words) => {
+            valid_words.sort_by_key(|w| w.2.len());
+            valid_words
+        }
+        None => return locations,
     };
-    valid_words.sort_by_key(|w| w.1.len());
-    let rarest = valid_words[0].clone();
-    let index = words.iter().position(|&s| s == rarest.0).unwrap();
+    let rarest = word_occur[0];
     let split_text: Vec<&str> = file.text.split_whitespace().collect(); // this is nasty, maybe we should consider the `File` object holding a split text
 
-    for location in rarest.1 {
-        let mut i: usize = 0;
+    for location in rarest.2 {
         let location_usize = *location as usize;
-        for word in &words {
-            if location_usize >= index {
-                if split_text[location_usize - index + i] != words[i] {
-                    continue;
-                }
-            } else {
-                return locations;
+        if location_usize >= rarest.0 {
+            let is_match = word_occur.iter().all(|(word_index, _, occurrences)| {
+                let expected_pos = (location_usize - rarest.0 + word_index) as i32;
+                occurrences.binary_search(&expected_pos).is_ok()
+            });
+            if is_match {
+                locations.push(*location)
             }
-            i += 1;
         }
-        locations.push(*location);
     }
+
     locations
 }
