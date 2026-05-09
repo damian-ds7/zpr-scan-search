@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{Read, Write};
+use std::io::{BufRead, Read, Write};
 use std::path::Path;
 use std::time::SystemTime;
 
@@ -41,7 +41,7 @@ impl FileFingerprint {
         Ok(())
     }
 
-    pub fn read_from(r: &mut impl Read) -> Result<Self> {
+    pub fn read_from<R: BufRead>(r: &mut R) -> Result<Self> {
         let mut buf8 = [0u8; 8];
         let mut buf4 = [0u8; 4];
         r.read_exact(&mut buf8)?;
