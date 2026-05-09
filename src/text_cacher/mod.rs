@@ -53,7 +53,7 @@ pub fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
         })
 }
 
-fn read_delimited(reader: &mut BufReader<File>) -> io::Result<Vec<u8>> {
+fn read_delimited<R: BufRead>(reader: &mut R) -> io::Result<Vec<u8>> {
     let mut buf = vec![];
     reader.read_until(DELIMITER, &mut buf)?;
     if buf.ends_with(&[DELIMITER]) {
@@ -63,7 +63,7 @@ fn read_delimited(reader: &mut BufReader<File>) -> io::Result<Vec<u8>> {
 }
 
 /// Loads map, text and fingerprint parts from given cache file reader
-pub fn load_parts(reader: &mut BufReader<File>) -> Result<CachedDocument> {
+pub fn load_parts<R: BufRead>(reader: &mut R) -> Result<CachedDocument> {
     let map = serde_json::from_slice(&read_delimited(reader)?)?;
     let text = String::from_utf8(read_delimited(reader)?)
         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
