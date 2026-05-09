@@ -7,6 +7,7 @@ mod ocr;
 mod text_cacher;
 mod text_extractor;
 pub mod text_searcher;
+pub mod text_encoder;
 
 #[pymodule]
 mod scan_search {

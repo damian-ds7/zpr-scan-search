@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use pyo3::{PyErr, exceptions::PyRuntimeError};
 
+
 /// Central error type for the scan-search project, wrapping external library errors.
 #[derive(Debug, thiserror::Error)]
 pub enum ScanSearchError {
@@ -25,6 +26,12 @@ pub enum ScanSearchError {
 
     #[error("Serialization error: {0}")]
     Json(#[from] serde_json::Error),
+
+    #[error("Failed to persist temp file: {0}")]
+    PersistError(#[from] tempfile::PersistError),
+
+    #[error("Failed to encode a sentence: {0}")]
+    RustBertError(#[from] rust_bert::RustBertError),
 }
 
 impl From<ScanSearchError> for PyErr {
