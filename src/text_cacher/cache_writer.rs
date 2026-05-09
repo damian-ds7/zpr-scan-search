@@ -83,6 +83,11 @@ pub(crate) fn write(task: &WriteTask) -> Result<()> {
 
     tmp.write_all(&task.data)?;
 
-    tmp.persist(&task.path)?;
+    tmp.persist(&task.path).map_err(|e| {
+        std::io::Error::new(
+            e.error.kind(),
+            format!("failed to persist temp file: {}", e.error),
+        )
+    })?;
     Ok(())
 }
