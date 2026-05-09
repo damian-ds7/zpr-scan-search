@@ -25,9 +25,6 @@ pub enum ScanSearchError {
 
     #[error("Serialization error: {0}")]
     Json(#[from] serde_json::Error),
-
-    #[error("Failed to persist temp file: {0}")]
-    PersistError(#[from] tempfile::PersistError),
 }
 
 impl From<ScanSearchError> for PyErr {
