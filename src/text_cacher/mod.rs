@@ -13,8 +13,26 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 
 pub use cache_writer::CacheWriter;
-pub(crate) use cache_writer::Job;
 pub use file_fingerprint::FileFingerprint;
+
+/// Represents a single cache write task.
+pub(crate) struct Job {
+    pub text: Arc<String>,
+    pub map: Arc<HashMap<String, Vec<i32>>>,
+    pub fingerprint: FileFingerprint,
+    pub path: PathBuf,
+}
+
+impl Job {
+    pub fn write_to(&self, writer: &mut impl Write) -> Result<()> {
+        serde_json::to_writer(&mut *writer, self.map.as_ref())?;
+        writer.write_all(&[DELIMITER])?;
+        writer.write_all(self.text.as_bytes())?;
+        writer.write_all(&[DELIMITER])?;
+        self.fingerprint.write_to(writer)?;
+        Ok(())
+    }
+}
 
 pub struct CachedDocument {
     pub text: String,
