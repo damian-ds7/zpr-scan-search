@@ -13,7 +13,7 @@ use std::{
 use crate::{
     constants::DELIMITER,
     error::Result,
-    text_cacher::{FileFingerprint, Job},
+    text_cacher::{FileFingerprint, Job, execute_job},
 };
 
 /// Messages sent to the background cache writer thread.
@@ -75,19 +75,16 @@ impl CacheWriter {
 
 /// Atomically saves the word map and text to a .cache file using a temporary file.
 fn save_to_disk(job: &Job) -> Result<()> {
-    let cache_path = job.path.with_file_name(
-        job.path
-            .file_name()
-            .and_then(|f| f.to_str())
-            .map(|name| format!("{}.cache", name))
-            .unwrap_or_default(),
-    );
+    match job {
+        Job::CacheWrite { path, .. } => {
+            let dir = path.parent().unwrap_or(Path::new("."));
+            let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
 
-    let dir = job.path.parent().unwrap_or(Path::new("."));
-    let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
+            execute_job(job, &mut tmp)?;
 
-    job.write_to(&mut tmp)?;
-
-    tmp.persist(&cache_path)?;
-    Ok(())
+            tmp.persist(path)?;
+            Ok(())
+        }
+    }
 }
+

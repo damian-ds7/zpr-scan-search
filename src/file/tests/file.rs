@@ -2,7 +2,7 @@ use crate::constants::DELIMITER;
 use crate::error::Result;
 use crate::file::TextFile;
 use crate::ocr::OcrEngine;
-use crate::text_cacher::{FileFingerprint, Job};
+use crate::text_cacher::{FileFingerprint, Job, execute_job};
 use crate::text_extractor::TextExtractor;
 use image::DynamicImage;
 use std::collections::HashMap;
@@ -39,14 +39,14 @@ fn test_try_load_cache() {
     let fp = FileFingerprint::new_raw(1, 2, 3);
 
     let mut file = fs::File::create(&cache_path).unwrap();
-    let job = Job {
+    let job = Job::CacheWrite {
         text: Arc::new("test content".to_string()),
         map: Arc::new(map),
         fingerprint: fp.clone(),
         path: file_path.clone(),
     };
     let mut file = fs::File::create(&cache_path).unwrap();
-    job.write_to(&mut file).unwrap();
+    execute_job(&job, &mut file);
 
     let result = TextFile::try_load_cache(&file_path, &fp);
     assert!(result.is_ok());
