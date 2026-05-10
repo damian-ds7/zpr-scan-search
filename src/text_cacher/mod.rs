@@ -50,7 +50,14 @@ fn serialize_cache_write(
     writer.write_all(&[DELIMITER])?;
     writer.write_all(text.as_bytes())?;
     writer.write_all(&[DELIMITER])?;
-    fingerprint.write_to(writer)?;
+    write_fingerprint(fingerprint, writer)?;
+    Ok(())
+}
+
+pub(crate) fn write_fingerprint(fingerprint: &FileFingerprint, w: &mut impl Write) -> Result<()> {
+    w.write_all(&fingerprint.mtime_secs.to_le_bytes())?;
+    w.write_all(&fingerprint.mtime_nanos.to_le_bytes())?;
+    w.write_all(&fingerprint.size.to_le_bytes())?;
     Ok(())
 }
 pub struct CachedDocument {
@@ -102,11 +109,27 @@ pub fn load_parts<R: BufRead>(reader: &mut R) -> Result<CachedDocument> {
     let map = serde_json::from_slice(&read_delimited(reader)?)?;
     let text = String::from_utf8(read_delimited(reader)?)
         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-    let fingerprint = FileFingerprint::read_from(reader)?;
+    let fingerprint = read_fingerprint(reader)?;
 
     Ok(CachedDocument {
         text,
         map,
         fingerprint,
+    })
+}
+
+pub(crate) fn read_fingerprint<R: BufRead>(r: &mut R) -> Result<FileFingerprint> {
+    let mut buf8 = [0u8; 8];
+    let mut buf4 = [0u8; 4];
+    r.read_exact(&mut buf8)?;
+    let mtime_secs = u64::from_le_bytes(buf8);
+    r.read_exact(&mut buf4)?;
+    let mtime_nanos = u32::from_le_bytes(buf4);
+    r.read_exact(&mut buf8)?;
+    let size = u64::from_le_bytes(buf8);
+    Ok(FileFingerprint {
+        mtime_secs,
+        mtime_nanos,
+        size,
     })
 }
