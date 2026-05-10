@@ -10,7 +10,11 @@ use std::{
     thread,
 };
 
-use crate::{constants::DELIMITER, error::Result, text_cacher::FileFingerprint};
+use crate::{
+    constants::DELIMITER,
+    error::Result,
+    text_cacher::{FileFingerprint, Job},
+};
 
 /// Messages sent to the background cache writer thread.
 pub enum Msg {
@@ -23,25 +27,6 @@ pub enum Msg {
 /// A background worker that handles non-blocking cache persistence.
 pub struct CacheWriter {
     tx: Sender<Msg>,
-}
-
-/// Represents a single cache write task.
-pub(crate) struct Job {
-    pub text: Arc<String>,
-    pub map: Arc<HashMap<String, Vec<i32>>>,
-    pub fingerprint: FileFingerprint,
-    pub path: PathBuf,
-}
-
-impl Job {
-    pub fn write_to(&self, writer: &mut impl Write) -> Result<()> {
-        serde_json::to_writer(&mut *writer, self.map.as_ref())?;
-        writer.write_all(&[DELIMITER])?;
-        writer.write_all(self.text.as_bytes())?;
-        writer.write_all(&[DELIMITER])?;
-        self.fingerprint.write_to(writer)?;
-        Ok(())
-    }
 }
 
 impl CacheWriter {
