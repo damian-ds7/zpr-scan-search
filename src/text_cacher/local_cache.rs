@@ -6,7 +6,7 @@ use std::sync::Arc;
 use crate::error::Result;
 use crate::text_cacher::cache_writer::Msg;
 use crate::text_cacher::{
-    CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job, WordMap, load_parts,
+    CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job, WordMap, WriteTask, load_parts
 };
 
 #[derive(Default)]
@@ -46,23 +46,25 @@ impl CacheBackend for LocalCache {
         Ok(Some(cached_file))
     }
 
-    fn cache_document(
-        &self,
-        path: PathBuf,
-        text: Arc<String>,
-        map: Arc<WordMap>,
-        fingerprint: FileFingerprint,
-    ) {
+    fn submit_job(&self, path: PathBuf, job: Job) {
         let mut cache_path = path;
         if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {
             cache_path.set_file_name(format!("{}.cache", file_name));
         }
 
-        CacheWriter::get().submit(Msg::Write(Job::CacheWrite {
-            text,
-            map,
-            fingerprint,
-            path: cache_path,
-        }));
+        match job {
+            Job::CacheWrite { text, map, fingerprint } => {
+                let mut data = Vec::new();
+                if let Err(e) = crate::text_cacher::serialize_cache_write(&text, &map, &fingerprint, &mut data) {
+                    eprintln!("Failed to serialize cache data for {:?}: {}", cache_path, e);
+                    return;
+                }
+
+                CacheWriter::get().submit(Msg::Write(WriteTask {
+                    data,
+                    path: cache_path,
+                }));
+            }
+        }
     }
 }

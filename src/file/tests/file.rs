@@ -2,7 +2,7 @@ use crate::constants::DELIMITER;
 use crate::error::Result;
 use crate::file::TextFile;
 use crate::ocr::OcrEngine;
-use crate::text_cacher::{CacheBackend, FileFingerprint, Job, LocalCache, execute_job};
+use crate::text_cacher::{CacheBackend, FileFingerprint, Job, LocalCache, serialize_cache_write};
 use crate::text_extractor::TextExtractor;
 use image::DynamicImage;
 use std::collections::HashMap;
@@ -38,15 +38,10 @@ fn test_try_load_cache() {
 
     let fp = FileFingerprint::new_raw(1, 2, 3);
 
+    let text = Arc::new("test content".to_string());
+    let map_arc = Arc::new(map);
     let mut file = fs::File::create(&cache_path).unwrap();
-    let job = Job::CacheWrite {
-        text: Arc::new("test content".to_string()),
-        map: Arc::new(map),
-        fingerprint: fp.clone(),
-        path: file_path.clone(),
-    };
-    let mut file = fs::File::create(&cache_path).unwrap();
-    execute_job(&job, &mut file);
+    serialize_cache_write(&text, &map_arc, &fp, &mut file).unwrap();
 
     let result = LocalCache::new().try_load(&file_path, &fp);
     assert!(result.is_ok());
