@@ -16,24 +16,41 @@ pub use cache_writer::CacheWriter;
 pub use file_fingerprint::FileFingerprint;
 
 /// Represents a single cache write task.
-pub(crate) struct Job {
-    pub text: Arc<String>,
-    pub map: Arc<HashMap<String, Vec<i32>>>,
-    pub fingerprint: FileFingerprint,
-    pub path: PathBuf,
+pub(crate) enum Job {
+    CacheWrite {
+        text: Arc<String>,
+        map: Arc<HashMap<String, Vec<i32>>>,
+        fingerprint: FileFingerprint,
+        path: PathBuf,
+    },
 }
 
-impl Job {
-    pub fn write_to(&self, writer: &mut impl Write) -> Result<()> {
-        serde_json::to_writer(&mut *writer, self.map.as_ref())?;
-        writer.write_all(&[DELIMITER])?;
-        writer.write_all(self.text.as_bytes())?;
-        writer.write_all(&[DELIMITER])?;
-        self.fingerprint.write_to(writer)?;
-        Ok(())
+pub fn execute_job<W: Write>(job: &Job, writer: &mut W) -> Result<()> {
+    match job {
+        Job::CacheWrite {
+            text,
+            map,
+            fingerprint,
+            path,
+        } => serialize_cache_write(text, map, fingerprint, writer)?,
     }
+
+    Ok(())
 }
 
+fn serialize_cache_write(
+    text: &Arc<String>,
+    map: &Arc<HashMap<String, Vec<i32>>>,
+    fingerprint: &FileFingerprint,
+    writer: &mut impl Write,
+) -> Result<()> {
+    serde_json::to_writer(&mut *writer, map.as_ref())?;
+    writer.write_all(&[DELIMITER])?;
+    writer.write_all(text.as_bytes())?;
+    writer.write_all(&[DELIMITER])?;
+    fingerprint.write_to(writer)?;
+    Ok(())
+}
 pub struct CachedDocument {
     pub text: String,
     pub map: HashMap<String, Vec<i32>>,
@@ -49,14 +66,12 @@ pub fn process_and_cache(
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
 
-    CacheWriter::get().submit(Msg::Write(
-        (Job {
-            text: Arc::clone(&text),
-            map: Arc::clone(&map),
-            fingerprint,
-            path,
-        }),
-    ));
+    CacheWriter::get().submit(Msg::Write(Job::CacheWrite {
+        text: Arc::clone(&text),
+        map: Arc::clone(&map),
+        fingerprint,
+        path,
+    }));
 
     (text, map)
 }
