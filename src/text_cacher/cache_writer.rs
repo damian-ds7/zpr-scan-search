@@ -10,16 +10,12 @@ use std::{
     thread,
 };
 
-use crate::{
-    constants::DELIMITER,
-    error::Result,
-    text_cacher::{FileFingerprint, Job, execute_job},
-};
+use crate::{error::Result, text_cacher::WriteTask};
 
 /// Messages sent to the background cache writer thread.
 pub enum Msg {
     /// Write a new cache job to disk.
-    Write(Job),
+    Write(WriteTask),
     /// Block until all previous messages are processed.
     Shutdown(Sender<()>),
 }
@@ -37,8 +33,8 @@ impl CacheWriter {
         thread::spawn(move || {
             while let Ok(msg) = rx.recv() {
                 match msg {
-                    Msg::Write(job) => {
-                        if let Err(e) = save_to_disk(&job) {
+                    Msg::Write(task) => {
+                        if let Err(e) = save_to_disk(&task) {
                             eprintln!("Cache error: {}", e);
                         }
                     }
@@ -74,17 +70,12 @@ impl CacheWriter {
 }
 
 /// Atomically saves the word map and text to a .cache file using a temporary file.
-fn save_to_disk(job: &Job) -> Result<()> {
-    match job {
-        Job::CacheWrite { path, .. } => {
-            let dir = path.parent().unwrap_or(Path::new("."));
-            let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
+fn save_to_disk(task: &WriteTask) -> Result<()> {
+    let dir = task.path.parent().unwrap_or(Path::new("."));
+    let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
 
-            execute_job(job, &mut tmp)?;
+    tmp.write_all(&task.data)?;
 
-            tmp.persist(path)?;
-            Ok(())
-        }
-    }
+    tmp.persist(&task.path)?;
+    Ok(())
 }
-

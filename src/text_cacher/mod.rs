@@ -24,39 +24,25 @@ pub trait CacheBackend {
         fingerprint: &FileFingerprint,
     ) -> Result<Option<CachedDocument>>;
 
-    fn cache_document(
-        &self,
-        path: PathBuf,
-        text: Arc<String>,
-        map: Arc<WordMap>,
-        fingerprint: FileFingerprint,
-    );
+    fn submit_job(&self, path: PathBuf, job: Job);
 }
 
-/// Represents a single cache write task.
-pub(crate) enum Job {
+/// Represents the high-level domain data for a cache write task.
+pub enum Job {
     CacheWrite {
         text: Arc<String>,
         map: Arc<WordMap>,
         fingerprint: FileFingerprint,
-        path: PathBuf,
     },
 }
 
-pub fn execute_job<W: Write>(job: &Job, writer: &mut W) -> Result<()> {
-    match job {
-        Job::CacheWrite {
-            text,
-            map,
-            fingerprint,
-            path,
-        } => serialize_cache_write(text, map, fingerprint, writer)?,
-    }
-
-    Ok(())
+/// Represents a raw write task sent to the background writer.
+pub struct WriteTask {
+    pub path: PathBuf,
+    pub data: Vec<u8>,
 }
 
-fn serialize_cache_write<W: Write>(
+pub(crate) fn serialize_cache_write<W: Write>(
     text: &Arc<String>,
     map: &Arc<WordMap>,
     fingerprint: &FileFingerprint,
@@ -93,7 +79,14 @@ pub fn process_and_cache<B: CacheBackend>(
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
 
-    backend.cache_document(path, Arc::clone(&text), Arc::clone(&map), fingerprint);
+    backend.submit_job(
+        path,
+        Job::CacheWrite {
+            text: Arc::clone(&text),
+            map: Arc::clone(&map),
+            fingerprint,
+        },
+    );
 
     (text, map)
 }
