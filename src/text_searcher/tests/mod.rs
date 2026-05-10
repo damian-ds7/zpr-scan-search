@@ -1,4 +1,5 @@
 use crate::file::TextFile;
+use crate::text_cacher::WordMap;
 use crate::text_searcher::search;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -11,7 +12,7 @@ jumps over the lazy dog\
 ";
 
 fn create_test_file(content: &str) -> TextFile {
-    let mut map: HashMap<String, Vec<i32>> = HashMap::new();
+    let mut map: WordMap = HashMap::new();
     let words: Vec<&str> = content.split_whitespace().collect();
 
     for (i, &word) in words.iter().enumerate() {

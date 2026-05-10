@@ -15,11 +15,13 @@ use std::sync::{Arc, OnceLock};
 pub use cache_writer::CacheWriter;
 pub use file_fingerprint::FileFingerprint;
 
+pub type WordMap = HashMap<String, Vec<i32>>;
+
 /// Represents a single cache write task.
 pub(crate) enum Job {
     CacheWrite {
         text: Arc<String>,
-        map: Arc<HashMap<String, Vec<i32>>>,
+        map: Arc<WordMap>,
         fingerprint: FileFingerprint,
         path: PathBuf,
     },
@@ -40,7 +42,7 @@ pub fn execute_job<W: Write>(job: &Job, writer: &mut W) -> Result<()> {
 
 fn serialize_cache_write(
     text: &Arc<String>,
-    map: &Arc<HashMap<String, Vec<i32>>>,
+    map: &Arc<WordMap>,
     fingerprint: &FileFingerprint,
     writer: &mut impl Write,
 ) -> Result<()> {
@@ -53,7 +55,7 @@ fn serialize_cache_write(
 }
 pub struct CachedDocument {
     pub text: String,
-    pub map: HashMap<String, Vec<i32>>,
+    pub map: WordMap,
     pub fingerprint: FileFingerprint,
 }
 
@@ -62,7 +64,7 @@ pub fn process_and_cache(
     text: String,
     path: PathBuf,
     fingerprint: FileFingerprint,
-) -> (Arc<String>, Arc<HashMap<String, Vec<i32>>>) {
+) -> (Arc<String>, Arc<WordMap>) {
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
 
@@ -77,7 +79,7 @@ pub fn process_and_cache(
 }
 
 /// Creates a map of words and their occurrence indices in the text.
-pub fn create_word_map(text: &str) -> HashMap<String, Vec<i32>> {
+pub fn create_word_map(text: &str) -> WordMap {
     text.split_whitespace()
         .enumerate()
         .fold(HashMap::new(), |mut acc, (i, word)| {

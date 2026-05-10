@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests;
 use crate::error::Result;
-use crate::text_cacher::{CachedDocument, FileFingerprint};
+use crate::text_cacher::{CachedDocument, FileFingerprint, WordMap};
 use crate::text_cacher::{load_parts, process_and_cache};
 use crate::text_extractor::TextExtractor;
 use std::collections::HashMap;
@@ -15,12 +15,12 @@ use std::sync::Arc;
 pub struct TextFile {
     path: PathBuf,
     text: Arc<String>,
-    map: Arc<HashMap<String, Vec<i32>>>,
+    map: Arc<WordMap>,
 }
 
 impl TextFile {
     #[cfg(test)]
-    pub fn new_raw(path: PathBuf, text: String, map: HashMap<String, Vec<i32>>) -> Self {
+    pub fn new_raw(path: PathBuf, text: String, map: WordMap) -> Self {
         Self {
             path,
             text: Arc::new(text),
@@ -76,7 +76,7 @@ impl TextFile {
     }
 
     // TODO: can probably be removed after preview python function is not needed
-    pub fn map(&self) -> &HashMap<String, Vec<i32>> {
+    pub fn map(&self) -> &WordMap {
         &self.map
     }
 
