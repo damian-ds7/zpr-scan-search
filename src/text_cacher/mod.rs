@@ -1,21 +1,37 @@
 mod cache_writer;
 mod file_fingerprint;
+mod local_cache;
 #[cfg(test)]
 mod tests;
 
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::text_cacher::cache_writer::Msg;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{self, BufRead, BufReader, Read, Write};
+use std::io::{self, BufRead, Read, Write};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
 
 pub use cache_writer::CacheWriter;
 pub use file_fingerprint::FileFingerprint;
+pub use local_cache::LocalCache;
 
 pub type WordMap = HashMap<String, Vec<i32>>;
+
+pub trait CacheBackend {
+    fn try_load(
+        &self,
+        path: &Path,
+        fingerprint: &FileFingerprint,
+    ) -> Result<Option<CachedDocument>>;
+
+    fn cache_document(
+        &self,
+        path: PathBuf,
+        text: Arc<String>,
+        map: Arc<WordMap>,
+        fingerprint: FileFingerprint,
+    );
+}
 
 /// Represents a single cache write task.
 pub(crate) enum Job {
@@ -40,11 +56,11 @@ pub fn execute_job<W: Write>(job: &Job, writer: &mut W) -> Result<()> {
     Ok(())
 }
 
-fn serialize_cache_write(
+fn serialize_cache_write<W: Write>(
     text: &Arc<String>,
     map: &Arc<WordMap>,
     fingerprint: &FileFingerprint,
-    writer: &mut impl Write,
+    writer: &mut W,
 ) -> Result<()> {
     serde_json::to_writer(&mut *writer, map.as_ref())?;
     writer.write_all(&[DELIMITER])?;
@@ -54,12 +70,13 @@ fn serialize_cache_write(
     Ok(())
 }
 
-pub(crate) fn write_fingerprint(fingerprint: &FileFingerprint, w: &mut impl Write) -> Result<()> {
+pub(crate) fn write_fingerprint<W: Write>(fingerprint: &FileFingerprint, w: &mut W) -> Result<()> {
     w.write_all(&fingerprint.mtime_secs.to_le_bytes())?;
     w.write_all(&fingerprint.mtime_nanos.to_le_bytes())?;
     w.write_all(&fingerprint.size.to_le_bytes())?;
     Ok(())
 }
+
 pub struct CachedDocument {
     pub text: String,
     pub map: WordMap,
@@ -67,20 +84,16 @@ pub struct CachedDocument {
 }
 
 /// Processes text into a map and triggers a background save to disk.
-pub fn process_and_cache(
+pub fn process_and_cache<B: CacheBackend>(
     text: String,
     path: PathBuf,
     fingerprint: FileFingerprint,
+    backend: &B,
 ) -> (Arc<String>, Arc<WordMap>) {
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
 
-    CacheWriter::get().submit(Msg::Write(Job::CacheWrite {
-        text: Arc::clone(&text),
-        map: Arc::clone(&map),
-        fingerprint,
-        path,
-    }));
+    backend.cache_document(path, Arc::clone(&text), Arc::clone(&map), fingerprint);
 
     (text, map)
 }
