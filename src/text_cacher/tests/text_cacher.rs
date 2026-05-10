@@ -3,7 +3,9 @@ use std::fs::File;
 use std::io::BufReader;
 use tempfile::tempdir;
 
-use crate::text_cacher::{FileFingerprint, create_word_map, load_parts, process_and_cache};
+use crate::text_cacher::{
+    FileFingerprint, LocalCache, create_word_map, load_parts, process_and_cache,
+};
 
 #[test]
 fn test_create_word_map_logic() {
@@ -31,9 +33,10 @@ fn test_process_and_cache_async() {
     let file_path = dir.path().join("document.pdf");
     let text = "hello world".to_string();
     let fp = FileFingerprint::new_raw(1, 2, 3);
+    let backend = LocalCache::new();
 
     let (returned_text, returned_map) =
-        process_and_cache(text.clone(), file_path.clone(), fp.clone());
+        process_and_cache(text.clone(), file_path.clone(), fp.clone(), &backend);
 
     assert!(returned_map.contains_key("hello"));
     assert!(returned_map.contains_key("world"));
