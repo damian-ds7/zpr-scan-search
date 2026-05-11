@@ -1,7 +1,34 @@
+use crate::error::ScanSearchError;
 use crate::text_cacher::CacheWriter;
-use crate::text_cacher::cache_writer::{Msg, WriteTask};
+use crate::text_cacher::cache_writer::{self, Msg, WriteTask};
 use std::fs;
+use std::path::PathBuf;
 use tempfile::tempdir;
+
+#[test]
+fn test_write_error_no_parent() {
+    let task = WriteTask {
+        path: PathBuf::from(""),
+        data: b"some data".to_vec(),
+    };
+
+    let result = cache_writer::write(&task);
+    assert!(matches!(result, Err(ScanSearchError::NoParentDir(_))));
+}
+
+#[test]
+fn test_write_error_non_existent_dir() {
+    let dir = tempdir().unwrap();
+    let file_path = dir.path().join("non_existent_folder/file.cache");
+
+    let task = WriteTask {
+        path: file_path,
+        data: b"some data".to_vec(),
+    };
+
+    let result = cache_writer::write(&task);
+    assert!(matches!(result, Err(ScanSearchError::Io(_))));
+}
 
 #[test]
 fn test_writer_basic_write() {
