@@ -1,6 +1,6 @@
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::file::TextFile;
+use crate::file::{TextFile, TextFileLoader};
 use crate::ocr::OcrEngine;
 use crate::text_cacher::{CacheBackend, FileFingerprint, Job, LocalCache, serialize_cache_write};
 use crate::text_extractor::TextExtractor;
@@ -54,12 +54,14 @@ fn test_try_load_cache() {
 }
 
 #[test]
-fn test_new_with_mock_extractor() {
+fn test_loader_with_mock_extractor() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("test.pdf");
-    let file = fs::File::create(&file_path).unwrap();
+    let _file = fs::File::create(&file_path).unwrap();
     let extractor = MockExtractor;
+    let backend = LocalCache::new();
+    let loader = TextFileLoader::new(extractor, backend);
 
-    let text_file = TextFile::new(file_path, &extractor).unwrap();
+    let text_file = loader.load(file_path).unwrap();
     assert_eq!(*text_file.text, "mocked text content");
 }
