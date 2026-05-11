@@ -1,4 +1,3 @@
-
 use pyo3::{PyErr, exceptions::PyRuntimeError};
 
 /// Central error type for the scan-search project, wrapping external library errors.
