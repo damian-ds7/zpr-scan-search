@@ -12,7 +12,7 @@ jumps over the lazy dog\
 ";
 
 fn create_test_file(content: &str) -> TextFile {
-    let mut map: WordMap = HashMap::new();
+    let mut map = WordMap::new();
     let words: Vec<&str> = content.split_whitespace().collect();
 
     for (i, &word) in words.iter().enumerate() {
