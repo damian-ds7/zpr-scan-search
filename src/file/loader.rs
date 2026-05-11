@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::Arc};
 use crate::{
     error::Result,
     file::TextFile,
-    text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, process_text},
+    text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, codec::process_text},
     text_extractor::TextExtractor,
 };
 

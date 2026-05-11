@@ -4,9 +4,8 @@ use std::path::{Path, PathBuf};
 
 use crate::error::Result;
 use crate::text_cacher::cache_writer::{Msg, WriteTask};
-use crate::text_cacher::{
-    CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job, load_parts,
-};
+use crate::text_cacher::codec::{load_parts, serialize_cache_write};
+use crate::text_cacher::{CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job};
 
 #[derive(Default)]
 pub struct LocalCache;
@@ -52,9 +51,7 @@ impl CacheBackend for LocalCache {
                 fingerprint,
             } => {
                 let mut data = Vec::new();
-                if let Err(e) =
-                    crate::text_cacher::serialize_cache_write(&text, &map, &fingerprint, &mut data)
-                {
+                if let Err(e) = serialize_cache_write(&text, &map, &fingerprint, &mut data) {
                     eprintln!("Failed to serialize cache data for {:?}: {}", cache_path, e);
                     return;
                 }
