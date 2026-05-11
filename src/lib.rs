@@ -1,5 +1,3 @@
-// TODO: remove later
-#![allow(unused)]
 use pyo3::prelude::*;
 
 mod constants;
