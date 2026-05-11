@@ -63,24 +63,9 @@ pub struct CachedDocument {
 }
 
 /// Processes text into a map and triggers a background save to disk.
-pub fn process_and_cache<B: CacheBackend>(
-    text: String,
-    path: PathBuf,
-    fingerprint: FileFingerprint,
-    backend: &B,
-) -> (Arc<String>, Arc<WordMap>) {
+pub fn process_text(text: String) -> (Arc<String>, Arc<WordMap>) {
     let map = Arc::new(create_word_map(&text));
     let text = Arc::new(text);
-
-    backend.submit_job(
-        path,
-        Job::CacheWrite {
-            text: Arc::clone(&text),
-            map: Arc::clone(&map),
-            fingerprint,
-        },
-    );
-
     (text, map)
 }
 

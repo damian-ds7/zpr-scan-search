@@ -2,7 +2,7 @@ mod loader;
 #[cfg(test)]
 mod tests;
 use crate::error::Result;
-use crate::text_cacher::process_and_cache;
+use crate::text_cacher::process_text;
 use crate::text_cacher::{CacheBackend, CachedDocument, FileFingerprint, LocalCache, WordMap};
 use crate::text_extractor::TextExtractor;
 use std::collections::HashMap;
