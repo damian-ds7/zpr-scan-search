@@ -3,7 +3,8 @@ use std::sync::Arc;
 use tempfile::tempdir;
 
 use crate::text_cacher::{
-    CacheBackend, FileFingerprint, LocalCache, WordMap, serialize_cache_write,
+    CacheBackend, FileFingerprint, LocalCache, WordMap,
+    codec::{process_text, serialize_cache_write},
 };
 
 #[test]
@@ -99,7 +100,7 @@ fn test_local_cache_round_trip() {
     };
 
     let text = "round trip content".to_string();
-    let (text_arc, map_arc) = crate::text_cacher::process_text(text);
+    let (text_arc, map_arc) = process_text(text);
 
     let backend = LocalCache;
 

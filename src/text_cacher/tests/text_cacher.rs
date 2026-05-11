@@ -1,4 +1,4 @@
-use crate::text_cacher::process_text;
+use crate::text_cacher::codec::process_text;
 
 #[test]
 fn test_process_text_pure() {

@@ -1,4 +1,7 @@
-use crate::text_cacher::{FileFingerprint, read_fingerprint, write_fingerprint};
+use crate::text_cacher::{
+    FileFingerprint,
+    codec::{read_fingerprint, write_fingerprint},
+};
 
 #[test]
 fn test_fingerprint_round_trip() {
