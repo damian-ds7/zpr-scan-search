@@ -64,19 +64,9 @@ pub struct CachedDocument {
 
 /// Processes text into a map and triggers a background save to disk.
 pub fn process_text(text: String) -> (Arc<String>, Arc<WordMap>) {
-    let map = Arc::new(create_word_map(&text));
+    let map = Arc::new(WordMap::from(&text));
     let text = Arc::new(text);
     (text, map)
-}
-
-/// Creates a map of words and their occurrence indices in the text.
-pub fn create_word_map(text: &str) -> WordMap {
-    text.split_whitespace()
-        .enumerate()
-        .fold(WordMap::new(), |mut acc, (i, word)| {
-            acc.entry(word.to_string()).or_default().push(i as i32);
-            acc
-        })
 }
 
 fn read_delimited<R: BufRead>(reader: &mut R) -> io::Result<Vec<u8>> {

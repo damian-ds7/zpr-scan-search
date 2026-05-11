@@ -1,24 +1,4 @@
-use crate::text_cacher::{create_word_map, process_text};
-
-#[test]
-fn test_create_word_map_logic() {
-    let test_cases = [
-        (
-            "Ala ma kota",
-            vec![("Ala", vec![0]), ("ma", vec![1]), ("kota", vec![2])],
-        ),
-        ("kota kota", vec![("kota", vec![0, 1])]),
-        ("", vec![]),
-    ];
-
-    for (text, expected) in test_cases {
-        let map = create_word_map(text);
-        assert_eq!(map.len(), expected.len());
-        for (word, indices) in expected {
-            assert_eq!(map.get(word).unwrap(), &indices);
-        }
-    }
-}
+use crate::text_cacher::process_text;
 
 #[test]
 fn test_process_text_pure() {

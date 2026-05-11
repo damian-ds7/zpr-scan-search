@@ -24,7 +24,7 @@ impl CacheBackend for MockCache {
 
         Ok(Some(CachedDocument {
             text: "mocked text content".into(),
-            map: WordMap::new(),
+            map: WordMap::from("mocked text content"),
             fingerprint: fingerprint.clone(),
         }))
     }
