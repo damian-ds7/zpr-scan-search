@@ -1,16 +1,11 @@
-use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::file::{TextFile, TextFileLoader};
-use crate::ocr::OcrEngine;
+use crate::file::TextFileLoader;
 use crate::text_cacher::{
-    CacheBackend, FileFingerprint, Job, LocalCache, WordMap, serialize_cache_write,
+    CacheBackend, FileFingerprint, LocalCache, WordMap, serialize_cache_write,
 };
 use crate::text_extractor::TextExtractor;
-use image::DynamicImage;
-use std::collections::HashMap;
 use std::fs;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
 use tempfile::tempdir;
 
@@ -18,13 +13,6 @@ struct MockExtractor;
 impl TextExtractor for MockExtractor {
     fn extract_from(&self, _path: &Path) -> Result<String> {
         Ok("mocked text content".to_string())
-    }
-}
-
-struct MockOcr;
-impl OcrEngine for MockOcr {
-    fn extract_text_from_image(&self, _image_data: DynamicImage) -> Result<String> {
-        Ok("mocked ocr text".to_string())
     }
 }
 
@@ -36,7 +24,6 @@ fn test_try_load_cache() {
 
     let mut map = WordMap::new();
     map.insert("test".to_string(), vec![0]);
-    let json_map = serde_json::to_string(&map).unwrap();
 
     let fp = FileFingerprint::new_raw(1, 2, 3);
 

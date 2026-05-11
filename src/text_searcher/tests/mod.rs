@@ -1,9 +1,7 @@
 use crate::file::TextFile;
 use crate::text_cacher::WordMap;
 use crate::text_searcher::search;
-use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::Arc;
 
 const TEST_DOCUMENT: &str = "\
 the quick brown fox jumps over the lazy dog and runs away \

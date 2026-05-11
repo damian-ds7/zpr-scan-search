@@ -7,7 +7,7 @@ mod word_map;
 
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use std::io::{self, BufRead, Read, Write};
+use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 

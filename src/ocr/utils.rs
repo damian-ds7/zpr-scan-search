@@ -1,6 +1,4 @@
-use std::error::Error;
 use std::path::PathBuf;
-use tesseract_rs::TesseractAPI;
 
 fn get_default_tessdata_dir() -> PathBuf {
     if cfg!(target_os = "macos") {

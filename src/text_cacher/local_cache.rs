@@ -1,12 +1,11 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
 use crate::error::Result;
 use crate::text_cacher::cache_writer::{Msg, WriteTask};
 use crate::text_cacher::{
-    CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job, WordMap, load_parts,
+    CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job, load_parts,
 };
 
 #[derive(Default)]

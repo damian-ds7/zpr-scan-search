@@ -1,5 +1,3 @@
-use crate::ocr::utils::get_tessdata_dir;
-
 use super::*;
 use image::{Rgb, RgbImage};
 use rayon::prelude::*;
@@ -55,7 +53,6 @@ fn gen_digit_9() -> DynamicImage {
 
 #[test]
 fn test_multithreaded_tesseract_order_and_safety() -> Result<()> {
-    let tessdata_path = get_tessdata_dir();
     let engine = TesseractEngine::new("eng").unwrap();
     let mut tasks = Vec::new();
     for _ in 0..15 {

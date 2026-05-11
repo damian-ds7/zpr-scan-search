@@ -1,20 +1,14 @@
 mod loader;
 #[cfg(test)]
 mod tests;
-use crate::error::Result;
-use crate::text_cacher::process_text;
-use crate::text_cacher::{CacheBackend, CachedDocument, FileFingerprint, LocalCache, WordMap};
-use crate::text_extractor::TextExtractor;
-use std::collections::HashMap;
-use std::fs::{self, File};
-use std::io;
-use std::io::BufReader;
+use crate::text_cacher::WordMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 pub use loader::TextFileLoader;
 
 /// Represents a processed document containing its text content and a word occurrence map.
+#[allow(dead_code)] // TODO: check if path can be removed later
 pub struct TextFile {
     path: PathBuf,
     text: Arc<String>,
@@ -30,6 +24,7 @@ impl TextFile {
         }
     }
 
+    #[allow(dead_code)] // TODO: check if path can be removed later
     fn path(&self) -> &Path {
         &self.path
     }

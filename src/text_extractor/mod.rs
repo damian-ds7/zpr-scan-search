@@ -5,12 +5,9 @@ mod tests;
 
 pub use pdf_extractor::PdfExtractor;
 
-use image::DynamicImage;
-use pdf_oxide::PdfDocument;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::path::Path;
 
-use crate::{error::Result, ocr::OcrEngine};
+use crate::error::Result;
 
 /// Interface for extracting text from document files.
 pub trait TextExtractor {

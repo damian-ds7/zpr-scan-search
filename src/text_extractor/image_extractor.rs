@@ -6,11 +6,13 @@ use crate::{
     text_extractor::TextExtractor,
 };
 
+#[allow(dead_code)] // TODO: remove allow
 pub struct ImageTextExtractor<E: OcrEngine> {
     engine: E,
 }
 
 impl<E: OcrEngine> ImageTextExtractor<E> {
+    #[allow(dead_code)] // TODO: remove allow
     pub fn new(engine: E) -> Self {
         Self { engine }
     }

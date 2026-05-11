@@ -10,13 +10,13 @@ pub mod text_searcher;
 
 #[pymodule]
 mod scan_search {
-    use std::path::{Path, PathBuf};
+    use std::path::PathBuf;
 
     use pyo3::prelude::*;
 
     use crate::{
         error::ScanSearchError,
-        file::{TextFile, TextFileLoader},
+        file::TextFileLoader,
         ocr::TesseractEngine,
         text_cacher::{CacheWriter, LocalCache},
         text_extractor::PdfExtractor,
