@@ -1,6 +1,4 @@
 use crate::file::TextFile;
-use std::collections::HashMap;
-use std::ops::Index;
 
 #[cfg(test)]
 pub mod tests;

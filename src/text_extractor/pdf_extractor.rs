@@ -1,5 +1,4 @@
 use crate::{error::ScanSearchError, text_extractor::TextExtractor};
-use image::DynamicImage;
 use pdf_oxide::PdfDocument;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::path::Path;

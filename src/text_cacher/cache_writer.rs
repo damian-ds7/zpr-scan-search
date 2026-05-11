@@ -1,10 +1,8 @@
 use std::{
-    collections::HashMap,
-    fs::File,
     io::Write,
     path::{Path, PathBuf},
     sync::{
-        Arc, OnceLock,
+        OnceLock,
         mpsc::{self, Sender},
     },
     thread,

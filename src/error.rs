@@ -1,4 +1,3 @@
-use std::ffi::OsString;
 
 use pyo3::{PyErr, exceptions::PyRuntimeError};
 

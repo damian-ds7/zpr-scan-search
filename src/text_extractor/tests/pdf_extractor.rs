@@ -17,7 +17,7 @@ impl OcrEngine for MockOcr {
 fn test_pdf_extraction_with_text() {
     let path = format!("{}/resources/text.pdf", env!("CARGO_MANIFEST_DIR"));
     let ocr = MockOcr;
-    let mut extractor = PdfExtractor::new(&ocr);
+    let extractor = PdfExtractor::new(&ocr);
     let text = extractor.extract_from(Path::new(&path)).unwrap();
 
     assert!(text.contains("This is a test pdf"));
@@ -30,7 +30,7 @@ fn test_pdf_extraction_with_text_and_image() {
         env!("CARGO_MANIFEST_DIR")
     );
     let ocr = MockOcr;
-    let mut extractor = PdfExtractor::new(&ocr);
+    let extractor = PdfExtractor::new(&ocr);
     let text = extractor.extract_from(Path::new(&path)).unwrap();
 
     assert!(text.contains("This is a test pdf with an image\nmocked ocr text\n"));

@@ -4,12 +4,8 @@ mod tests;
 mod utils;
 
 use image::DynamicImage;
-use thread_local::ThreadLocal;
 
-use crate::{
-    error::{Result, ScanSearchError},
-    ocr::utils::get_tessdata_dir,
-};
+use crate::error::Result;
 
 pub use tesseract_engine::TesseractEngine;
 

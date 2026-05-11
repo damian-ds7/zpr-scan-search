@@ -1,9 +1,8 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use tempfile::tempdir;
 
-use crate::text_cacher::{FileFingerprint, LocalCache, create_word_map, load_parts, process_text};
+use crate::text_cacher::{FileFingerprint, create_word_map, load_parts, process_text};
 
 #[test]
 fn test_create_word_map_logic() {
