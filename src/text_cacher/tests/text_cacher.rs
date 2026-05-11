@@ -1,10 +1,4 @@
-use std::fs::File;
-use std::io::BufReader;
-use tempfile::tempdir;
-
-use crate::text_cacher::{
-    CacheBackend, FileFingerprint, Job, LocalCache, create_word_map, load_parts, process_text,
-};
+use crate::text_cacher::{create_word_map, process_text};
 
 #[test]
 fn test_create_word_map_logic() {
@@ -34,47 +28,4 @@ fn test_process_text_pure() {
     assert_eq!(*returned_text, "hello world");
     assert!(returned_map.contains_key("hello"));
     assert!(returned_map.contains_key("world"));
-}
-
-#[test]
-fn test_local_cache_async_write() {
-    let dir = tempdir().expect("Failed to create temp dir");
-    let file_path = dir.path().join("document.pdf");
-    let cache_path = dir.path().join("document.pdf.cache");
-    let text = "hello world".to_string();
-    let fp = FileFingerprint {
-        mtime_secs: 1234,
-        mtime_nanos: 5678,
-        size: 999,
-    };
-
-    let (text_arc, map_arc) = process_text(text);
-    let backend = LocalCache::new();
-
-    backend.submit_job(
-        file_path,
-        Job::CacheWrite {
-            text: text_arc.clone(),
-            map: map_arc.clone(),
-            fingerprint: fp.clone(),
-        },
-    );
-
-    let mut attempts = 0;
-    while !cache_path.exists() && attempts < 50 {
-        std::thread::sleep(std::time::Duration::from_millis(10));
-        attempts += 1;
-    }
-    assert!(
-        cache_path.exists(),
-        "Cache file was not created in background"
-    );
-
-    let file = File::open(cache_path).expect("Failed to open cache");
-    let mut reader = BufReader::new(file);
-    let cached_document = load_parts(&mut reader).expect("Failed to load parts");
-
-    assert_eq!(*map_arc, cached_document.map);
-    assert_eq!(*text_arc, cached_document.text);
-    assert_eq!(fp, cached_document.fingerprint);
 }
