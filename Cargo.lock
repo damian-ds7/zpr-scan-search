@@ -2907,7 +2907,6 @@ dependencies = [
  "rayon",
  "rust-bert",
  "serde",
- "serde_json",
  "tempfile",
  "tesseract-rs",
  "thiserror 2.0.18",
