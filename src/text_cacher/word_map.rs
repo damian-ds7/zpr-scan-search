@@ -11,6 +11,21 @@ impl WordMap {
     }
 }
 
+impl<T> From<T> for WordMap
+where
+    T: AsRef<str>,
+{
+    fn from(text: T) -> Self {
+        text.as_ref()
+            .split_whitespace()
+            .enumerate()
+            .fold(Self::new(), |mut acc, (i, word)| {
+                acc.entry(word.to_string()).or_default().push(i as i32);
+                acc
+            })
+    }
+}
+
 impl DerefMut for WordMap {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
