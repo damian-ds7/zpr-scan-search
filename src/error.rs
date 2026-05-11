@@ -1,10 +1,12 @@
+use std::path::PathBuf;
+
 use pyo3::{PyErr, exceptions::PyRuntimeError};
 
 /// Central error type for the scan-search project, wrapping external library errors.
 #[derive(Debug, thiserror::Error)]
 pub enum ScanSearchError {
-    #[error("Path is not valid UTF-8: {0}")]
-    InvalidPath(String),
+    #[error("Path is not valid UTF-8: {0:?}")]
+    NonUtf8Path(PathBuf),
 
     #[error("Image load failed: {0}")]
     Image(String),

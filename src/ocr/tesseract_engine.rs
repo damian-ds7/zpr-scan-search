@@ -26,7 +26,7 @@ impl TesseractEngine {
         let tessdata_path = get_tessdata_dir()
             .into_os_string()
             .into_string()
-            .map_err(|e| ScanSearchError::InvalidPath(e.to_string_lossy().into_owned()))?;
+            .map_err(|e| ScanSearchError::NonUtf8Path(e.into()))?;
 
         Ok(Self {
             tess_pool: ThreadLocal::new(),
