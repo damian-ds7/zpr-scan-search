@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use crate::error::Result;
-use crate::text_cacher::cache_writer::Msg;
+use crate::text_cacher::cache_writer::{Msg, WriteTask};
 use crate::text_cacher::{
-    CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job, WordMap, WriteTask, load_parts
+    CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job, WordMap, load_parts,
 };
 
 #[derive(Default)]
@@ -53,9 +53,15 @@ impl CacheBackend for LocalCache {
         }
 
         match job {
-            Job::CacheWrite { text, map, fingerprint } => {
+            Job::CacheWrite {
+                text,
+                map,
+                fingerprint,
+            } => {
                 let mut data = Vec::new();
-                if let Err(e) = crate::text_cacher::serialize_cache_write(&text, &map, &fingerprint, &mut data) {
+                if let Err(e) =
+                    crate::text_cacher::serialize_cache_write(&text, &map, &fingerprint, &mut data)
+                {
                     eprintln!("Failed to serialize cache data for {:?}: {}", cache_path, e);
                     return;
                 }

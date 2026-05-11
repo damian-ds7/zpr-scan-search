@@ -35,12 +35,6 @@ pub enum Job {
     },
 }
 
-/// Represents a raw write task sent to the background writer.
-pub(crate) struct WriteTask {
-    path: PathBuf,
-    data: Vec<u8>,
-}
-
 pub(crate) fn serialize_cache_write<W: Write>(
     text: &Arc<String>,
     map: &Arc<WordMap>,
