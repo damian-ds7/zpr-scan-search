@@ -12,15 +12,6 @@ pub struct FileFingerprint {
 }
 
 impl FileFingerprint {
-    #[cfg(test)]
-    pub fn new_raw(mtime_secs: u64, mtime_nanos: u32, size: u64) -> Self {
-        Self {
-            mtime_secs,
-            mtime_nanos,
-            size,
-        }
-    }
-
     pub fn from_path(path: &Path) -> Result<Self> {
         let meta = fs::metadata(path)?;
         let mtime = meta.modified()?;

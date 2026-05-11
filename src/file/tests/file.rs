@@ -25,7 +25,11 @@ fn test_try_load_cache() {
     let mut map = WordMap::new();
     map.insert("test".to_string(), vec![0]);
 
-    let fp = FileFingerprint::new_raw(1, 2, 3);
+    let fp = FileFingerprint {
+        mtime_secs: 1234,
+        mtime_nanos: 5678,
+        size: 999,
+    };
 
     let text = Arc::new("test content".to_string());
     let map_arc = Arc::new(map);
