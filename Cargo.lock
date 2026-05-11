@@ -2418,6 +2418,7 @@ dependencies = [
  "pdf_oxide",
  "pyo3",
  "rayon",
+ "serde",
  "serde_json",
  "tempfile",
  "tesseract-rs",

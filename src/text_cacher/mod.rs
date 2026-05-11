@@ -3,10 +3,10 @@ mod file_fingerprint;
 mod local_cache;
 #[cfg(test)]
 mod tests;
+mod word_map;
 
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use std::collections::HashMap;
 use std::io::{self, BufRead, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -14,8 +14,7 @@ use std::sync::Arc;
 pub use cache_writer::CacheWriter;
 pub use file_fingerprint::FileFingerprint;
 pub use local_cache::LocalCache;
-
-pub type WordMap = HashMap<String, Vec<i32>>;
+pub use word_map::WordMap;
 
 pub trait CacheBackend {
     fn try_load(
@@ -95,7 +94,7 @@ pub fn process_and_cache<B: CacheBackend>(
 pub fn create_word_map(text: &str) -> WordMap {
     text.split_whitespace()
         .enumerate()
-        .fold(HashMap::new(), |mut acc, (i, word)| {
+        .fold(WordMap::new(), |mut acc, (i, word)| {
             acc.entry(word.to_string()).or_default().push(i as i32);
             acc
         })

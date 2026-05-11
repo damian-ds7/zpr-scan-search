@@ -2,7 +2,9 @@ use crate::constants::DELIMITER;
 use crate::error::Result;
 use crate::file::{TextFile, TextFileLoader};
 use crate::ocr::OcrEngine;
-use crate::text_cacher::{CacheBackend, FileFingerprint, Job, LocalCache, serialize_cache_write};
+use crate::text_cacher::{
+    CacheBackend, FileFingerprint, Job, LocalCache, WordMap, serialize_cache_write,
+};
 use crate::text_extractor::TextExtractor;
 use image::DynamicImage;
 use std::collections::HashMap;
@@ -32,7 +34,7 @@ fn test_try_load_cache() {
     let file_path = dir.path().join("test.pdf");
     let cache_path = dir.path().join("test.pdf.cache");
 
-    let mut map = HashMap::new();
+    let mut map = WordMap::new();
     map.insert("test".to_string(), vec![0]);
     let json_map = serde_json::to_string(&map).unwrap();
 
