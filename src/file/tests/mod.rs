@@ -6,44 +6,83 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use tempfile::tempdir;
 
+use std::sync::Arc;
+use std::sync::Mutex;
+
 struct MockExtractor;
 impl TextExtractor for MockExtractor {
     fn extract_from(&self, _path: &Path) -> Result<String> {
-        Ok("mocked text content".to_string())
+        Ok("extracted text".to_string())
     }
 }
 
-struct MockCache;
-impl CacheBackend for MockCache {
+struct SpyCache {
+    should_hit: bool,
+    submit_called: Arc<Mutex<bool>>,
+}
+
+impl SpyCache {
+    fn new(should_hit: bool) -> Self {
+        Self {
+            should_hit,
+            submit_called: Arc::new(Mutex::new(false)),
+        }
+    }
+}
+
+impl CacheBackend for SpyCache {
     fn try_load(
         &self,
-        path: &Path,
+        _path: &Path,
         fingerprint: &FileFingerprint,
     ) -> Result<Option<CachedDocument>> {
-        let _ = path;
-
-        Ok(Some(CachedDocument {
-            text: "mocked text content".into(),
-            map: WordMap::from("mocked text content"),
-            fingerprint: fingerprint.clone(),
-        }))
+        if self.should_hit {
+            Ok(Some(CachedDocument {
+                text: "cached text".into(),
+                map: WordMap::from("cached text"),
+                fingerprint: fingerprint.clone(),
+            }))
+        } else {
+            Ok(None)
+        }
     }
 
-    fn submit_job(&self, path: PathBuf, job: Job) {
-        let _ = path;
-        let _ = job;
+    fn submit_job(&self, _path: PathBuf, _job: Job) {
+        let mut called = self.submit_called.lock().unwrap();
+        *called = true;
     }
 }
 
 #[test]
-fn test_loader_with_mock_extractor() {
+fn test_loader_cache_hit() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("test.pdf");
     let _file = fs::File::create(&file_path).unwrap();
+
     let extractor = MockExtractor;
-    let backend = MockCache;
+    let backend = SpyCache::new(true);
+    let submit_called = backend.submit_called.clone();
     let loader = TextFileLoader::new(extractor, backend);
 
     let text_file = loader.load(file_path).unwrap();
-    assert_eq!(*text_file.text, "mocked text content");
+
+    assert_eq!(text_file.text(), "cached text");
+    assert!(!*submit_called.lock().unwrap());
+}
+
+#[test]
+fn test_loader_cache_miss_triggers_extraction_and_cache() {
+    let dir = tempdir().unwrap();
+    let file_path = dir.path().join("test.pdf");
+    let _file = fs::File::create(&file_path).unwrap();
+
+    let extractor = MockExtractor;
+    let backend = SpyCache::new(false);
+    let submit_called = backend.submit_called.clone();
+    let loader = TextFileLoader::new(extractor, backend);
+
+    let text_file = loader.load(file_path).unwrap();
+
+    assert_eq!(text_file.text(), "extracted text");
+    assert!(*submit_called.lock().unwrap());
 }
