@@ -27,7 +27,7 @@ mod scan_search {
     fn process_file(path: String) -> PyResult<String> {
         let ocr_engine = TesseractEngine::new("eng")?;
         let text_extractor = PdfExtractor::new(&ocr_engine);
-        let backend = LocalCache::new();
+        let backend = LocalCache;
         let loader = TextFileLoader::new(text_extractor, backend);
         let file = loader.load(PathBuf::from(path))?;
         let word_map = serde_json::to_string(file.map()).map_err(ScanSearchError::from)?;
