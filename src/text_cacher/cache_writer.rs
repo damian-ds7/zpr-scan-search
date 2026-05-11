@@ -34,7 +34,7 @@ impl CacheWriter {
             while let Ok(msg) = rx.recv() {
                 match msg {
                     Msg::Write(task) => {
-                        if let Err(e) = save_to_disk(&task) {
+                        if let Err(e) = write(&task) {
                             eprintln!("Cache error: {}", e);
                         }
                     }
@@ -69,8 +69,8 @@ impl CacheWriter {
     }
 }
 
-/// Atomically saves the word map and text to a .cache file using a temporary file.
-fn save_to_disk(task: &WriteTask) -> Result<()> {
+/// Saves given `WriteTask` using a temporary file and atomic persist to prevent corrupt data.
+fn write(task: &WriteTask) -> Result<()> {
     let dir = task.path.parent().unwrap_or(Path::new("."));
     let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
 
