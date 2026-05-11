@@ -43,7 +43,7 @@ impl TextFile {
         &self.map
     }
 
-    pub fn as_str(&self) -> &str {
+    pub fn text(&self) -> &str {
         &self.text
     }
 }
