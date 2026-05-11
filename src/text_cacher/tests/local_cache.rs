@@ -87,3 +87,38 @@ fn test_local_cache_fingerprint_mismatch() {
         "Should return None if fingerprint does not match"
     );
 }
+
+#[test]
+fn test_local_cache_round_trip() {
+    let dir = tempdir().unwrap();
+    let file_path = dir.path().join("roundtrip.pdf");
+    let fp = FileFingerprint {
+        mtime_secs: 1234,
+        mtime_nanos: 5678,
+        size: 999,
+    };
+
+    let text = "round trip content".to_string();
+    let (text_arc, map_arc) = crate::text_cacher::process_text(text);
+
+    let backend = LocalCache::new();
+
+    backend.submit_job(
+        file_path.clone(),
+        crate::text_cacher::Job::CacheWrite {
+            text: text_arc.clone(),
+            map: map_arc.clone(),
+            fingerprint: fp.clone(),
+        },
+    );
+
+    crate::text_cacher::CacheWriter::get().shutdown();
+
+    let result = backend.try_load(&file_path, &fp).unwrap();
+
+    assert!(result.is_some());
+    let doc = result.unwrap();
+    assert_eq!(doc.text, *text_arc);
+    assert_eq!(doc.map, *map_arc);
+    assert_eq!(doc.fingerprint, fp);
+}
