@@ -17,7 +17,10 @@ mod scan_search {
     use pyo3::prelude::*;
 
     use crate::{
-        error::ScanSearchError, file::TextFile, ocr::TesseractEngine, text_cacher::CacheWriter,
+        error::ScanSearchError,
+        file::{TextFile, TextFileLoader},
+        ocr::TesseractEngine,
+        text_cacher::{CacheWriter, LocalCache},
         text_extractor::PdfExtractor,
     };
 
@@ -26,7 +29,9 @@ mod scan_search {
     fn process_file(path: String) -> PyResult<String> {
         let ocr_engine = TesseractEngine::new("eng")?;
         let text_extractor = PdfExtractor::new(&ocr_engine);
-        let file = TextFile::new(PathBuf::from(path), &text_extractor)?;
+        let backend = LocalCache::new();
+        let loader = TextFileLoader::new(text_extractor, backend);
+        let file = loader.load(PathBuf::from(path))?;
         let word_map = serde_json::to_string(file.map()).map_err(ScanSearchError::from)?;
         Ok(word_map)
     }

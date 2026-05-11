@@ -1,3 +1,4 @@
+mod loader;
 #[cfg(test)]
 mod tests;
 use crate::error::Result;
@@ -11,6 +12,8 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+pub use loader::TextFileLoader;
+
 /// Represents a processed document containing its text content and a word occurrence map.
 pub struct TextFile {
     path: PathBuf,
@@ -19,31 +22,12 @@ pub struct TextFile {
 }
 
 impl TextFile {
-    #[cfg(test)]
-    pub fn new_raw(path: PathBuf, text: String, map: WordMap) -> Self {
+    pub fn new(path: PathBuf, text: String, map: WordMap) -> Self {
         Self {
             path,
             text: Arc::new(text),
             map: Arc::new(map),
         }
-    }
-
-    /// Creates a new TextFile by either loading from cache or extracting from source using the provided extractor.
-    pub fn new<E: TextExtractor>(path: PathBuf, extractor: &E) -> Result<TextFile> {
-        let fp = FileFingerprint::from_path(&path)?;
-        let backend = LocalCache::new();
-
-        if let Ok(Some(CachedDocument { text, map, .. })) = backend.try_load(&path, &fp) {
-            return Ok(Self {
-                path,
-                text: Arc::new(text),
-                map: Arc::new(map),
-            });
-        }
-
-        let text = extractor.extract_from(&path)?;
-        let (text, map) = process_and_cache(text, path.clone(), fp, &backend);
-        Ok(Self { path, text, map })
     }
 
     fn path(&self) -> &Path {
