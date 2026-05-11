@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::Arc};
 use crate::{
     error::Result,
     file::TextFile,
-    text_cacher::{CacheBackend, CachedDocument, FileFingerprint, process_and_cache},
+    text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, process_text},
     text_extractor::TextExtractor,
 };
 
@@ -33,8 +33,19 @@ impl<E: TextExtractor, B: CacheBackend> TextFileLoader<E, B> {
             });
         }
 
-        let text = self.extractor.extract_from(&path)?;
-        let (text, map) = process_and_cache(text, path.clone(), fp, &self.backend);
+        let raw_text = self.extractor.extract_from(&path)?;
+
+        let (text, map) = process_text(raw_text);
+
+        self.backend.submit_job(
+            path.clone(),
+            Job::CacheWrite {
+                text: Arc::clone(&text),
+                map: Arc::clone(&map),
+                fingerprint: fp,
+            },
+        );
+
         Ok(TextFile { path, text, map })
     }
 }
