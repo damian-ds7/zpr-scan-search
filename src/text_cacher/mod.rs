@@ -15,13 +15,16 @@ pub use file_fingerprint::FileFingerprint;
 pub use local_cache::LocalCache;
 pub use word_map::WordMap;
 
+/// Interface for cache backends that store and retrieve processed document data.
 pub trait CacheBackend {
+    /// Attempts to load a cached document for the given path and fingerprint.
     fn try_load(
         &self,
         path: &Path,
         fingerprint: &FileFingerprint,
     ) -> Result<Option<CachedDocument>>;
 
+    /// Submits a background job to the cache backend.
     fn submit_job(&self, path: PathBuf, job: Job);
 }
 
@@ -34,6 +37,7 @@ pub enum Job {
     },
 }
 
+/// Represents a document loaded from the cache.
 pub struct CachedDocument {
     pub text: String,
     pub map: WordMap,

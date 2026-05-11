@@ -3,6 +3,8 @@ use crate::file::TextFile;
 #[cfg(test)]
 pub mod tests;
 
+/// Searches for a multi-word phrase in the given TextFile.
+/// Returns a list of indices where the phrase starts.
 pub fn search(file: &TextFile, query: &str) -> Vec<i32> {
     let words: Vec<&str> = query.split_whitespace().collect();
     let mut locations: Vec<i32> = vec![];

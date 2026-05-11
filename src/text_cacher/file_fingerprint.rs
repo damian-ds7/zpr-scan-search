@@ -4,6 +4,7 @@ use std::time::SystemTime;
 
 use crate::error::{Result, ScanSearchError};
 
+/// Represents a unique identifier for a file based on its modification time and size.
 #[derive(Debug, PartialEq, Clone)]
 pub struct FileFingerprint {
     pub(crate) mtime_secs: u64,
@@ -12,6 +13,7 @@ pub struct FileFingerprint {
 }
 
 impl FileFingerprint {
+    /// Generates a fingerprint from the file at the specified path.
     pub fn from_path(path: &Path) -> Result<Self> {
         let meta = fs::metadata(path)?;
         let mtime = meta.modified()?;

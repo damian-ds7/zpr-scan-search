@@ -7,6 +7,8 @@ use crate::text_cacher::cache_writer::{Msg, WriteTask};
 use crate::text_cacher::codec::{load_parts, serialize_cache_write};
 use crate::text_cacher::{CacheBackend, CacheWriter, CachedDocument, FileFingerprint, Job};
 
+/// A local file-system based cache backend.
+/// It stores cache files in the same directory as the original file, appending `.cache` to the filename.
 #[derive(Default)]
 pub struct LocalCache;
 

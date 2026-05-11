@@ -4,6 +4,7 @@ use crate::text_cacher::{CachedDocument, FileFingerprint, WordMap};
 use std::io::{self, BufRead, Write};
 use std::sync::Arc;
 
+/// Serializes the word map, text, and file fingerprint to the provided writer.
 pub(crate) fn serialize_cache_write<W: Write>(
     text: &Arc<String>,
     map: &Arc<WordMap>,
@@ -18,6 +19,7 @@ pub(crate) fn serialize_cache_write<W: Write>(
     Ok(())
 }
 
+/// Writes the file fingerprint (mtime and size) to the provided writer.
 pub(crate) fn write_fingerprint<W: Write>(fingerprint: &FileFingerprint, w: &mut W) -> Result<()> {
     w.write_all(&fingerprint.mtime_secs.to_le_bytes())?;
     w.write_all(&fingerprint.mtime_nanos.to_le_bytes())?;
@@ -32,6 +34,7 @@ pub fn process_text(text: String) -> (Arc<String>, Arc<WordMap>) {
     (text, map)
 }
 
+/// Reads from the reader until the delimiter is encountered.
 pub(crate) fn read_delimited<R: BufRead>(reader: &mut R) -> io::Result<Vec<u8>> {
     let mut buf = vec![];
     reader.read_until(DELIMITER, &mut buf)?;
@@ -55,6 +58,7 @@ pub fn load_parts<R: BufRead>(reader: &mut R) -> Result<CachedDocument> {
     })
 }
 
+/// Reads the file fingerprint from the provided reader.
 pub(crate) fn read_fingerprint<R: BufRead>(r: &mut R) -> Result<FileFingerprint> {
     let mut buf8 = [0u8; 8];
     let mut buf4 = [0u8; 4];

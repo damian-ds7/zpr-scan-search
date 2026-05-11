@@ -34,6 +34,7 @@ mod scan_search {
         Ok(word_map)
     }
 
+    /// Shuts down the background cache writer, ensuring all pending writes are completed.
     #[pyfunction]
     fn _cache_shutdown() {
         CacheWriter::get().shutdown();
