@@ -2,10 +2,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 
+/// A map that stores words and their occurrences (indices) in a document.
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct WordMap(HashMap<String, Vec<i32>>);
 
 impl WordMap {
+    /// Creates a new, empty WordMap.
     pub fn new() -> Self {
         WordMap(HashMap::new())
     }

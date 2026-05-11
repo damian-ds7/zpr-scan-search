@@ -6,12 +6,14 @@ use crate::{
     text_extractor::TextExtractor,
 };
 
+/// Extractor that uses an OCR engine to extract text from image files.
 #[allow(dead_code)] // TODO: remove allow
 pub struct ImageTextExtractor<E: OcrEngine> {
     engine: E,
 }
 
 impl<E: OcrEngine> ImageTextExtractor<E> {
+    /// Creates a new ImageTextExtractor with the specified OCR engine.
     #[allow(dead_code)] // TODO: remove allow
     pub fn new(engine: E) -> Self {
         Self { engine }

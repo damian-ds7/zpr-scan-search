@@ -22,6 +22,8 @@ fn get_default_tessdata_dir() -> PathBuf {
     }
 }
 
+/// Returns the directory where Tesseract tessdata files are located.
+/// It first checks the `TESSDATA_PREFIX` environment variable, then falls back to platform-specific defaults.
 pub fn get_tessdata_dir() -> PathBuf {
     match std::env::var("TESSDATA_PREFIX") {
         Ok(dir) => {
