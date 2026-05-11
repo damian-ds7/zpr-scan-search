@@ -12,7 +12,12 @@ fn test_local_cache_valid_cache() {
     let file_path = dir.path().join("document.pdf");
     let cache_path = dir.path().join("document.pdf.cache");
 
-    let fp = FileFingerprint::new_raw(1234, 5678, 999);
+    let fp = FileFingerprint {
+        mtime_secs: 1234,
+        mtime_nanos: 5678,
+        size: 999,
+    };
+
     let text = Arc::new("cached content".to_string());
     let mut map = WordMap::new();
     map.insert("cached".to_string(), vec![0]);
@@ -36,7 +41,12 @@ fn test_local_cache_valid_cache() {
 fn test_local_cache_no_cache() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("missing.pdf");
-    let fp = FileFingerprint::new_raw(1, 2, 3);
+
+    let fp = FileFingerprint {
+        mtime_secs: 1234,
+        mtime_nanos: 5678,
+        size: 999,
+    };
 
     let backend = LocalCache::new();
     let result = backend.try_load(&file_path, &fp).unwrap();
@@ -50,8 +60,16 @@ fn test_local_cache_fingerprint_mismatch() {
     let file_path = dir.path().join("stale.pdf");
     let cache_path = dir.path().join("stale.pdf.cache");
 
-    let fp_old = FileFingerprint::new_raw(1, 1, 1);
-    let fp_new = FileFingerprint::new_raw(2, 2, 2);
+    let fp_old = FileFingerprint {
+        mtime_secs: 1234,
+        mtime_nanos: 5678,
+        size: 999,
+    };
+    let fp_new = FileFingerprint {
+        mtime_secs: 1,
+        mtime_nanos: 1,
+        size: 1,
+    };
 
     let text = Arc::new("old content".to_string());
     let map = Arc::new(WordMap::new());

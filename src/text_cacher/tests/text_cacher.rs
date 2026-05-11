@@ -42,7 +42,11 @@ fn test_local_cache_async_write() {
     let file_path = dir.path().join("document.pdf");
     let cache_path = dir.path().join("document.pdf.cache");
     let text = "hello world".to_string();
-    let fp = FileFingerprint::new_raw(1, 2, 3);
+    let fp = FileFingerprint {
+        mtime_secs: 1234,
+        mtime_nanos: 5678,
+        size: 999,
+    };
 
     let (text_arc, map_arc) = process_text(text);
     let backend = LocalCache::new();
