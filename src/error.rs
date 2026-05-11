@@ -8,6 +8,9 @@ pub enum ScanSearchError {
     #[error("Path is not valid UTF-8: {0:?}")]
     NonUtf8Path(PathBuf),
 
+    #[error("Path has no parent directory: {0:?}")]
+    NoParentDir(PathBuf),
+
     #[error("Image load failed: {0}")]
     Image(String),
 

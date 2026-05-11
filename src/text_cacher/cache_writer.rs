@@ -1,6 +1,6 @@
 use std::{
     io::Write,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::{
         OnceLock,
         mpsc::{self, Sender},
@@ -8,7 +8,7 @@ use std::{
     thread,
 };
 
-use crate::error::Result;
+use crate::error::{Result, ScanSearchError};
 
 /// Represents a raw write task sent to the background writer.
 pub(crate) struct WriteTask {
@@ -74,8 +74,11 @@ impl CacheWriter {
 }
 
 /// Saves given `WriteTask` using a temporary file and atomic persist to prevent corrupt data.
-fn write(task: &WriteTask) -> Result<()> {
-    let dir = task.path.parent().unwrap_or(Path::new("."));
+pub(crate) fn write(task: &WriteTask) -> Result<()> {
+    let dir = task
+        .path
+        .parent()
+        .ok_or_else(|| ScanSearchError::NoParentDir(task.path.clone()))?;
     let mut tmp = tempfile::NamedTempFile::new_in(dir)?;
 
     tmp.write_all(&task.data)?;
