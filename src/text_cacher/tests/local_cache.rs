@@ -27,7 +27,7 @@ fn test_local_cache_valid_cache() {
     let mut file = File::create(&cache_path).unwrap();
     serialize_cache_write(&text, &map_arc, &fp, &mut file).unwrap();
 
-    let backend = LocalCache::new();
+    let backend = LocalCache;
     let result = backend.try_load(&file_path, &fp).unwrap();
 
     assert!(result.is_some());
@@ -48,7 +48,7 @@ fn test_local_cache_no_cache() {
         size: 999,
     };
 
-    let backend = LocalCache::new();
+    let backend = LocalCache;
     let result = backend.try_load(&file_path, &fp).unwrap();
 
     assert!(result.is_none());
@@ -78,7 +78,7 @@ fn test_local_cache_fingerprint_mismatch() {
     let mut file = File::create(&cache_path).unwrap();
     serialize_cache_write(&text, &map, &fp_old, &mut file).unwrap();
 
-    let backend = LocalCache::new();
+    let backend = LocalCache;
     // Try to load with new fingerprint
     let result = backend.try_load(&file_path, &fp_new).unwrap();
 
@@ -101,7 +101,7 @@ fn test_local_cache_round_trip() {
     let text = "round trip content".to_string();
     let (text_arc, map_arc) = crate::text_cacher::process_text(text);
 
-    let backend = LocalCache::new();
+    let backend = LocalCache;
 
     backend.submit_job(
         file_path.clone(),

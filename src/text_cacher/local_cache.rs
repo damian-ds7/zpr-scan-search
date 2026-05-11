@@ -11,12 +11,6 @@ use crate::text_cacher::{
 #[derive(Default)]
 pub struct LocalCache;
 
-impl LocalCache {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
 impl CacheBackend for LocalCache {
     fn try_load(
         &self,
