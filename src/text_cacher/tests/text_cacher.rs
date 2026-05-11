@@ -2,7 +2,9 @@ use std::fs::File;
 use std::io::BufReader;
 use tempfile::tempdir;
 
-use crate::text_cacher::{FileFingerprint, create_word_map, load_parts, process_text};
+use crate::text_cacher::{
+    CacheBackend, FileFingerprint, Job, LocalCache, create_word_map, load_parts, process_text,
+};
 
 #[test]
 fn test_create_word_map_logic() {
@@ -25,17 +27,35 @@ fn test_create_word_map_logic() {
 }
 
 #[test]
-fn test_process_and_cache_async() {
+fn test_process_text_pure() {
+    let text = "hello world".to_string();
+    let (returned_text, returned_map) = process_text(text);
+
+    assert_eq!(*returned_text, "hello world");
+    assert!(returned_map.contains_key("hello"));
+    assert!(returned_map.contains_key("world"));
+}
+
+#[test]
+fn test_local_cache_async_write() {
     let dir = tempdir().expect("Failed to create temp dir");
+    let file_path = dir.path().join("document.pdf");
+    let cache_path = dir.path().join("document.pdf.cache");
     let text = "hello world".to_string();
     let fp = FileFingerprint::new_raw(1, 2, 3);
 
-    let (returned_text, returned_map) = process_text(text.clone());
+    let (text_arc, map_arc) = process_text(text);
+    let backend = LocalCache::new();
 
-    assert!(returned_map.contains_key("hello"));
-    assert!(returned_map.contains_key("world"));
+    backend.submit_job(
+        file_path,
+        Job::CacheWrite {
+            text: text_arc.clone(),
+            map: map_arc.clone(),
+            fingerprint: fp.clone(),
+        },
+    );
 
-    let cache_path = dir.path().join("document.pdf.cache");
     let mut attempts = 0;
     while !cache_path.exists() && attempts < 50 {
         std::thread::sleep(std::time::Duration::from_millis(10));
@@ -50,7 +70,7 @@ fn test_process_and_cache_async() {
     let mut reader = BufReader::new(file);
     let cached_document = load_parts(&mut reader).expect("Failed to load parts");
 
-    assert_eq!(*returned_map, cached_document.map);
-    assert_eq!(*returned_text, cached_document.text);
+    assert_eq!(*map_arc, cached_document.map);
+    assert_eq!(*text_arc, cached_document.text);
     assert_eq!(fp, cached_document.fingerprint);
 }
