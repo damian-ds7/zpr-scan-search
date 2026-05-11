@@ -1,9 +1,9 @@
 use crate::error::Result;
 use crate::file::TextFileLoader;
-use crate::text_cacher::LocalCache;
+use crate::text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, WordMap};
 use crate::text_extractor::TextExtractor;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tempfile::tempdir;
 
 struct MockExtractor;
@@ -13,13 +13,35 @@ impl TextExtractor for MockExtractor {
     }
 }
 
+struct MockCache;
+impl CacheBackend for MockCache {
+    fn try_load(
+        &self,
+        path: &Path,
+        fingerprint: &FileFingerprint,
+    ) -> Result<Option<CachedDocument>> {
+        let _ = path;
+
+        Ok(Some(CachedDocument {
+            text: "mocked text content".into(),
+            map: WordMap::new(),
+            fingerprint: fingerprint.clone(),
+        }))
+    }
+
+    fn submit_job(&self, path: PathBuf, job: Job) {
+        let _ = path;
+        let _ = job;
+    }
+}
+
 #[test]
 fn test_loader_with_mock_extractor() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("test.pdf");
     let _file = fs::File::create(&file_path).unwrap();
     let extractor = MockExtractor;
-    let backend = LocalCache::new();
+    let backend = MockCache;
     let loader = TextFileLoader::new(extractor, backend);
 
     let text_file = loader.load(file_path).unwrap();
