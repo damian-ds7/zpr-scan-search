@@ -10,7 +10,13 @@ use std::{
     thread,
 };
 
-use crate::{error::Result, text_cacher::WriteTask};
+use crate::error::Result;
+
+/// Represents a raw write task sent to the background writer.
+pub(crate) struct WriteTask {
+    pub path: PathBuf,
+    pub data: Vec<u8>,
+}
 
 /// Messages sent to the background cache writer thread.
 pub enum Msg {
