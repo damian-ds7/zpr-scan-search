@@ -30,7 +30,7 @@ impl<'a> SearchableIterator<'a> for TextSearcherIterator<'a> {
     }
 }
 
-struct TextSearcher<'a> {
+pub(crate) struct TextSearcher<'a> {
     file: &'a TextFile,
 }
 
