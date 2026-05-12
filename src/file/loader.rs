@@ -30,6 +30,7 @@ impl<E: TextExtractor, B: CacheBackend> TextFileLoader<E, B> {
                 path,
                 text: Arc::new(text),
                 map: Arc::new(map),
+                embeddings: None,
             });
         }
 
@@ -46,6 +47,6 @@ impl<E: TextExtractor, B: CacheBackend> TextFileLoader<E, B> {
             },
         );
 
-        Ok(TextFile { path, text, map })
+        Ok(TextFile { path, text, map, embeddings: None })
     }
 }

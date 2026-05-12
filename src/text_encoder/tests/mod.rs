@@ -1,9 +1,10 @@
 use super::TextEncoder;
+use crate::error::Result;
 
 struct MockEncoder {}
 
 impl TextEncoder for MockEncoder {
-    fn encode(&self, text: Vec<&str>) -> crate::error::Result<Vec<Vec<f32>>> {
+    fn encode(&self, text: &Vec<&str>) -> Result<Vec<Vec<f32>>> {
         let mut embeddings = Vec::new();
         for (i, _) in text.iter().enumerate() {
             let val = i as f32;
@@ -17,7 +18,7 @@ impl TextEncoder for MockEncoder {
 fn test_mock_encoder_trait() {
     let encoder = MockEncoder {};
     let text = vec!["This is a test sentence.", "This is another test sentence."];
-    let result = encoder.encode(text);
+    let result = encoder.encode(&text);
     let embeddings = result.unwrap();
     assert_eq!(embeddings.len(), 2);
 

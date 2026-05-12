@@ -9,6 +9,7 @@ mod text_extractor;
 pub mod text_searcher;
 pub mod text_encoder;
 mod searcher;
+pub mod sem_searcher;
 
 #[pymodule]
 mod scan_search {

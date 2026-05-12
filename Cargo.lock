@@ -2938,6 +2938,7 @@ dependencies = [
  "fastembed",
  "filetime",
  "image",
+ "ndarray",
  "pdf_oxide",
  "pyo3",
  "rayon",
