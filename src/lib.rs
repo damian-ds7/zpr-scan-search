@@ -8,6 +8,7 @@ mod text_cacher;
 mod text_extractor;
 pub mod text_searcher;
 pub mod text_encoder;
+mod searcher;
 
 #[pymodule]
 mod scan_search {
