@@ -20,7 +20,7 @@ impl<'a> TextSearcherIterator<'a> {
 }
 
 impl<'a> SearchableIterator<'a> for TextSearcherIterator<'a> {
-    fn nth(&mut self, index: usize) -> Option<&'a str> {
+    fn get_at(&mut self, index: usize) -> Option<&'a str> {
         if index < self.locations.len() {
             let val = self.locations.iter().nth(index)?;
             Some(self.iterator.clone().nth(*val as usize)?)
