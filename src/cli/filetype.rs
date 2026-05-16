@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+#[derive(PartialEq, Debug)]
 pub enum FileType {
     Pdf(PathBuf),
     Image(PathBuf),
