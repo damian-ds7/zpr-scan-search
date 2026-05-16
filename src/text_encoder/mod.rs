@@ -1,9 +1,9 @@
+pub mod fastembed;
 #[cfg(test)]
 pub mod tests;
-pub mod fastembed;
 
+use crate::error::Result;
 use std::sync::Arc;
-use crate::{error::Result};
-pub trait TextEncoder{
+pub trait TextEncoder {
     fn encode(&self, text: &Vec<&str>) -> Result<Vec<Vec<f32>>>;
 }

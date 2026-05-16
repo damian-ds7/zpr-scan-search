@@ -4,12 +4,12 @@ mod constants;
 mod error;
 mod file;
 mod ocr;
-mod text_cacher;
-mod text_extractor;
-pub mod text_searcher;
-pub mod text_encoder;
 mod searcher;
 pub mod sem_searcher;
+mod text_cacher;
+pub mod text_encoder;
+mod text_extractor;
+pub mod text_searcher;
 
 #[pymodule]
 mod scan_search {

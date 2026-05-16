@@ -48,7 +48,11 @@ struct SemSearcher<'a, E: TextEncoder> {
 impl<'a, E: TextEncoder> SemSearcher<'a, E> {
     fn new(file: &'a mut TextFile, encoder: E, queue_size: usize) -> Self {
         file.set_embeddings(&encoder);
-        SemSearcher { file, encoder , queue_size }
+        SemSearcher {
+            file,
+            encoder,
+            queue_size,
+        }
     }
 }
 
@@ -80,15 +84,17 @@ impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
 
 impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
     fn search(&self, query: &str) -> impl SearchableIterator<'_> {
-        if query.len() == 0 || self.file.text().len() == 0{
+        if query.len() == 0 || self.file.text().len() == 0 {
             return SemSearcherIterator::new(self.file, vec![]);
         }
         let mut heap = BinaryHeap::new();
         let encoded = self.encoder.encode(&vec![query]);
-        let query_vec = match encoded{
-            Ok(encoded) => {let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
-                query_vec}
-            Err(_) => return SemSearcherIterator::new(self.file, vec![])
+        let query_vec = match encoded {
+            Ok(encoded) => {
+                let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
+                query_vec
+            }
+            Err(_) => return SemSearcherIterator::new(self.file, vec![]),
         };
 
         self.file

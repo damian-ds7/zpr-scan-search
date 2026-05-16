@@ -25,12 +25,12 @@ filler 10
 ";
 
 const LINE_FOX_AND_DOG: usize = 0;
-const LINE_FOREST:      usize = 1;
-const LINE_JUMPS:       usize = 2;
+const LINE_FOREST: usize = 1;
+const LINE_JUMPS: usize = 2;
 
-const QUERY_QUICK_BROWN_FOX:     &str = "quick brown fox";
+const QUERY_QUICK_BROWN_FOX: &str = "quick brown fox";
 const QUERY_JUMPS_OVER_LAZY_DOG: &str = "jumps over the lazy dog";
-const QUERY_SOME_RARESTWORD:     &str = "some rarestword";
+const QUERY_SOME_RARESTWORD: &str = "some rarestword";
 
 fn create_test_file(content: &str) -> TextFile {
     let mut map = WordMap::new();
@@ -48,13 +48,13 @@ impl TextEncoder for MockEncoder {
 
         text.iter()
             .map(|&s| match s {
-                QUERY_QUICK_BROWN_FOX     => vec![1.0, 0.0, 0.0, 0.0],
+                QUERY_QUICK_BROWN_FOX => vec![1.0, 0.0, 0.0, 0.0],
                 QUERY_JUMPS_OVER_LAZY_DOG => vec![0.0, 1.0, 0.0, 0.0],
-                QUERY_SOME_RARESTWORD     => vec![1.0, 0.0, 0.0, 0.0],
+                QUERY_SOME_RARESTWORD => vec![1.0, 0.0, 0.0, 0.0],
                 s if s == main_lines[LINE_FOX_AND_DOG] => vec![0.8, 0.6, 0.0, 0.0],
-                s if s == main_lines[LINE_FOREST]      => vec![0.6, 0.0, 0.8, 0.0],
-                s if s == main_lines[LINE_JUMPS]       => vec![0.0, 1.0, 0.0, 0.0],
-                _                                      => vec![0.0, 0.0, 0.0, 1.0],
+                s if s == main_lines[LINE_FOREST] => vec![0.6, 0.0, 0.8, 0.0],
+                s if s == main_lines[LINE_JUMPS] => vec![0.0, 1.0, 0.0, 0.0],
+                _ => vec![0.0, 0.0, 0.0, 1.0],
             })
             .map(Ok)
             .collect()

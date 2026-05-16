@@ -1,9 +1,8 @@
-use std::sync::Arc;
-use crate::text_encoder::TextEncoder;
-use fastembed::{TextEmbedding, InitOptions, EmbeddingModel};
 use crate::error::Result;
-pub struct FastEmbed{}
-
+use crate::text_encoder::TextEncoder;
+use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
+use std::sync::Arc;
+pub struct FastEmbed {}
 
 impl TextEncoder for FastEmbed {
     fn encode(&self, text: &Vec<&str>) -> Result<Vec<Vec<f32>>> {
