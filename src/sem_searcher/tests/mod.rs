@@ -1,3 +1,5 @@
+mod fastembed_tests;
+
 use super::SemSearcher;
 use crate::error::Result;
 use crate::file::TextFile;

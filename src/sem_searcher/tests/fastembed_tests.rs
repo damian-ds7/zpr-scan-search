@@ -1,8 +1,4 @@
-
-
-mod fastmebed;
-
-use super::SemSearcher;
+use super::super::SemSearcher;
 use crate::error::Result;
 use crate::file::TextFile;
 use crate::searcher::{Search, SearchableIterator};
