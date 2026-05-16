@@ -5,8 +5,8 @@ use crate::text_cacher::WordMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-pub use loader::TextFileLoader;
 use crate::text_encoder::TextEncoder;
+pub use loader::TextFileLoader;
 
 /// Represents a processed document containing its text content and a word occurrence map.
 #[allow(dead_code)] // TODO: check if path can be removed later
@@ -14,7 +14,7 @@ pub struct TextFile {
     path: PathBuf,
     text: Arc<String>,
     map: Arc<WordMap>,
-    pub(crate) embeddings: Option<Arc<Vec<Vec<f32>>>>
+    pub(crate) embeddings: Option<Arc<Vec<Vec<f32>>>>,
 }
 
 impl TextFile {
@@ -45,7 +45,9 @@ impl TextFile {
         &self.text
     }
 
-    pub fn embeddings(&self) -> &Option<Arc<Vec<Vec<f32>>>> {&self.embeddings}
+    pub fn embeddings(&self) -> &Option<Arc<Vec<Vec<f32>>>> {
+        &self.embeddings
+    }
 
     pub fn set_embeddings<E: TextEncoder>(&mut self, encoder: &E) {
         self.embeddings = encoder

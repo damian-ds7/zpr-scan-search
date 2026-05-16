@@ -47,6 +47,11 @@ impl<E: TextExtractor, B: CacheBackend> TextFileLoader<E, B> {
             },
         );
 
-        Ok(TextFile { path, text, map, embeddings: None })
+        Ok(TextFile {
+            path,
+            text,
+            map,
+            embeddings: None,
+        })
     }
 }

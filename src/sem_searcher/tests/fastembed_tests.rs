@@ -4,8 +4,8 @@ use crate::file::TextFile;
 use crate::searcher::{Search, SearchableIterator};
 use crate::text_cacher::WordMap;
 use crate::text_encoder::TextEncoder;
-use std::path::PathBuf;
 use crate::text_encoder::fastembed::FastEmbed;
+use std::path::PathBuf;
 
 const MAIN_DOC: &str = "\
 the quick brown fox jumps over the lazy dog and runs away
@@ -24,10 +24,10 @@ filler 10
 ";
 
 const LINE_FOX_AND_DOG: usize = 0;
-const LINE_FOREST:      usize = 1;
-const LINE_JUMPS:       usize = 2;
+const LINE_FOREST: usize = 1;
+const LINE_JUMPS: usize = 2;
 
-const QUERY_QUICK_BROWN_FOX:     &str = "quick brown fox";
+const QUERY_QUICK_BROWN_FOX: &str = "quick brown fox";
 const QUERY_JUMPS_OVER_LAZY_DOG: &str = "jumps over the lazy dog";
 
 fn create_test_file(content: &str) -> TextFile {
@@ -41,7 +41,7 @@ fn create_test_file(content: &str) -> TextFile {
 #[test]
 fn searcher_ranks_lines_by_cosine_similarity() {
     let mut file = create_test_file(MAIN_DOC);
-    let searcher = SemSearcher::new(&mut file, FastEmbed{}, 10usize);
+    let searcher = SemSearcher::new(&mut file, FastEmbed {}, 10usize);
     let doc = MAIN_DOC.lines().collect::<Vec<_>>();
 
     let query = QUERY_QUICK_BROWN_FOX.to_string();

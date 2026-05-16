@@ -2,7 +2,6 @@ use std::path::PathBuf;
 
 use pyo3::{PyErr, exceptions::PyRuntimeError};
 
-
 /// Central error type for the scan-search project, wrapping external library errors.
 #[derive(Debug, thiserror::Error)]
 pub enum ScanSearchError {

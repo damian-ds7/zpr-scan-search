@@ -1,7 +1,7 @@
-use crate::file::TextFile;
-use crate::text_cacher::WordMap;
-use crate::searcher::{Search, SearchableIterator};
 use super::TextSearcher;
+use crate::file::TextFile;
+use crate::searcher::{Search, SearchableIterator};
+use crate::text_cacher::WordMap;
 use std::path::PathBuf;
 
 const TEST_DOCUMENT: &str = "\
