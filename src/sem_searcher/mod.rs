@@ -43,11 +43,12 @@ fn cosine_similarity(a: &Array1<f32>, b: &Array1<f32>) -> f32 {
 struct SemSearcher<'a, E: TextEncoder> {
     file: &'a TextFile,
     encoder: E,
+    queue_size: usize,
 }
 impl<'a, E: TextEncoder> SemSearcher<'a, E> {
-    fn new(file: &'a mut TextFile, encoder: E) -> Self {
+    fn new(file: &'a mut TextFile, encoder: E, queue_size: usize) -> Self {
         file.set_embeddings(&encoder);
-        SemSearcher { file, encoder }
+        SemSearcher { file, encoder , queue_size }
     }
 }
 
@@ -104,7 +105,7 @@ impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
                 })
             });
         let mut locations = Vec::new();
-        for _ in 0..10 {
+        for _ in 0..self.queue_size {
             if let Some(embedding) = heap.pop() {
                 locations.push(embedding.location);
             } else {
