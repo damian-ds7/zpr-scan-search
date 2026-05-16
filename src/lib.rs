@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use pyo3::prelude::*;
 
+mod cli;
 mod constants;
 mod error;
 mod file;
