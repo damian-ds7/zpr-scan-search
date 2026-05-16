@@ -1,16 +1,16 @@
 #[cfg(test)]
 pub mod tests;
 
-use ndarray::Array1;
 use crate::file::TextFile;
-use crate::text_encoder::TextEncoder;
 use crate::searcher::{Search, SearchableIterator};
-use std::collections::BinaryHeap;
+use crate::text_encoder::TextEncoder;
+use ndarray::Array1;
 use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 use std::io::BufRead;
 use std::str::Lines;
 
-struct CosinedEmbedding{
+struct CosinedEmbedding {
     similarity: f32,
     location: i32,
 }
@@ -51,20 +51,22 @@ impl<'a, E: TextEncoder> SemSearcher<'a, E> {
     }
 }
 
-
 struct SemSearcherIterator<'a> {
-    iterator:  Lines<'a>,
-    locations: Vec<i32>
+    iterator: Lines<'a>,
+    locations: Vec<i32>,
 }
 
-impl <'a> SemSearcherIterator<'a>{
+impl<'a> SemSearcherIterator<'a> {
     fn new(file: &'a TextFile, locations: Vec<i32>) -> Self {
         let iterator = file.text().lines();
-        SemSearcherIterator{iterator, locations}
+        SemSearcherIterator {
+            iterator,
+            locations,
+        }
     }
 }
 
-impl <'a> SearchableIterator<'a> for SemSearcherIterator<'a>{
+impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
     fn nth(&mut self, index: usize) -> Option<&'a str> {
         if index < self.locations.len() {
             let val = self.locations.iter().nth(index)?;
@@ -81,7 +83,8 @@ impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
         let encoded = self.encoder.encode(&vec![query]).unwrap();
         let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
 
-        self.file.embeddings
+        self.file
+            .embeddings
             .as_deref()
             .unwrap()
             .iter()
