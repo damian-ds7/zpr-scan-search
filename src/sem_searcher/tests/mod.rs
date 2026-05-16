@@ -23,12 +23,12 @@ filler 10
 ";
 
 const LINE_FOX_AND_DOG: usize = 0;
-const LINE_FOREST: usize = 1;
-const LINE_JUMPS: usize = 2;
+const LINE_FOREST:      usize = 1;
+const LINE_JUMPS:       usize = 2;
 
-const QUERY_QUICK_BROWN_FOX: &str = "quick brown fox";
+const QUERY_QUICK_BROWN_FOX:     &str = "quick brown fox";
 const QUERY_JUMPS_OVER_LAZY_DOG: &str = "jumps over the lazy dog";
-const QUERY_SOME_RARESTWORD: &str = "some rarestword";
+const QUERY_SOME_RARESTWORD:     &str = "some rarestword";
 
 fn create_test_file(content: &str) -> TextFile {
     let mut map = WordMap::new();
@@ -46,13 +46,13 @@ impl TextEncoder for MockEncoder {
 
         text.iter()
             .map(|&s| match s {
-                QUERY_QUICK_BROWN_FOX => vec![1.0, 0.0, 0.0, 0.0],
+                QUERY_QUICK_BROWN_FOX     => vec![1.0, 0.0, 0.0, 0.0],
                 QUERY_JUMPS_OVER_LAZY_DOG => vec![0.0, 1.0, 0.0, 0.0],
-                QUERY_SOME_RARESTWORD => vec![1.0, 0.0, 0.0, 0.0],
+                QUERY_SOME_RARESTWORD     => vec![1.0, 0.0, 0.0, 0.0],
                 s if s == main_lines[LINE_FOX_AND_DOG] => vec![0.8, 0.6, 0.0, 0.0],
-                s if s == main_lines[LINE_FOREST] => vec![0.6, 0.0, 0.8, 0.0],
-                s if s == main_lines[LINE_JUMPS] => vec![0.0, 1.0, 0.0, 0.0],
-                _ => vec![0.0, 0.0, 0.0, 1.0],
+                s if s == main_lines[LINE_FOREST]      => vec![0.6, 0.0, 0.8, 0.0],
+                s if s == main_lines[LINE_JUMPS]       => vec![0.0, 1.0, 0.0, 0.0],
+                _                                      => vec![0.0, 0.0, 0.0, 1.0],
             })
             .map(Ok)
             .collect()
@@ -67,15 +67,32 @@ fn searcher_ranks_lines_by_cosine_similarity() {
 
     let query = QUERY_QUICK_BROWN_FOX.to_string();
     let mut results = searcher.search(&query);
-    assert_eq!(results.nth(0), Some(doc[LINE_FOX_AND_DOG]));
-    assert_eq!(results.nth(1), Some(doc[LINE_FOREST]));
+    assert_eq!(results.get_at(0), Some(doc[LINE_FOX_AND_DOG]));
+    assert_eq!(results.get_at(1), Some(doc[LINE_FOREST]));
 
     let query = QUERY_JUMPS_OVER_LAZY_DOG.to_string();
     let mut results = searcher.search(&query);
-    assert_eq!(results.nth(0), Some(doc[LINE_JUMPS]));
-    assert_eq!(results.nth(1), Some(doc[LINE_FOX_AND_DOG]));
+    assert_eq!(results.get_at(0), Some(doc[LINE_JUMPS]));
+    assert_eq!(results.get_at(1), Some(doc[LINE_FOX_AND_DOG]));
 
     let query = QUERY_SOME_RARESTWORD.to_string();
     let mut results = searcher.search(&query);
-    assert_eq!(results.nth(0), Some(doc[LINE_FOX_AND_DOG]));
+    assert_eq!(results.get_at(0), Some(doc[LINE_FOX_AND_DOG]));
+}
+
+#[test]
+fn searcher_returns_none_for_empty_query() {
+    let mut file = create_test_file(MAIN_DOC);
+    let searcher = SemSearcher::new(&mut file, MockEncoder);
+    let query = String::new();
+    let mut results = searcher.search(&query);
+    assert_eq!(results.get_at(0), None);
+}
+#[test]
+fn searcher_returns_nothing_for_empty_doc() {
+    let mut file = create_test_file("");
+    let searcher = SemSearcher::new(&mut file, MockEncoder);
+    let query = QUERY_QUICK_BROWN_FOX.to_string();
+    let mut results = searcher.search(&query);
+    assert_eq!(results.get_at(0), None);
 }

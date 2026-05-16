@@ -67,7 +67,7 @@ impl<'a> SemSearcherIterator<'a> {
 }
 
 impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
-    fn nth(&mut self, index: usize) -> Option<&'a str> {
+    fn get_at(&mut self, index: usize) -> Option<&'a str> {
         if index < self.locations.len() {
             let val = self.locations.iter().nth(index)?;
             Some(self.iterator.clone().nth(*val as usize)?)
@@ -79,9 +79,16 @@ impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
 
 impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
     fn search(&self, query: &str) -> impl SearchableIterator<'_> {
+        if query.len() == 0 || self.file.text().len() == 0{
+            return SemSearcherIterator::new(self.file, vec![]);
+        }
         let mut heap = BinaryHeap::new();
-        let encoded = self.encoder.encode(&vec![query]).unwrap();
-        let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
+        let encoded = self.encoder.encode(&vec![query]);
+        let query_vec = match encoded{
+            Ok(encoded) => {let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
+                query_vec}
+            Err(_) => return SemSearcherIterator::new(self.file, vec![])
+        };
 
         self.file
             .embeddings
