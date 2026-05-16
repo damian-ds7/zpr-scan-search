@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod tests;
-mod fastembed;
+pub mod fastembed;
 
 use std::sync::Arc;
 use crate::{error::Result};
