@@ -2,6 +2,7 @@ use std::{path::Path, sync::Arc};
 
 use crate::{
     ocr::OcrEngine,
+    supported_file::{FileKind, SupportedFile},
     text_extractor::{PdfExtractor, Result, TextExtractor},
 };
 use image::DynamicImage;
@@ -18,7 +19,11 @@ fn test_pdf_extraction_with_text() {
     let path = format!("{}/resources/text.pdf", env!("CARGO_MANIFEST_DIR"));
     let ocr = Arc::new(MockOcr);
     let extractor = PdfExtractor::new(ocr);
-    let text = extractor.extract_from(Path::new(&path)).unwrap();
+    let file = SupportedFile {
+        path: Path::new(&path).to_path_buf(),
+        kind: FileKind::Pdf,
+    };
+    let text = extractor.extract_from(&file).unwrap();
 
     assert!(text.contains("This is a test pdf"));
 }
@@ -31,7 +36,11 @@ fn test_pdf_extraction_with_text_and_image() {
     );
     let ocr = Arc::new(MockOcr);
     let extractor = PdfExtractor::new(ocr);
-    let text = extractor.extract_from(Path::new(&path)).unwrap();
+    let file = SupportedFile {
+        path: Path::new(&path).to_path_buf(),
+        kind: FileKind::Pdf,
+    };
+    let text = extractor.extract_from(&file).unwrap();
 
     assert!(text.contains("This is a test pdf with an image\nmocked ocr text\n"));
 }
@@ -40,6 +49,10 @@ fn test_pdf_extraction_with_text_and_image() {
 fn test_open_non_existent_file() {
     let ocr = Arc::new(MockOcr);
     let extractor = PdfExtractor::new(ocr);
-    let result = extractor.extract_from(Path::new("non_existent_file.pdf"));
+    let file = SupportedFile {
+        path: Path::new("non_existent_file.pdf").to_path_buf(),
+        kind: FileKind::Pdf,
+    };
+    let result = extractor.extract_from(&file);
     assert!(result.is_err());
 }

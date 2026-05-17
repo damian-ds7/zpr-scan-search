@@ -1,5 +1,6 @@
 use crate::error::Result;
 use crate::file::TextFileLoader;
+use crate::supported_file::{FileKind, SupportedFile};
 use crate::text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, WordMap};
 use crate::text_extractor::TextExtractor;
 use std::fs;
@@ -11,7 +12,7 @@ use std::sync::Mutex;
 
 struct MockExtractor;
 impl TextExtractor for MockExtractor {
-    fn extract_from(&self, _path: &Path) -> Result<String> {
+    fn extract_from(&self, _file: &SupportedFile) -> Result<String> {
         Ok("extracted text".to_string())
     }
 }
@@ -64,7 +65,12 @@ fn test_loader_cache_hit() {
     let submit_called = backend.submit_called.clone();
     let loader = TextFileLoader::new(extractor, backend);
 
-    let text_file = loader.load(file_path).unwrap();
+    let file = SupportedFile {
+        path: file_path,
+        kind: FileKind::Pdf,
+    };
+
+    let text_file = loader.load(file).unwrap();
 
     assert_eq!(text_file.text(), "cached text");
     assert!(!*submit_called.lock().unwrap());
@@ -81,7 +87,12 @@ fn test_loader_cache_miss_triggers_extraction_and_cache() {
     let submit_called = backend.submit_called.clone();
     let loader = TextFileLoader::new(extractor, backend);
 
-    let text_file = loader.load(file_path).unwrap();
+    let file = SupportedFile {
+        path: file_path,
+        kind: FileKind::Pdf,
+    };
+
+    let text_file = loader.load(file).unwrap();
 
     assert_eq!(text_file.text(), "extracted text");
     assert!(*submit_called.lock().unwrap());
