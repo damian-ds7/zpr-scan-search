@@ -1,8 +1,9 @@
-use std::{path::Path, sync::Arc};
+use std::sync::Arc;
 
 use crate::{
     error::{Result, ScanSearchError},
     ocr::OcrEngine,
+    supported_file::SupportedFile,
     text_extractor::TextExtractor,
 };
 
@@ -21,8 +22,9 @@ impl<E: OcrEngine + Sync + Send> ImageTextExtractor<E> {
 }
 
 impl<E: OcrEngine + Sync + Send> TextExtractor for ImageTextExtractor<E> {
-    fn extract_from(&self, path: &Path) -> Result<String> {
-        let image = image::open(path).map_err(|e| ScanSearchError::Image(e.to_string()))?;
+    fn extract_from(&self, file: &SupportedFile) -> Result<String> {
+        let image =
+            image::open(file.path.clone()).map_err(|e| ScanSearchError::Image(e.to_string()))?;
         self.engine.extract_text_from_image(image)
     }
 }

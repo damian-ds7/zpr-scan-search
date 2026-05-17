@@ -24,6 +24,7 @@ mod scan_search {
         error::ScanSearchError,
         file::TextFileLoader,
         ocr::TesseractEngine,
+        supported_file::{FileKind, SupportedFile},
         text_cacher::{CacheWriter, LocalCache},
         text_extractor::PdfExtractor,
     };
@@ -35,7 +36,11 @@ mod scan_search {
         let text_extractor = PdfExtractor::new(ocr_engine);
         let backend = LocalCache;
         let loader = TextFileLoader::new(text_extractor, backend);
-        let file = loader.load(PathBuf::from(path))?;
+        let file = SupportedFile {
+            path: PathBuf::from(path),
+            kind: FileKind::Pdf,
+        };
+        let file = loader.load(file)?;
         let word_map = serde_json::to_string(file.map()).map_err(ScanSearchError::from)?;
         Ok(word_map)
     }
