@@ -43,7 +43,7 @@ fn create_test_file(content: &str) -> TextFile {
 struct MockEncoder;
 
 impl TextEncoder for MockEncoder {
-    fn encode(&self, text: &Vec<&str>) -> Result<Vec<Vec<f32>>> {
+    fn encode(&self, text: &[&str]) -> Result<Vec<Vec<f32>>> {
         let main_lines = MAIN_DOC.lines().collect::<Vec<_>>();
 
         text.iter()
