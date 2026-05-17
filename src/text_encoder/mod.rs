@@ -4,7 +4,7 @@ pub mod tests;
 
 use crate::error::Result;
 
-
+/// Interface for text encoders
 pub trait TextEncoder {
     fn encode(&self, text: &[&str]) -> Result<Vec<Vec<f32>>>;
 }

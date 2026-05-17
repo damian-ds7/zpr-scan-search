@@ -4,6 +4,7 @@ use std::str::SplitWhitespace;
 #[cfg(test)]
 pub mod tests;
 
+/// SearchableIterator with search results being words in the file
 struct TextSearcherIterator<'a> {
     iterator: SplitWhitespace<'a>,
     locations: Vec<i32>,
@@ -33,7 +34,7 @@ impl<'a> SearchableIterator<'a> for TextSearcherIterator<'a> {
 pub(crate) struct TextSearcher<'a> {
     file: &'a TextFile,
 }
-
+/// A simple searcher looking for exact matches
 impl<'a> TextSearcher<'a> {
     fn new(file: &'a TextFile) -> Self {
         TextSearcher { file }
