@@ -31,7 +31,7 @@ pub enum ScanSearchError {
     PersistError(#[from] tempfile::PersistError),
 
     #[error("Failed to encode a sentence: {0}")]
-    RustBertError(#[from] rust_bert::RustBertError),
+    FastEmbedError(#[from] fastembed::Error),
 }
 
 impl From<ScanSearchError> for PyErr {

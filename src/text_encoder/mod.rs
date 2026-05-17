@@ -1,8 +1,8 @@
 #[cfg(test)]
 pub mod tests;
-mod rust_bert;
+mod fastembed;
 
 use crate::{error::Result};
 pub trait TextEncoder{
-    fn encode(&self, text: &str) -> Result<Vec<Vec<f32>>>;
+    fn encode(&self, text: Vec<&str>) -> Result<Vec<Vec<f32>>>;
 }
