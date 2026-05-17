@@ -16,7 +16,7 @@ pub mod text_searcher;
 
 #[pymodule]
 mod scan_search {
-    use std::path::PathBuf;
+    use std::{path::PathBuf, sync::Arc};
 
     use pyo3::prelude::*;
 
@@ -31,8 +31,8 @@ mod scan_search {
     /// Processes given pdf file and saves data to cache file and returns extracted text
     #[pyfunction]
     fn process_file(path: String) -> PyResult<String> {
-        let ocr_engine = TesseractEngine::new("eng")?;
-        let text_extractor = PdfExtractor::new(&ocr_engine);
+        let ocr_engine = Arc::new(TesseractEngine::new("eng")?);
+        let text_extractor = PdfExtractor::new(ocr_engine);
         let backend = LocalCache;
         let loader = TextFileLoader::new(text_extractor, backend);
         let file = loader.load(PathBuf::from(path))?;

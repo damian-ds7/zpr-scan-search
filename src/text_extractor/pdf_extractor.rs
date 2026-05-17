@@ -1,7 +1,7 @@
 use crate::{error::ScanSearchError, text_extractor::TextExtractor};
 use pdf_oxide::PdfDocument;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use std::path::Path;
+use std::{path::Path, sync::Arc};
 
 use crate::{error::Result, ocr::OcrEngine};
 
@@ -12,18 +12,18 @@ impl From<pdf_oxide::Error> for ScanSearchError {
 }
 
 /// Extractor specifically designed for PDF documents.
-pub struct PdfExtractor<'a, E: OcrEngine> {
-    ocr_engine: &'a E,
+pub struct PdfExtractor<E: OcrEngine + Sync + Send> {
+    ocr_engine: Arc<E>,
 }
 
-impl<'a, E: OcrEngine> PdfExtractor<'a, E> {
+impl<E: OcrEngine + Sync + Send> PdfExtractor<E> {
     /// Creates a new PdfExtractor using the provided OCR engine.
-    pub fn new(ocr_engine: &'a E) -> Self {
+    pub fn new(ocr_engine: Arc<E>) -> Self {
         Self { ocr_engine }
     }
 }
 
-impl<'a, E: OcrEngine> TextExtractor for PdfExtractor<'a, E> {
+impl<E: OcrEngine + Sync + Send> TextExtractor for PdfExtractor<E> {
     fn extract_from(&self, path: &Path) -> Result<String> {
         let mut document = PdfDocument::open(path.to_str().ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid path")
