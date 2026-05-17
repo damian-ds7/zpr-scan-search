@@ -5,6 +5,7 @@ mod tests;
 mod universal_extractor;
 
 pub use pdf_extractor::PdfExtractor;
+pub use universal_extractor::UniversalExtractor;
 
 use crate::{error::Result, supported_file::SupportedFile};
 
