@@ -1,7 +1,4 @@
-use std::{
-    fs::metadata,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
 
