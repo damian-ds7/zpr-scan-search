@@ -2,7 +2,8 @@ use crate::error::Result;
 use crate::text_encoder::TextEncoder;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 use crate::error::ScanSearchError;
-pub struct FastEmbed {}
+/// Encoder using the fastembed lib
+pub struct FastEmbed;
 
 impl TextEncoder for FastEmbed {
     fn encode(&self, text: &[&str]) -> Result<Vec<Vec<f32>>> {
