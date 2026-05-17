@@ -41,7 +41,6 @@ struct SemSearcherIterator<'a> {
     locations: Vec<i32>,
 }
 
-
 impl<'a> SemSearcherIterator<'a> {
     fn new(file: &'a TextFile, locations: Vec<i32>) -> Self {
         let iterator = file.text().lines();
@@ -66,7 +65,7 @@ impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
 /// Searcher which uses cosine similarity between sentence(line) embeddings
 impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
     fn search(&self, query: &str) -> impl SearchableIterator<'_> {
-        if query.is_empty() || self.file.text().is_empty(){
+        if query.is_empty() || self.file.text().is_empty() {
             return SemSearcherIterator::new(self.file, vec![]);
         }
         let mut heap = BinaryHeap::new();

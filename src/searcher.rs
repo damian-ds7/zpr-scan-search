@@ -1,4 +1,3 @@
-
 /// Allows access to elements found by Search
 pub trait SearchableIterator<'a> {
     fn get_at(&mut self, index: usize) -> Option<&'a str>;
