@@ -5,6 +5,7 @@ mod cli;
 mod constants;
 mod error;
 mod file;
+mod filetype;
 mod ocr;
 mod searcher;
 pub mod sem_searcher;

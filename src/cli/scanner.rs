@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
 
-use crate::cli::FileType;
+use crate::filetype::FileType;
 
 pub struct ScannerConfig {
     pub follow_links: bool,
