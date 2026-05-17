@@ -30,7 +30,7 @@ pub enum ScanSearchError {
     PersistError(#[from] tempfile::PersistError),
 
     #[error("Failed to encode a sentence: {0}")]
-    FastEmbedError(#[from] fastembed::Error),
+    Embedding(String),
 }
 
 impl From<ScanSearchError> for PyErr {

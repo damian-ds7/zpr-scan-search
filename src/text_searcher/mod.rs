@@ -22,7 +22,7 @@ impl<'a> TextSearcherIterator<'a> {
 impl<'a> SearchableIterator<'a> for TextSearcherIterator<'a> {
     fn get_at(&mut self, index: usize) -> Option<&'a str> {
         if index < self.locations.len() {
-            let val = self.locations.iter().nth(index)?;
+            let val = self.locations.get(index)?;
             Some(self.iterator.clone().nth(*val as usize)?)
         } else {
             None
@@ -76,7 +76,6 @@ impl<'a> Search for TextSearcher<'a> {
                 }
             }
         }
-        let iterator = TextSearcherIterator::new(self.file, locations);
-        iterator
+        TextSearcherIterator::new(self.file, locations)
     }
 }

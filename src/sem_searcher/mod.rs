@@ -5,35 +5,15 @@ use crate::file::TextFile;
 use crate::searcher::{Search, SearchableIterator};
 use crate::text_encoder::TextEncoder;
 use ndarray::Array1;
-use std::cmp::Ordering;
 use std::collections::BinaryHeap;
-use std::io::BufRead;
 use std::str::Lines;
 
+use ordered_float::OrderedFloat;
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct CosinedEmbedding {
-    similarity: f32,
+    similarity: OrderedFloat<f32>,
     location: i32,
-}
-impl PartialEq for CosinedEmbedding {
-    fn eq(&self, other: &Self) -> bool {
-        self.similarity == other.similarity && self.location == other.location
-    }
-}
-
-impl Eq for CosinedEmbedding {}
-
-impl PartialOrd for CosinedEmbedding {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for CosinedEmbedding {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.similarity
-            .partial_cmp(&other.similarity)
-            .unwrap_or(Ordering::Equal)
-    }
 }
 fn cosine_similarity(a: &Array1<f32>, b: &Array1<f32>) -> f32 {
     let dot = a.dot(b);
@@ -74,7 +54,7 @@ impl<'a> SemSearcherIterator<'a> {
 impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
     fn get_at(&mut self, index: usize) -> Option<&'a str> {
         if index < self.locations.len() {
-            let val = self.locations.iter().nth(index)?;
+            let val = self.locations.get(index)?;
             Some(self.iterator.clone().nth(*val as usize)?)
         } else {
             None
@@ -84,11 +64,11 @@ impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
 
 impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
     fn search(&self, query: &str) -> impl SearchableIterator<'_> {
-        if query.len() == 0 || self.file.text().len() == 0 {
+        if query.is_empty() || self.file.text().is_empty(){
             return SemSearcherIterator::new(self.file, vec![]);
         }
         let mut heap = BinaryHeap::new();
-        let encoded = self.encoder.encode(&vec![query]);
+        let encoded = self.encoder.encode(&[query]);
         let query_vec = match encoded {
             Ok(encoded) => {
                 let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
@@ -106,7 +86,7 @@ impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
             .for_each(|(i, line)| {
                 let line_vec: Array1<f32> = Array1::from_vec(line.clone());
                 heap.push(CosinedEmbedding {
-                    similarity: cosine_similarity(&query_vec, &line_vec),
+                    similarity: OrderedFloat::from(cosine_similarity(&query_vec, &line_vec)),
                     location: i as i32,
                 })
             });

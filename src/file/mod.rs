@@ -18,6 +18,7 @@ pub struct TextFile {
 }
 
 impl TextFile {
+
     pub fn new(path: PathBuf, text: String, map: WordMap) -> Self {
         Self {
             path,
@@ -51,7 +52,7 @@ impl TextFile {
 
     pub fn set_embeddings<E: TextEncoder>(&mut self, encoder: &E) {
         self.embeddings = encoder
-            .encode(&self.text.lines().collect())
+            .encode(&self.text.lines().collect::<Vec<_>>())
             .ok()
             .map(Arc::new);
     }

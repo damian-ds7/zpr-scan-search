@@ -4,7 +4,7 @@ use crate::error::Result;
 struct MockEncoder {}
 
 impl TextEncoder for MockEncoder {
-    fn encode(&self, text: &Vec<&str>) -> Result<Vec<Vec<f32>>> {
+    fn encode(&self, text: &[&str]) -> Result<Vec<Vec<f32>>> {
         let mut embeddings = Vec::new();
         for (i, _) in text.iter().enumerate() {
             let val = i as f32;
