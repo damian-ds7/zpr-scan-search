@@ -2,6 +2,7 @@ mod image_extractor;
 mod pdf_extractor;
 #[cfg(test)]
 mod tests;
+mod universal_extractor;
 
 pub use pdf_extractor::PdfExtractor;
 
