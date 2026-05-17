@@ -42,6 +42,7 @@ impl CacheBackend for SpyCache {
                 text: "cached text".into(),
                 map: WordMap::from("cached text"),
                 fingerprint: fingerprint.clone(),
+                embeddings: None,
             }))
         } else {
             Ok(None)

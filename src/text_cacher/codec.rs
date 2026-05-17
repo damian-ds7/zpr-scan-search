@@ -1,6 +1,6 @@
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::text_cacher::{CachedDocument, FileFingerprint, WordMap};
+use crate::text_cacher::{read_embeddings, CachedDocument, FileFingerprint, WordMap};
 use std::io::{self, BufRead, Write};
 use std::sync::Arc;
 
@@ -50,11 +50,12 @@ pub fn load_parts<R: BufRead>(reader: &mut R) -> Result<CachedDocument> {
     let text = String::from_utf8(read_delimited(reader)?)
         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
     let fingerprint = read_fingerprint(reader)?;
-
+    let embeddings = read_embeddings(crate::text_cacher::read_delimited(reader)?)?;
     Ok(CachedDocument {
         text,
         map,
         fingerprint,
+        embeddings: Some(embeddings),
     })
 }
 
