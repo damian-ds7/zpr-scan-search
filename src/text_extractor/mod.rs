@@ -10,6 +10,6 @@ use crate::{error::Result, supported_file::SupportedFile};
 
 /// Interface for extracting text from document files.
 pub trait TextExtractor {
-    /// Extracts text from the file at the specified path.
+    /// Extracts text from the given `SupportedFile`.
     fn extract_from(&self, file: &SupportedFile) -> Result<String>;
 }

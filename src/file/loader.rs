@@ -20,7 +20,8 @@ impl<E: TextExtractor, B: CacheBackend> TextFileLoader<E, B> {
         Self { extractor, backend }
     }
 
-    /// Loads a TextFile from the given path.
+    /// Loads a TextFile from the given `SupportedFile`.
+    ///
     /// It first tries to load from the cache backend. If not found or stale, it uses the extractor
     /// and then saves the result to the cache.
     pub fn load(&self, file: SupportedFile) -> Result<TextFile> {

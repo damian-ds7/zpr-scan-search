@@ -4,8 +4,11 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::supported_file::{MimeDetector, SupportedFile};
 
+/// Configuration for the directory scanner.
 pub struct ScannerConfig {
+    /// Whether to follow symbolic links during scanning.
     pub follow_links: bool,
+    /// Whether to include hidden files and directories in the scan.
     pub include_hidden: bool,
 }
 
@@ -18,12 +21,16 @@ impl Default for ScannerConfig {
     }
 }
 
+/// Checks if a directory entry is hidden.
 fn is_hidden(entry: &DirEntry) -> bool {
     let path = entry.path();
     hf::is_hidden(path).unwrap_or(false)
 }
 
-/// Walks a directory and collects FileTypes
+/// Recursively walks a directory and collects `SupportedFile`s.
+///
+/// Filters entries based on the provided `ScannerConfig` and uses the `detector`
+/// to identify supported files.
 fn from_dir<D: MimeDetector>(
     path: &Path,
     config: &ScannerConfig,
@@ -43,6 +50,10 @@ fn from_dir<D: MimeDetector>(
         .collect()
 }
 
+/// Collects `SupportedFile`s from a list of paths.
+///
+/// If a path is a directory, it scans it recursively based on the `config`.
+/// If it's a file, it checks if it's a supported type using the `detector`.
 pub fn get_fts_from_paths<D: MimeDetector>(
     paths: Vec<PathBuf>,
     config: &ScannerConfig,
