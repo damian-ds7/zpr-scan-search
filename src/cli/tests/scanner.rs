@@ -2,7 +2,7 @@ use std::fs::{create_dir, write};
 
 use tempfile::TempDir;
 
-use crate::cli::{get_fts_from_paths, scanner::ScannerConfig};
+use crate::cli::scanner::{ScannerConfig, get_fts_from_paths};
 
 /// Creates this structure:
 /// root
