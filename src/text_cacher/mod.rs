@@ -15,10 +15,10 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 pub use cache_writer::CacheWriter;
+pub use embeddings::Embeddings;
 pub use file_fingerprint::FileFingerprint;
 pub use local_cache::LocalCache;
 pub use word_map::WordMap;
-pub use embeddings::Embeddings;
 
 pub trait CacheBackend {
     /// Attempts to load a cached document for the given path and fingerprint.

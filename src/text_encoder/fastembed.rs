@@ -1,7 +1,7 @@
 use crate::error::Result;
+use crate::error::ScanSearchError;
 use crate::text_encoder::TextEncoder;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-use crate::error::ScanSearchError;
 /// Encoder using the fastembed lib
 pub struct FastEmbed;
 
@@ -14,7 +14,6 @@ impl TextEncoder for FastEmbed {
         Ok(embeddings)
     }
 }
-
 
 impl From<fastembed::Error> for ScanSearchError {
     fn from(e: fastembed::Error) -> Self {

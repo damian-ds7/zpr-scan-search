@@ -18,7 +18,6 @@ pub struct TextFile {
 }
 
 impl TextFile {
-
     pub fn new(path: PathBuf, text: String, map: WordMap) -> Self {
         Self {
             path,
