@@ -19,14 +19,16 @@ mod scan_search {
     use std::{path::PathBuf, sync::Arc};
 
     use pyo3::prelude::*;
+    use rayon::prelude::*;
 
     use crate::{
-        error::ScanSearchError,
+        cli::{ScannerConfig, get_fts_from_paths},
+        error::{Result, ScanSearchError},
         file::TextFileLoader,
         ocr::TesseractEngine,
-        supported_file::{FileKind, SupportedFile},
+        supported_file::{FileKind, InferDetector, SupportedFile},
         text_cacher::{CacheWriter, LocalCache},
-        text_extractor::PdfExtractor,
+        text_extractor::{PdfExtractor, UniversalExtractor},
     };
 
     /// Processes given pdf file and saves data to cache file and returns extracted text
@@ -43,6 +45,31 @@ mod scan_search {
         let file = loader.load(file)?;
         let word_map = serde_json::to_string(file.map()).map_err(ScanSearchError::from)?;
         Ok(word_map)
+    }
+
+    /// Extracts text from multiple files or directories in parallel.
+    #[pyfunction]
+    #[pyo3(signature = (*paths))]
+    fn process_files(paths: Vec<String>) -> PyResult<Vec<String>> {
+        let path_bufs: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
+        let config = ScannerConfig::default();
+        let detector = InferDetector;
+
+        let supported_files = get_fts_from_paths(path_bufs, &config, &detector);
+
+        let engine = Arc::new(TesseractEngine::new("eng")?);
+        let extractor = UniversalExtractor::new(engine);
+        let loader = TextFileLoader::new(extractor, LocalCache);
+
+        let results = supported_files
+            .into_par_iter()
+            .map(|file| {
+                let text_file = loader.load(file)?;
+                Ok(text_file.text().to_string())
+            })
+            .collect::<Result<Vec<String>>>();
+
+        Ok(results?)
     }
 
     /// Shuts down the background cache writer, ensuring all pending writes are completed.
