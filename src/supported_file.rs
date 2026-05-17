@@ -7,12 +7,12 @@ pub enum FileKind {
 }
 
 #[derive(PartialEq, Debug)]
-pub struct FileType {
+pub struct SupportedFile {
     pub path: PathBuf,
     pub kind: FileKind,
 }
 
-impl FileType {
+impl SupportedFile {
     pub fn from_path(path: PathBuf) -> Option<Self> {
         let extension = path.extension()?.to_str()?;
         let kind = match extension {
@@ -27,14 +27,14 @@ impl FileType {
 
 #[cfg(test)]
 mod tests {
-    use crate::filetype::{FileKind, FileType};
+    use crate::supported_file::{FileKind, SupportedFile};
     use std::path::PathBuf;
 
     macro_rules! case {
         (@path $ext:expr) => { PathBuf::from(concat!("file.", $ext)) };
-        (pdf, $ext:expr) => { ($ext, Some(FileType { path: case!(@path $ext), kind: FileKind::Pdf })) };
-        (img, $ext:expr) => { ($ext, Some(FileType { path: case!(@path $ext), kind: FileKind::Image })) };
-        (none, $ext:expr) => { ($ext, None::<FileType>) };
+        (pdf, $ext:expr) => { ($ext, Some(SupportedFile { path: case!(@path $ext), kind: FileKind::Pdf })) };
+        (img, $ext:expr) => { ($ext, Some(SupportedFile { path: case!(@path $ext), kind: FileKind::Image })) };
+        (none, $ext:expr) => { ($ext, None) };
     }
 
     #[test]
@@ -50,7 +50,7 @@ mod tests {
         ];
         for (ext, expected) in cases {
             let path = PathBuf::from(format!("file.{ext}"));
-            assert_eq!(expected, FileType::from_path(path));
+            assert_eq!(expected, SupportedFile::from_path(path));
         }
     }
 }
