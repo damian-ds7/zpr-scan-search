@@ -1,7 +1,7 @@
 mod loader;
 #[cfg(test)]
 mod tests;
-use crate::text_cacher::WordMap;
+use crate::text_cacher::{Embeddings, WordMap};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -14,7 +14,7 @@ pub struct TextFile {
     path: PathBuf,
     text: Arc<String>,
     map: Arc<WordMap>,
-    pub(crate) embeddings: Option<Arc<Vec<Vec<f32>>>>,
+    pub(crate) embeddings: Option<Arc<Embeddings>>,
 }
 
 impl TextFile {
@@ -46,7 +46,7 @@ impl TextFile {
         &self.text
     }
 
-    pub fn embeddings(&self) -> &Option<Arc<Vec<Vec<f32>>>> {
+    pub fn embeddings(&self) -> &Option<Arc<Embeddings>> {
         &self.embeddings
     }
 
@@ -54,6 +54,6 @@ impl TextFile {
         self.embeddings = encoder
             .encode(&self.text.lines().collect::<Vec<_>>())
             .ok()
-            .map(Arc::new);
+            .map(|e| Arc::new(Embeddings::from(e)));
     }
 }

@@ -35,13 +35,13 @@ impl<'a, E: TextEncoder> SemSearcher<'a, E> {
         }
     }
 }
-///
+/// SearchableIterator allowing access to most similar lines in the file
 struct SemSearcherIterator<'a> {
     iterator: Lines<'a>,
     locations: Vec<i32>,
 }
 
-/// SearchableIterator allowing access to most similar sentences in the file
+
 impl<'a> SemSearcherIterator<'a> {
     fn new(file: &'a TextFile, locations: Vec<i32>) -> Self {
         let iterator = file.text().lines();
@@ -63,7 +63,7 @@ impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
     }
 }
 
-/// Searcher which uses cosine similarity between sentence embeddings
+/// Searcher which uses cosine similarity between sentence(line) embeddings
 impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
     fn search(&self, query: &str) -> impl SearchableIterator<'_> {
         if query.is_empty() || self.file.text().is_empty(){
