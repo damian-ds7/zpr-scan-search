@@ -1,8 +1,28 @@
-use std::fs::{create_dir, write};
+use std::{
+    fs::{create_dir, write},
+    path::Path,
+};
 
 use tempfile::TempDir;
 
-use crate::cli::scanner::{ScannerConfig, get_fts_from_paths};
+use crate::{
+    cli::scanner::{ScannerConfig, get_fts_from_paths},
+    supported_file::MimeDetector,
+};
+
+pub struct MockDetector;
+
+impl MimeDetector for MockDetector {
+    fn detect(&self, path: &Path) -> Option<&'static str> {
+        match path.extension()?.to_str()? {
+            "pdf" => Some("application/pdf"),
+            "png" => Some("image/png"),
+            "jpg" => Some("image/jpeg"),
+            "zip" => Some("application/zip"),
+            _ => None,
+        }
+    }
+}
 
 /// Creates this structure:
 /// root
@@ -41,7 +61,7 @@ fn test_get_fts_from_paths_default_config() {
     let config = ScannerConfig::default();
 
     let paths = vec![root.path().join("document.pdf"), root.path().join("subdir")];
-    let result = get_fts_from_paths(paths, &config);
+    let result = get_fts_from_paths(paths, &config, &MockDetector);
 
     assert_eq!(result.len(), 4); // pdf, png, jpg, report.pdf
 }
@@ -55,7 +75,7 @@ fn test_get_fts_from_paths_include_hidden() {
     };
 
     let paths = vec![root.path().join("document.pdf"), root.path().join("subdir")];
-    let result = get_fts_from_paths(paths, &config);
+    let result = get_fts_from_paths(paths, &config, &MockDetector);
 
     dbg!(&result);
 
