@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
 
-use crate::filetype::FileType;
+use crate::supported_file::SupportedFile;
 
 pub struct ScannerConfig {
     pub follow_links: bool,
@@ -24,13 +24,13 @@ fn is_hidden(entry: &DirEntry) -> bool {
 }
 
 /// Walks a directory and collects FileTypes
-fn from_dir(path: &Path, config: &ScannerConfig) -> Vec<FileType> {
+fn from_dir(path: &Path, config: &ScannerConfig) -> Vec<SupportedFile> {
     WalkDir::new(path)
         .follow_links(config.follow_links)
         .into_iter()
         .filter_entry(|e| !is_hidden(e) || config.include_hidden)
         .filter_map(|entry| match entry {
-            Ok(e) => FileType::from_path(e.into_path()),
+            Ok(e) => SupportedFile::from_path(e.into_path()),
             Err(e) => {
                 eprintln!("Warning: skipping entry: {e}");
                 None
@@ -39,14 +39,14 @@ fn from_dir(path: &Path, config: &ScannerConfig) -> Vec<FileType> {
         .collect()
 }
 
-pub fn get_fts_from_paths(paths: Vec<PathBuf>, config: &ScannerConfig) -> Vec<FileType> {
+pub fn get_fts_from_paths(paths: Vec<PathBuf>, config: &ScannerConfig) -> Vec<SupportedFile> {
     paths
         .into_iter()
         .flat_map(|path| {
             if path.is_dir() {
                 from_dir(&path, config)
             } else {
-                FileType::from_path(path).into_iter().collect()
+                SupportedFile::from_path(path).into_iter().collect()
             }
         })
         .collect()
