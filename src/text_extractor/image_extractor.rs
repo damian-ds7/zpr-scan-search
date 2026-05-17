@@ -13,7 +13,7 @@ pub struct ImageTextExtractor<E: OcrEngine> {
     engine: Arc<E>,
 }
 
-impl<E: OcrEngine + Sync + Send> ImageTextExtractor<E> {
+impl<E: OcrEngine> ImageTextExtractor<E> {
     /// Creates a new ImageTextExtractor with the specified OCR engine.
     #[allow(dead_code)] // TODO: remove allow
     pub fn new(engine: Arc<E>) -> Self {
@@ -21,7 +21,7 @@ impl<E: OcrEngine + Sync + Send> ImageTextExtractor<E> {
     }
 }
 
-impl<E: OcrEngine + Sync + Send> TextExtractor for ImageTextExtractor<E> {
+impl<E: OcrEngine> TextExtractor for ImageTextExtractor<E> {
     fn extract_from(&self, file: &SupportedFile) -> Result<String> {
         let image =
             image::open(file.path.clone()).map_err(|e| ScanSearchError::Image(e.to_string()))?;

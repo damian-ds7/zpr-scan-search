@@ -12,18 +12,18 @@ impl From<pdf_oxide::Error> for ScanSearchError {
 }
 
 /// Extractor specifically designed for PDF documents.
-pub struct PdfExtractor<E: OcrEngine + Sync + Send> {
+pub struct PdfExtractor<E: OcrEngine> {
     ocr_engine: Arc<E>,
 }
 
-impl<E: OcrEngine + Sync + Send> PdfExtractor<E> {
+impl<E: OcrEngine> PdfExtractor<E> {
     /// Creates a new PdfExtractor using the provided OCR engine.
     pub fn new(ocr_engine: Arc<E>) -> Self {
         Self { ocr_engine }
     }
 }
 
-impl<E: OcrEngine + Sync + Send> TextExtractor for PdfExtractor<E> {
+impl<E: OcrEngine> TextExtractor for PdfExtractor<E> {
     fn extract_from(&self, file: &SupportedFile) -> Result<String> {
         let mut document = PdfDocument::open(file.path.to_str().ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid path")
