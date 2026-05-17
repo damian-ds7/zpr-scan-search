@@ -27,7 +27,12 @@ impl<E: OcrEngine + Sync + Send> TextExtractor for PdfExtractor<E> {
     fn extract_from(&self, file: &SupportedFile) -> Result<String> {
         let mut document = PdfDocument::open(file.path.to_str().ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid path")
-        })?)?;
+        })?)
+        .map_err(|e| match e {
+            pdf_oxide::Error::Io(io_err) => ScanSearchError::Io(io_err),
+            other => ScanSearchError::from(other),
+        })?;
+
         let mut full_text = String::new();
         let page_count = document.page_count()?;
 
