@@ -26,9 +26,6 @@ pub enum ScanSearchError {
     #[error("Serialization error: {0}")]
     Json(#[from] serde_json::Error),
 
-    #[error("Failed to persist temp file: {0}")]
-    PersistError(#[from] tempfile::PersistError),
-
     #[error("Failed to encode a sentence: {0}")]
     Embedding(String),
 }
