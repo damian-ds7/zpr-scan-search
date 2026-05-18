@@ -51,9 +51,12 @@ impl CacheBackend for LocalCache {
                 text,
                 map,
                 fingerprint,
+                embeddings,
             } => {
                 let mut data = Vec::new();
-                if let Err(e) = serialize_cache_write(&text, &map, &fingerprint, &mut data) {
+                if let Err(e) =
+                    serialize_cache_write(&text, &map, &fingerprint, &mut data, &embeddings)
+                {
                     eprintln!("Failed to serialize cache data for {:?}: {}", cache_path, e);
                     return;
                 }

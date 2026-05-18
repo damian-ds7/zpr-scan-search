@@ -39,13 +39,14 @@ impl<E: TextExtractor, B: CacheBackend> TextFileLoader<E, B> {
         let raw_text = self.extractor.extract_from(&file)?;
 
         let (text, map) = process_text(raw_text);
-
+        let embeddings = Arc::new(None);
         self.backend.submit_job(
             path.clone(),
             Job::CacheWrite {
                 text: Arc::clone(&text),
                 map: Arc::clone(&map),
                 fingerprint: fp,
+                embeddings,
             },
         );
 

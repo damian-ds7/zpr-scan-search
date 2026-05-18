@@ -23,10 +23,10 @@ fn test_local_cache_valid_cache() {
     let mut map = WordMap::new();
     map.insert("cached".to_string(), vec![0]);
     let map_arc = Arc::new(map);
-
     // Manually create a valid cache file
     let mut file = File::create(&cache_path).unwrap();
-    serialize_cache_write(&text, &map_arc, &fp, &mut file).unwrap();
+    let empty_embeddings = Arc::new(None);
+    serialize_cache_write(&text, &map_arc, &fp, &mut file, &empty_embeddings).unwrap();
 
     let backend = LocalCache;
     let result = backend.try_load(&file_path, &fp).unwrap();
@@ -74,10 +74,10 @@ fn test_local_cache_fingerprint_mismatch() {
 
     let text = Arc::new("old content".to_string());
     let map = Arc::new(WordMap::new());
-
+    let empty_embeddings = Arc::new(None);
     // Create cache with old fingerprint
     let mut file = File::create(&cache_path).unwrap();
-    serialize_cache_write(&text, &map, &fp_old, &mut file).unwrap();
+    serialize_cache_write(&text, &map, &fp_old, &mut file, &empty_embeddings).unwrap();
 
     let backend = LocalCache;
     // Try to load with new fingerprint
@@ -101,7 +101,7 @@ fn test_local_cache_round_trip() {
 
     let text = "round trip content".to_string();
     let (text_arc, map_arc) = process_text(text);
-
+    let empty_embeddings = Arc::new(None);
     let backend = LocalCache;
 
     backend.submit_job(
@@ -110,6 +110,7 @@ fn test_local_cache_round_trip() {
             text: text_arc.clone(),
             map: map_arc.clone(),
             fingerprint: fp.clone(),
+            embeddings: empty_embeddings.clone(),
         },
     );
 
