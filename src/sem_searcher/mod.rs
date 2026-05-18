@@ -1,14 +1,15 @@
 #[cfg(test)]
 pub mod tests;
-
+use crate::error::Result;
+use crate::error::ScanSearchError::Embedding;
 use crate::file::TextFile;
 use crate::searcher::{Search, SearchableIterator};
 use crate::text_encoder::TextEncoder;
 use ndarray::Array1;
+use ordered_float::OrderedFloat;
 use std::collections::BinaryHeap;
 use std::str::Lines;
-
-use ordered_float::OrderedFloat;
+use std::string::String;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct CosinedEmbedding {
@@ -64,9 +65,9 @@ impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
 
 /// Searcher which uses cosine similarity between sentence(line) embeddings
 impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
-    fn search(&self, query: &str) -> impl SearchableIterator<'_> {
+    fn search(&self, query: &str) -> Result<impl SearchableIterator<'_>> {
         if query.is_empty() || self.file.text().is_empty() {
-            return SemSearcherIterator::new(self.file, vec![]);
+            return Ok(SemSearcherIterator::new(self.file, vec![]));
         }
         let mut heap = BinaryHeap::new();
         let encoded = self.encoder.encode(&[query]);
@@ -75,22 +76,25 @@ impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
                 let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
                 query_vec
             }
-            Err(_) => return SemSearcherIterator::new(self.file, vec![]),
+            Err(_) => return Ok(SemSearcherIterator::new(self.file, vec![])),
         };
 
-        self.file
-            .embeddings
-            .as_deref()
-            .unwrap()
-            .iter()
-            .enumerate()
-            .for_each(|(i, line)| {
-                let line_vec: Array1<f32> = Array1::from_vec(line.clone());
-                heap.push(CosinedEmbedding {
-                    similarity: OrderedFloat::from(cosine_similarity(&query_vec, &line_vec)),
-                    location: i as i32,
-                })
-            });
+        match self.file.embeddings.as_deref() {
+            Some(embeddings) => {
+                embeddings.iter().enumerate().for_each(|(i, line)| {
+                    let line_vec: Array1<f32> = Array1::from_vec(line.clone());
+                    heap.push(CosinedEmbedding {
+                        similarity: OrderedFloat::from(cosine_similarity(&query_vec, &line_vec)),
+                        location: i as i32,
+                    })
+                });
+            }
+            None => {
+                return Err(Embedding(String::from(
+                    "Error encountered while reading embeddings",
+                )));
+            }
+        }
         let mut locations = Vec::new();
         for _ in 0..self.queue_size {
             if let Some(embedding) = heap.pop() {
@@ -99,6 +103,6 @@ impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
                 break;
             }
         }
-        SemSearcherIterator::new(self.file, locations)
+        Ok(SemSearcherIterator::new(self.file, locations))
     }
 }

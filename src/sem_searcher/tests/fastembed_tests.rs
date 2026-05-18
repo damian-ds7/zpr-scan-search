@@ -1,9 +1,7 @@
 use super::super::SemSearcher;
-use crate::error::Result;
 use crate::file::TextFile;
 use crate::searcher::{Search, SearchableIterator};
 use crate::text_cacher::WordMap;
-use crate::text_encoder::TextEncoder;
 use crate::text_encoder::fastembed::FastEmbed;
 use std::path::PathBuf;
 
@@ -45,12 +43,12 @@ fn searcher_ranks_lines_by_cosine_similarity() {
     let doc = MAIN_DOC.lines().collect::<Vec<_>>();
 
     let query = QUERY_QUICK_BROWN_FOX.to_string();
-    let mut results = searcher.search(&query);
+    let mut results = searcher.search(&query).unwrap();
     assert_eq!(results.get_at(0), Some(doc[LINE_FOX_AND_DOG]));
     assert_eq!(results.get_at(1), Some(doc[LINE_FOREST]));
 
     let query = QUERY_JUMPS_OVER_LAZY_DOG.to_string();
-    let mut results = searcher.search(&query);
+    let mut results = searcher.search(&query).unwrap();
     assert_eq!(results.get_at(0), Some(doc[LINE_JUMPS]));
     assert_eq!(results.get_at(1), Some(doc[LINE_FOX_AND_DOG]));
 }
