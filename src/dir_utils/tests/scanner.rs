@@ -6,7 +6,7 @@ use std::{
 use tempfile::TempDir;
 
 use crate::{
-    cli::scanner::{ScannerConfig, get_fts_from_paths},
+    dir_utils::scanner::{ScannerConfig, get_fts_from_paths},
     supported_file::MimeDetector,
 };
 
