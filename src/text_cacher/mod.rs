@@ -37,6 +37,7 @@ pub enum Job {
         text: Arc<String>,
         map: Arc<WordMap>,
         fingerprint: FileFingerprint,
+        embeddings: Arc<Option<Embeddings>>
     },
 }
 
@@ -45,4 +46,5 @@ pub struct CachedDocument {
     pub text: String,
     pub map: WordMap,
     pub fingerprint: FileFingerprint,
+    pub embeddings: Option<Embeddings>
 }
