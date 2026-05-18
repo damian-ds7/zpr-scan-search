@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 use pyo3::prelude::*;
 
-mod cli;
 mod constants;
+mod dir_utils;
 mod error;
 mod file;
 mod ocr;
@@ -22,7 +22,7 @@ mod scan_search {
     use rayon::prelude::*;
 
     use crate::{
-        cli::{ScannerConfig, get_fts_from_paths},
+        dir_utils::{ScannerConfig, get_fts_from_paths},
         error::{Result, ScanSearchError},
         file::TextFileLoader,
         ocr::TesseractEngine,
