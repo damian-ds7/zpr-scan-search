@@ -1,5 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::ops::Deref;
-
+#[derive(Serialize, Deserialize)]
 pub struct Embeddings(Vec<Vec<f32>>);
 
 impl Embeddings {

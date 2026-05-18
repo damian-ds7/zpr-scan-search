@@ -1,6 +1,6 @@
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::text_cacher::{read_embeddings, CachedDocument, FileFingerprint, WordMap};
+use crate::text_cacher::{CachedDocument, Embeddings, FileFingerprint, WordMap, read_embeddings};
 use std::io::{self, BufRead, Write};
 use std::sync::Arc;
 
@@ -10,10 +10,18 @@ pub(crate) fn serialize_cache_write<W: Write>(
     map: &Arc<WordMap>,
     fingerprint: &FileFingerprint,
     writer: &mut W,
+    embeddings: &Arc<Option<Embeddings>>,
 ) -> Result<()> {
     serde_json::to_writer(&mut *writer, map.as_ref())?;
     writer.write_all(&[DELIMITER])?;
     writer.write_all(text.as_bytes())?;
+    writer.write_all(&[DELIMITER])?;
+    match embeddings.as_ref() {
+        Some(emb) => {
+            serde_json::to_writer(&mut *writer, emb)?;
+        }
+        None => {}
+    }
     writer.write_all(&[DELIMITER])?;
     write_fingerprint(fingerprint, writer)?;
     Ok(())
@@ -49,8 +57,9 @@ pub fn load_parts<R: BufRead>(reader: &mut R) -> Result<CachedDocument> {
     let map = serde_json::from_slice(&read_delimited(reader)?)?;
     let text = String::from_utf8(read_delimited(reader)?)
         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-    let fingerprint = read_fingerprint(reader)?;
     let embeddings = read_embeddings(crate::text_cacher::read_delimited(reader)?)?;
+    let fingerprint = read_fingerprint(reader)?;
+
     Ok(CachedDocument {
         text,
         map,
