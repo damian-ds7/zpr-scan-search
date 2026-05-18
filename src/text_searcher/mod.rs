@@ -1,3 +1,4 @@
+use crate::error::Result;
 use crate::file::TextFile;
 use crate::searcher::{Search, SearchableIterator};
 use std::str::SplitWhitespace;
@@ -41,7 +42,7 @@ impl<'a> TextSearcher<'a> {
     }
 }
 impl<'a> Search for TextSearcher<'a> {
-    fn search(&self, query: &str) -> impl SearchableIterator<'_> {
+    fn search(&self, query: &str) -> Result<impl SearchableIterator<'_>> {
         let words: Vec<&str> = query.split_whitespace().collect();
         let mut locations: Vec<i32> = vec![];
 
@@ -61,7 +62,7 @@ impl<'a> Search for TextSearcher<'a> {
             }
             None => {
                 let iterator = TextSearcherIterator::new(self.file, locations);
-                return iterator;
+                return Ok(iterator);
             }
         };
         let rarest = word_occur[0];
@@ -77,6 +78,6 @@ impl<'a> Search for TextSearcher<'a> {
                 }
             }
         }
-        TextSearcherIterator::new(self.file, locations)
+        Ok(TextSearcherIterator::new(self.file, locations))
     }
 }

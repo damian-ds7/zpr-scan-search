@@ -26,7 +26,7 @@ fn test_search_existing_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "quick brown fox".to_string();
     let searcher = TextSearcher::new(&file);
-    let mut iter = searcher.search(&query);
+    let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.get_at(0), Some("quick"));
     let a = iter.get_at(0);
     assert_eq!(a, Some("quick"));
@@ -37,7 +37,7 @@ fn test_search_non_existent_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "quick red fox".to_string();
     let searcher = TextSearcher::new(&file);
-    let mut iter = searcher.search(&query);
+    let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.get_at(0), None);
 }
 
@@ -46,7 +46,7 @@ fn test_search_non_existent_phrase_with_existing_words() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "filler filler forest".to_string();
     let searcher = TextSearcher::new(&file);
-    let mut iter = searcher.search(&query);
+    let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.get_at(0), None);
 }
 
@@ -55,7 +55,7 @@ fn test_search_rare_word_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "deep dark forest".to_string();
     let searcher = TextSearcher::new(&file);
-    let mut iter = searcher.search(&query);
+    let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.get_at(0), Some("deep"));
 }
 
@@ -64,7 +64,7 @@ fn test_search_repeated_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
     let query = "jumps over the lazy dog".to_string();
     let searcher = TextSearcher::new(&file);
-    let mut iter = searcher.search(&query);
+    let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.get_at(0), Some("jumps"));
     assert_eq!(iter.get_at(1), Some("jumps"));
 }
@@ -75,6 +75,6 @@ fn test_edge_case_rarest_at_beginning() {
     let file = create_test_file(text);
     let query = "some rarestword".to_string();
     let searcher = TextSearcher::new(&file);
-    let mut iter = searcher.search(&query);
+    let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.get_at(0), None);
 }

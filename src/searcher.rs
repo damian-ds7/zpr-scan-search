@@ -1,3 +1,4 @@
+use crate::error::Result;
 /// Allows access to elements found by Search
 pub trait SearchableIterator<'a> {
     fn get_at(&mut self, index: usize) -> Option<&'a str>;
@@ -5,5 +6,5 @@ pub trait SearchableIterator<'a> {
 
 /// Interface for structs implementing searching of some kind in the document
 pub trait Search {
-    fn search(&self, query: &str) -> impl SearchableIterator<'_>;
+    fn search(&self, query: &str) -> Result<impl SearchableIterator<'_>>;
 }
