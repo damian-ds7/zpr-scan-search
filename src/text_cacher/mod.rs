@@ -9,7 +9,6 @@ mod word_map;
 mod embeddings;
 
 use crate::error::Result;
-use std::io::{BufRead};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
