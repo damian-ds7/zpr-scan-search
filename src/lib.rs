@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use pyo3::prelude::*;
 
+mod config;
 mod constants;
 mod dir_utils;
 mod error;
@@ -22,7 +23,8 @@ mod scan_search {
     use rayon::prelude::*;
 
     use crate::{
-        dir_utils::{ScannerConfig, get_fts_from_paths},
+        config::FsScanConfig,
+        dir_utils::get_fts_from_paths,
         error::{Result, ScanSearchError},
         file::TextFileLoader,
         ocr::TesseractEngine,
@@ -54,7 +56,7 @@ mod scan_search {
     #[pyo3(signature = (*paths))]
     fn process_files(paths: Vec<String>) -> PyResult<Vec<String>> {
         let path_bufs: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
-        let config = ScannerConfig::default();
+        let config = FsScanConfig::default();
         let detector = InferDetector;
 
         let supported_files = get_fts_from_paths(path_bufs, &config, &detector);

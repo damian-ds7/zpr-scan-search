@@ -2,24 +2,10 @@ use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
 
-use crate::supported_file::{MimeDetector, SupportedFile};
-
-/// Configuration for the directory scanner.
-pub struct ScannerConfig {
-    /// Whether to follow symbolic links during scanning.
-    pub follow_links: bool,
-    /// Whether to include hidden files and directories in the scan.
-    pub include_hidden: bool,
-}
-
-impl Default for ScannerConfig {
-    fn default() -> Self {
-        Self {
-            follow_links: true,
-            include_hidden: false,
-        }
-    }
-}
+use crate::{
+    config::FsScanConfig,
+    supported_file::{MimeDetector, SupportedFile},
+};
 
 /// Checks if a directory entry is hidden.
 fn is_hidden(entry: &DirEntry) -> bool {
@@ -33,7 +19,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
 /// to identify supported files.
 fn from_dir<D: MimeDetector>(
     path: &Path,
-    config: &ScannerConfig,
+    config: &FsScanConfig,
     detector: &D,
 ) -> Vec<SupportedFile> {
     WalkDir::new(path)
@@ -56,7 +42,7 @@ fn from_dir<D: MimeDetector>(
 /// If it's a file, it checks if it's a supported type using the `detector`.
 pub fn get_fts_from_paths<D: MimeDetector>(
     paths: Vec<PathBuf>,
-    config: &ScannerConfig,
+    config: &FsScanConfig,
     detector: &D,
 ) -> Vec<SupportedFile> {
     paths
