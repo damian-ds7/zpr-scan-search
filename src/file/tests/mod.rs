@@ -1,5 +1,5 @@
 use crate::error::Result;
-use crate::file::TextFileLoader;
+use crate::file::{FileLoader, TextFileLoader};
 use crate::supported_file::{FileKind, SupportedFile};
 use crate::text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, WordMap};
 use crate::text_encoder::fastembed::FastEmbed;
