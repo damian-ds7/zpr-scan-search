@@ -26,7 +26,7 @@ mod scan_search {
         config::FsScanConfig,
         dir_utils::get_fts_from_paths,
         error::{Result, ScanSearchError},
-        file::TextFileLoader,
+        file::{FileLoader, TextFileLoader},
         ocr::TesseractEngine,
         supported_file::{FileKind, InferDetector, SupportedFile},
         text_cacher::{CacheWriter, LocalCache},

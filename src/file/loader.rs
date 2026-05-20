@@ -9,6 +9,10 @@ use crate::{
     text_extractor::TextExtractor,
 };
 
+pub trait FileLoader: Sync + Send {
+    fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile>;
+}
+
 /// A loader that handles the process of loading a TextFile, either from cache or by extracting text.
 pub struct TextFileLoader<E: TextExtractor, B: CacheBackend, C: TextEncoder> {
     extractor: E,
@@ -25,12 +29,14 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> TextFileLoader<E, B, C> 
             encoder,
         }
     }
+}
 
+impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileLoader<E, B, C> {
     /// Loads a TextFile from the given `SupportedFile`.
     ///
     /// It first tries to load from the cache backend. If not found or stale, it uses the extractor
     /// and then saves the result to the cache.
-    pub fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile> {
+    fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile> {
         let path = &file.path;
         let fp = FileFingerprint::from_path(path)?;
 

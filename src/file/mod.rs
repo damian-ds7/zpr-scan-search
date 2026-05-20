@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use crate::text_encoder::TextEncoder;
-pub use loader::TextFileLoader;
+pub use loader::{FileLoader, TextFileLoader};
 
 /// Represents a processed document containing its text content and a word occurrence map.
 #[allow(dead_code)] // TODO: check if path can be removed later
