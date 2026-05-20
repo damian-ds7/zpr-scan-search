@@ -19,7 +19,7 @@ pub use local_cache::LocalCache;
 pub use word_map::WordMap;
 
 /// Interface for cache backends that store and retrieve processed document data.
-pub trait CacheBackend {
+pub trait CacheBackend: Sync + Send {
     /// Attempts to load a cached document for the given path and fingerprint.
     fn try_load(
         &self,
