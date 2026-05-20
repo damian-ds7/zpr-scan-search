@@ -1,3 +1,7 @@
+#[derive(Default, Debug)]
+pub struct ScanSearchConfig {
+    pub fs_scan: FsScanConfig,
+}
 /// Configuration for scanning the filesystem and collecting supported files.
 #[derive(Debug)]
 pub struct FsScanConfig {
