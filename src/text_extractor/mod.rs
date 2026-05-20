@@ -10,7 +10,7 @@ pub use universal_extractor::UniversalExtractor;
 use crate::{error::Result, supported_file::SupportedFile};
 
 /// Interface for extracting text from document files.
-pub trait TextExtractor {
+pub trait TextExtractor: Sync + Send {
     /// Extracts text from the given `SupportedFile`.
     fn extract_from(&self, file: &SupportedFile) -> Result<String>;
 }
