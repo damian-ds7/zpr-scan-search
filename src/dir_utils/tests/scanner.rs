@@ -6,8 +6,7 @@ use std::{
 use tempfile::TempDir;
 
 use crate::{
-    dir_utils::scanner::{ScannerConfig, get_fts_from_paths},
-    supported_file::MimeDetector,
+    config::FsScanConfig, dir_utils::fs_scan::get_fts_from_paths, supported_file::MimeDetector,
 };
 
 pub struct MockDetector;
@@ -58,7 +57,7 @@ fn create_mock_dir() -> TempDir {
 #[test]
 fn test_get_fts_from_paths_default_config() {
     let root = create_mock_dir();
-    let config = ScannerConfig::default();
+    let config = FsScanConfig::default();
 
     let paths = vec![root.path().join("document.pdf"), root.path().join("subdir")];
     let result = get_fts_from_paths(paths, &config, &MockDetector);
@@ -69,7 +68,7 @@ fn test_get_fts_from_paths_default_config() {
 #[test]
 fn test_get_fts_from_paths_include_hidden() {
     let root = create_mock_dir();
-    let config = ScannerConfig {
+    let config = FsScanConfig {
         include_hidden: true,
         ..Default::default()
     };
