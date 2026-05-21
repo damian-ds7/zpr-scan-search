@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
@@ -29,7 +29,7 @@ pub fn process_files<D, L>(
     config: FsScanConfig,
     detector: D,
     loader: L,
-) -> Result<Vec<TextFile>>
+) -> Result<Vec<Arc<TextFile>>>
 where
     D: MimeDetector,
     L: FileLoader,
