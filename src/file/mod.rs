@@ -14,16 +14,16 @@ pub struct TextFile {
     path: PathBuf,
     text: Arc<String>,
     map: Arc<WordMap>,
-    pub(crate) embeddings: Option<Arc<Embeddings>>,
+    pub(crate) embeddings: Arc<Option<Embeddings>>,
 }
 
 impl TextFile {
-    pub fn new(path: PathBuf, text: String, map: WordMap) -> Self {
+    pub fn new(path: PathBuf, text: String, map: WordMap, embeddings: Option<Embeddings>) -> Self {
         Self {
             path,
             text: Arc::new(text),
             map: Arc::new(map),
-            embeddings: None,
+            embeddings: Arc::new(embeddings),
         }
     }
 
@@ -45,14 +45,16 @@ impl TextFile {
         &self.text
     }
 
-    pub fn embeddings(&self) -> &Option<Arc<Embeddings>> {
+    pub fn embeddings(&self) -> &Arc<Option<Embeddings>> {
         &self.embeddings
     }
 
     pub fn set_embeddings<E: TextEncoder>(&mut self, encoder: &E) {
-        self.embeddings = encoder
-            .encode(&self.text.lines().collect::<Vec<_>>())
-            .ok()
-            .map(|e| Arc::new(Embeddings::from(e)));
+        self.embeddings = Arc::new(
+            encoder
+                .encode(&self.text.lines().collect::<Vec<_>>())
+                .ok()
+                .map(|e| Embeddings::from(e)),
+        );
     }
 }

@@ -37,7 +37,7 @@ fn create_test_file(content: &str) -> TextFile {
     for (i, word) in content.split_whitespace().enumerate() {
         map.entry(word.to_string()).or_default().push(i as i32);
     }
-    TextFile::new(PathBuf::from("test.txt"), content.to_string(), map)
+    TextFile::new(PathBuf::from("test.txt"), content.to_string(), map, None)
 }
 
 struct MockEncoder;

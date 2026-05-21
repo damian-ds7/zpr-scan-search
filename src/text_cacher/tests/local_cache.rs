@@ -81,9 +81,7 @@ fn test_local_cache_fingerprint_mismatch() {
 
     let text = Arc::new("old content".to_string());
     let map = Arc::new(WordMap::new());
-    let embeddings = Arc::new(Some(Embeddings::from(vec![
-        vec![1.0, 2.0],
-    ])));
+    let embeddings = Arc::new(Some(Embeddings::from(vec![vec![1.0, 2.0]])));
     // Create cache with old fingerprint
     let mut file = File::create(&cache_path).unwrap();
     serialize_cache_write(&text, &map, &fp_old, &mut file, &embeddings).unwrap();
