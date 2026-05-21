@@ -30,7 +30,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> TextFileLoader<E, B, C> 
     ///
     /// It first tries to load from the cache backend. If not found or stale, it uses the extractor
     /// and then saves the result to the cache.
-    pub fn load(&self, file: SupportedFile, _embed: bool) -> Result<TextFile> {
+    pub fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile> {
         let path = &file.path;
         let fp = FileFingerprint::from_path(path)?;
 
@@ -49,11 +49,14 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> TextFileLoader<E, B, C> 
             });
         }
         let raw_text = self.extractor.extract_from(&file)?;
-
         let (text, map) = process_text(raw_text);
-        let lines: Vec<&str> = text.lines().collect();
-        let embeddings_raw = self.encoder.encode(&lines)?;
-        let embeddings = Arc::new(Some(embeddings_raw.into()));
+        let embeddings = if embed {
+            let lines: Vec<&str> = text.lines().collect();
+            let embeddings_raw = self.encoder.encode(&lines)?;
+            Arc::new(Some(embeddings_raw.into()))
+        } else {
+            Arc::new(None)
+        };
         self.backend.submit_job(
             path.clone(),
             Job::CacheWrite {
