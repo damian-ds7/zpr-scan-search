@@ -18,11 +18,8 @@ pub(crate) fn serialize_cache_write<W: Write>(
     writer.write_all(&[DELIMITER])?;
     serde_json::to_writer(&mut *writer, embeddings.as_ref())?;
     writer.write_all(&[DELIMITER])?;
-    match embeddings.as_ref() {
-        Some(emb) => {
-            serde_json::to_writer(&mut *writer, emb)?;
-        }
-        None => {}
+    if let Some(emb) = embeddings.as_ref() {
+        serde_json::to_writer(&mut *writer, emb)?;
     }
     writer.write_all(&[DELIMITER])?;
     write_fingerprint(fingerprint, writer)?;

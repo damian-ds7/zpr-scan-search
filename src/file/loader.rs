@@ -30,7 +30,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> TextFileLoader<E, B, C> 
     ///
     /// It first tries to load from the cache backend. If not found or stale, it uses the extractor
     /// and then saves the result to the cache.
-    pub fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile> {
+    pub fn load(&self, file: SupportedFile, _embed: bool) -> Result<TextFile> {
         let path = &file.path;
         let fp = FileFingerprint::from_path(path)?;
 
