@@ -54,7 +54,7 @@ impl TextFile {
             encoder
                 .encode(&self.text.lines().collect::<Vec<_>>())
                 .ok()
-                .map(|e| Embeddings::from(e)),
+                .map(Embeddings::from),
         );
     }
 }

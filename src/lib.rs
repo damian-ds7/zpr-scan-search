@@ -18,7 +18,7 @@ pub mod text_searcher;
 mod scan_search {
     use std::{path::PathBuf, sync::Arc};
 
-    use pyo3::{ffi::Py_False, prelude::*};
+    use pyo3::prelude::*;
     use rayon::prelude::*;
 
     use crate::{
