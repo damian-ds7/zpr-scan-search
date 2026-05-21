@@ -18,10 +18,6 @@ pub(crate) fn serialize_cache_write<W: Write>(
     writer.write_all(&[DELIMITER])?;
     serde_json::to_writer(&mut *writer, embeddings.as_ref())?;
     writer.write_all(&[DELIMITER])?;
-    if let Some(emb) = embeddings.as_ref() {
-        serde_json::to_writer(&mut *writer, emb)?;
-    }
-    writer.write_all(&[DELIMITER])?;
     write_fingerprint(fingerprint, writer)?;
     Ok(())
 }
@@ -57,7 +53,6 @@ pub fn load_parts<R: BufRead>(reader: &mut R) -> Result<CachedDocument> {
     let text = String::from_utf8(read_delimited(reader)?)
         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
     let embeddings = serde_json::from_slice(&read_delimited(reader)?)?;
-    read_delimited(reader)?;
     let fingerprint = read_fingerprint(reader)?;
 
     Ok(CachedDocument {
