@@ -18,7 +18,7 @@ pub mod text_searcher;
 mod scan_search {
     use std::{path::PathBuf, sync::Arc};
 
-    use pyo3::prelude::*;
+    use pyo3::{ffi::Py_False, prelude::*};
     use rayon::prelude::*;
 
     use crate::{
@@ -28,6 +28,7 @@ mod scan_search {
         ocr::TesseractEngine,
         supported_file::{FileKind, InferDetector, SupportedFile},
         text_cacher::{CacheWriter, LocalCache},
+        text_encoder::fastembed::FastEmbed,
         text_extractor::{PdfExtractor, UniversalExtractor},
     };
 
@@ -37,12 +38,13 @@ mod scan_search {
         let ocr_engine = Arc::new(TesseractEngine::new("eng")?);
         let text_extractor = PdfExtractor::new(ocr_engine);
         let backend = LocalCache;
-        let loader = TextFileLoader::new(text_extractor, backend);
+        let encoder = FastEmbed {};
+        let loader = TextFileLoader::new(text_extractor, backend, encoder);
         let file = SupportedFile {
             path: PathBuf::from(path),
             kind: FileKind::Pdf,
         };
-        let file = loader.load(file)?;
+        let file = loader.load(file, false)?;
         let word_map = serde_json::to_string(file.map()).map_err(ScanSearchError::from)?;
         Ok(word_map)
     }
@@ -59,12 +61,13 @@ mod scan_search {
 
         let engine = Arc::new(TesseractEngine::new("eng")?);
         let extractor = UniversalExtractor::new(engine);
-        let loader = TextFileLoader::new(extractor, LocalCache);
+        let encoder = FastEmbed {};
+        let loader = TextFileLoader::new(extractor, LocalCache, encoder);
 
         let results = supported_files
             .into_par_iter()
             .map(|file| {
-                let text_file = loader.load(file)?;
+                let text_file = loader.load(file, false)?;
                 Ok(text_file.text().to_string())
             })
             .collect::<Result<Vec<String>>>();

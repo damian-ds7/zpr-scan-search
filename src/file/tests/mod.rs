@@ -2,6 +2,7 @@ use crate::error::Result;
 use crate::file::TextFileLoader;
 use crate::supported_file::{FileKind, SupportedFile};
 use crate::text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, WordMap};
+use crate::text_encoder::fastembed::FastEmbed;
 use crate::text_extractor::TextExtractor;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -64,14 +65,15 @@ fn test_loader_cache_hit() {
     let extractor = MockExtractor;
     let backend = SpyCache::new(true);
     let submit_called = backend.submit_called.clone();
-    let loader = TextFileLoader::new(extractor, backend);
+    let encoder = FastEmbed {};
+    let loader = TextFileLoader::new(extractor, backend, encoder);
 
     let file = SupportedFile {
         path: file_path,
         kind: FileKind::Pdf,
     };
 
-    let text_file = loader.load(file).unwrap();
+    let text_file = loader.load(file, false).unwrap();
 
     assert_eq!(text_file.text(), "cached text");
     assert!(!*submit_called.lock().unwrap());
@@ -86,14 +88,15 @@ fn test_loader_cache_miss_triggers_extraction_and_cache() {
     let extractor = MockExtractor;
     let backend = SpyCache::new(false);
     let submit_called = backend.submit_called.clone();
-    let loader = TextFileLoader::new(extractor, backend);
+    let encoder = FastEmbed {};
+    let loader = TextFileLoader::new(extractor, backend, encoder);
 
     let file = SupportedFile {
         path: file_path,
         kind: FileKind::Pdf,
     };
 
-    let text_file = loader.load(file).unwrap();
+    let text_file = loader.load(file, false).unwrap();
 
     assert_eq!(text_file.text(), "extracted text");
     assert!(*submit_called.lock().unwrap());
