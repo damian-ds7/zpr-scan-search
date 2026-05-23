@@ -21,3 +21,9 @@ impl From<Vec<Vec<f32>>> for Embeddings {
         Embeddings(vec)
     }
 }
+
+impl FromIterator<Vec<f32>> for Embeddings {
+    fn from_iter<I: IntoIterator<Item = Vec<f32>>>(iter: I) -> Self {
+        Embeddings(iter.into_iter().collect())
+    }
+}
