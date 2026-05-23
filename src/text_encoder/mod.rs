@@ -2,9 +2,9 @@ pub mod fastembed;
 #[cfg(test)]
 pub mod tests;
 
-use crate::error::Result;
+use crate::{error::Result, text_cacher::Embeddings};
 
 /// Interface for text encoders
 pub trait TextEncoder: Sync + Send {
-    fn encode(&self, text: &[&str]) -> Result<Vec<Vec<f32>>>;
+    fn encode(&self, text: &[&str]) -> Result<Embeddings>;
 }

@@ -58,8 +58,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
         let (text, map) = process_text(raw_text);
         let embeddings = if embed {
             let lines: Vec<&str> = text.lines().collect();
-            let embeddings_raw = self.encoder.encode(&lines)?;
-            Arc::new(Some(embeddings_raw.into()))
+            Arc::new(Some(self.encoder.encode(&lines)?))
         } else {
             Arc::new(None)
         };

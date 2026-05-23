@@ -1,16 +1,16 @@
 use super::TextEncoder;
-use crate::error::Result;
+use crate::{error::Result, text_cacher::Embeddings};
 
 struct MockEncoder {}
 
 impl TextEncoder for MockEncoder {
-    fn encode(&self, text: &[&str]) -> Result<Vec<Vec<f32>>> {
+    fn encode(&self, text: &[&str]) -> Result<Embeddings> {
         let mut embeddings = Vec::new();
         for (i, _) in text.iter().enumerate() {
             let val = i as f32;
             embeddings.push(vec![val + 0.1, val + 0.2, val + 0.3]);
         }
-        Ok(embeddings)
+        Ok(Embeddings::from(embeddings))
     }
 }
 
