@@ -26,7 +26,7 @@ use crate::{
 /// Returns the first extraction error encountered, or an I/O error from traversal.
 pub fn process_files<D, L>(
     paths: Vec<String>,
-    config: FsScanConfig,
+    config: &FsScanConfig,
     detector: D,
     loader: L,
 ) -> Result<Vec<Arc<TextFile>>>
@@ -36,7 +36,7 @@ where
 {
     let path_bufs: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
 
-    let supported_files = get_fts_from_paths(path_bufs, &config, &detector);
+    let supported_files = get_fts_from_paths(path_bufs, config, &detector);
 
     supported_files
         .into_par_iter()
