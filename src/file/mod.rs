@@ -5,7 +5,6 @@ use crate::text_cacher::{Embeddings, WordMap};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use crate::text_encoder::TextEncoder;
 pub use loader::{FileLoader, TextFileLoader};
 
 /// Represents a processed document containing its text content and a word occurrence map.
@@ -47,14 +46,5 @@ impl TextFile {
 
     pub fn embeddings(&self) -> &Arc<Option<Embeddings>> {
         &self.embeddings
-    }
-
-    pub fn set_embeddings<E: TextEncoder>(&mut self, encoder: &E) {
-        self.embeddings = Arc::new(
-            encoder
-                .encode(&self.text.lines().collect::<Vec<_>>())
-                .ok()
-                .map(Embeddings::from),
-        );
     }
 }
