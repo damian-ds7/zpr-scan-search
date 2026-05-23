@@ -1,48 +1,48 @@
 use crate::error::Result;
 use crate::file::TextFile;
-use crate::searcher::{Search, SearchableIterator};
-use std::str::SplitWhitespace;
+use crate::searcher::Search;
+use std::rc::Rc;
+use std::sync::Arc;
 #[cfg(test)]
 pub mod tests;
 
 /// SearchableIterator with search results being words in the file
-struct TextSearcherIterator<'a> {
-    iterator: SplitWhitespace<'a>,
+struct TextSearcherIterator {
+    file: Arc<TextFile>,
     locations: Vec<i32>,
+    pos: usize,
 }
-impl<'a> TextSearcherIterator<'a> {
-    fn new(file: &'a TextFile, locations: Vec<i32>) -> Self {
-        let iterator = file.text().split_whitespace();
-
+impl TextSearcherIterator {
+    fn new(file: Arc<TextFile>, locations: Vec<i32>) -> Self {
         TextSearcherIterator {
-            iterator,
+            file,
             locations,
+            pos: 0,
         }
     }
 }
 
-impl<'a> SearchableIterator<'a> for TextSearcherIterator<'a> {
-    fn get_at(&mut self, index: usize) -> Option<&'a str> {
-        if index < self.locations.len() {
-            let val = self.locations.get(index)?;
-            Some(self.iterator.clone().nth(*val as usize)?)
-        } else {
-            None
-        }
+impl Iterator for TextSearcherIterator {
+    type Item = Rc<str>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let val = *self.locations.get(self.pos)? as usize;
+        self.pos += 1;
+        self.file.text().split_whitespace().nth(val).map(Rc::from)
     }
 }
 
-pub(crate) struct TextSearcher<'a> {
-    file: &'a TextFile,
+pub(crate) struct TextSearcher {
+    file: Arc<TextFile>,
 }
 /// A simple searcher looking for exact matches
-impl<'a> TextSearcher<'a> {
-    fn new(file: &'a TextFile) -> Self {
+impl TextSearcher {
+    pub fn new(file: Arc<TextFile>) -> Self {
         TextSearcher { file }
     }
 }
-impl<'a> Search for TextSearcher<'a> {
-    fn search(&self, query: &str) -> Result<impl SearchableIterator<'_>> {
+impl Search for TextSearcher {
+    fn search(&self, query: &str) -> Result<impl Iterator<Item = Rc<str>>> {
         let words: Vec<&str> = query.split_whitespace().collect();
         let mut locations: Vec<i32> = vec![];
 
@@ -61,7 +61,7 @@ impl<'a> Search for TextSearcher<'a> {
                 valid_words
             }
             None => {
-                let iterator = TextSearcherIterator::new(self.file, locations);
+                let iterator = TextSearcherIterator::new(self.file.clone(), locations);
                 return Ok(iterator);
             }
         };
@@ -78,6 +78,6 @@ impl<'a> Search for TextSearcher<'a> {
                 }
             }
         }
-        Ok(TextSearcherIterator::new(self.file, locations))
+        Ok(TextSearcherIterator::new(self.file.clone(), locations))
     }
 }

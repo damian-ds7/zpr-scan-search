@@ -3,13 +3,14 @@ pub mod tests;
 use crate::error::Result;
 use crate::error::ScanSearchError::Embedding;
 use crate::file::TextFile;
-use crate::searcher::{Search, SearchableIterator};
+use crate::searcher::Search;
 use crate::text_encoder::TextEncoder;
 use ndarray::Array1;
 use ordered_float::OrderedFloat;
 use std::collections::BinaryHeap;
-use std::str::Lines;
+use std::rc::Rc;
 use std::string::String;
+use std::sync::Arc;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct CosinedEmbedding {
@@ -21,14 +22,13 @@ fn cosine_similarity(a: &Array1<f32>, b: &Array1<f32>) -> f32 {
     let norm = (a.dot(a) * b.dot(b)).sqrt();
     dot / norm
 }
-struct SemSearcher<'a, E: TextEncoder> {
-    file: &'a TextFile,
+struct SemSearcher<E: TextEncoder> {
+    file: Arc<TextFile>,
     encoder: E,
     queue_size: usize,
 }
-impl<'a, E: TextEncoder> SemSearcher<'a, E> {
-    fn new(file: &'a mut TextFile, encoder: E, queue_size: usize) -> Self {
-        file.set_embeddings(&encoder);
+impl<E: TextEncoder> SemSearcher<E> {
+    fn new(file: Arc<TextFile>, encoder: E, queue_size: usize) -> Self {
         SemSearcher {
             file,
             encoder,
@@ -37,37 +37,37 @@ impl<'a, E: TextEncoder> SemSearcher<'a, E> {
     }
 }
 /// SearchableIterator allowing access to most similar lines in the file
-struct SemSearcherIterator<'a> {
-    iterator: Lines<'a>,
+struct SemSearcherIterator {
+    file: Arc<TextFile>,
     locations: Vec<i32>,
+    pos: usize,
 }
 
-impl<'a> SemSearcherIterator<'a> {
-    fn new(file: &'a TextFile, locations: Vec<i32>) -> Self {
-        let iterator = file.text().lines();
+impl SemSearcherIterator {
+    fn new(file: Arc<TextFile>, locations: Vec<i32>) -> Self {
         SemSearcherIterator {
-            iterator,
+            file,
             locations,
+            pos: 0,
         }
     }
 }
 
-impl<'a> SearchableIterator<'a> for SemSearcherIterator<'a> {
-    fn get_at(&mut self, index: usize) -> Option<&'a str> {
-        if index < self.locations.len() {
-            let val = self.locations.get(index)?;
-            Some(self.iterator.clone().nth(*val as usize)?)
-        } else {
-            None
-        }
+impl Iterator for SemSearcherIterator {
+    type Item = Rc<str>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let line_index = *self.locations.get(self.pos)? as usize;
+        self.pos += 1;
+        self.file.text().lines().nth(line_index).map(Rc::from)
     }
 }
 
 /// Searcher which uses cosine similarity between sentence(line) embeddings
-impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
-    fn search(&self, query: &str) -> Result<impl SearchableIterator<'_>> {
+impl<E: TextEncoder> Search for SemSearcher<E> {
+    fn search(&self, query: &str) -> Result<impl Iterator<Item = Rc<str>>> {
         if query.is_empty() || self.file.text().is_empty() {
-            return Ok(SemSearcherIterator::new(self.file, vec![]));
+            return Ok(SemSearcherIterator::new(self.file.clone(), vec![]));
         }
         let mut heap = BinaryHeap::new();
         let encoded = self.encoder.encode(&[query]);
@@ -76,7 +76,7 @@ impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
                 let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
                 query_vec
             }
-            Err(_) => return Ok(SemSearcherIterator::new(self.file, vec![])),
+            Err(_) => return Ok(SemSearcherIterator::new(self.file.clone(), vec![])),
         };
 
         match self.file.embeddings.as_deref() {
@@ -103,6 +103,6 @@ impl<'a, E: TextEncoder> Search for SemSearcher<'a, E> {
                 break;
             }
         }
-        Ok(SemSearcherIterator::new(self.file, locations))
+        Ok(SemSearcherIterator::new(self.file.clone(), locations))
     }
 }

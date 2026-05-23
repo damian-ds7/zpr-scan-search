@@ -3,10 +3,12 @@ mod fastembed_tests;
 use super::SemSearcher;
 use crate::error::Result;
 use crate::file::TextFile;
-use crate::searcher::{Search, SearchableIterator};
-use crate::text_cacher::WordMap;
+use crate::searcher::Search;
+use crate::text_cacher::{Embeddings, WordMap};
 use crate::text_encoder::TextEncoder;
 use std::path::PathBuf;
+use std::rc::Rc;
+use std::sync::Arc;
 
 const MAIN_DOC: &str = "\
 the quick brown fox jumps over the lazy dog and runs away
@@ -32,18 +34,25 @@ const QUERY_QUICK_BROWN_FOX: &str = "quick brown fox";
 const QUERY_JUMPS_OVER_LAZY_DOG: &str = "jumps over the lazy dog";
 const QUERY_SOME_RARESTWORD: &str = "some rarestword";
 
-fn create_test_file(content: &str) -> TextFile {
+pub(crate) fn create_test_file<E: TextEncoder>(content: &str, encoder: &E) -> Arc<TextFile> {
     let mut map = WordMap::new();
     for (i, word) in content.split_whitespace().enumerate() {
         map.entry(word.to_string()).or_default().push(i as i32);
     }
-    TextFile::new(PathBuf::from("test.txt"), content.to_string(), map, None)
+    let lines: Vec<&str> = content.lines().collect();
+    let embeddings = encoder.encode(&lines).ok();
+    Arc::new(TextFile::new(
+        PathBuf::from("test.txt"),
+        content.to_string(),
+        map,
+        embeddings,
+    ))
 }
 
 struct MockEncoder;
 
 impl TextEncoder for MockEncoder {
-    fn encode(&self, text: &[&str]) -> Result<Vec<Vec<f32>>> {
+    fn encode(&self, text: &[&str]) -> Result<Embeddings> {
         let main_lines = MAIN_DOC.lines().collect::<Vec<_>>();
 
         text.iter()
@@ -63,38 +72,38 @@ impl TextEncoder for MockEncoder {
 
 #[test]
 fn searcher_ranks_lines_by_cosine_similarity() {
-    let mut file = create_test_file(MAIN_DOC);
-    let searcher = SemSearcher::new(&mut file, MockEncoder, 10usize);
+    let file = create_test_file(MAIN_DOC, &MockEncoder);
+    let searcher = SemSearcher::new(file, MockEncoder, 10usize);
     let doc = MAIN_DOC.lines().collect::<Vec<_>>();
 
     let query = QUERY_QUICK_BROWN_FOX.to_string();
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.get_at(0), Some(doc[LINE_FOX_AND_DOG]));
-    assert_eq!(results.get_at(1), Some(doc[LINE_FOREST]));
+    assert_eq!(results.next(), Some(Rc::from(doc[LINE_FOX_AND_DOG])));
+    assert_eq!(results.next(), Some(Rc::from(doc[LINE_FOREST])));
 
     let query = QUERY_JUMPS_OVER_LAZY_DOG.to_string();
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.get_at(0), Some(doc[LINE_JUMPS]));
-    assert_eq!(results.get_at(1), Some(doc[LINE_FOX_AND_DOG]));
+    assert_eq!(results.next(), Some(Rc::from(doc[LINE_JUMPS])));
+    assert_eq!(results.next(), Some(Rc::from(doc[LINE_FOX_AND_DOG])));
 
     let query = QUERY_SOME_RARESTWORD.to_string();
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.get_at(0), Some(doc[LINE_FOX_AND_DOG]));
+    assert_eq!(results.next(), Some(Rc::from(doc[LINE_FOX_AND_DOG])));
 }
 
 #[test]
 fn searcher_returns_none_for_empty_query() {
-    let mut file = create_test_file(MAIN_DOC);
-    let searcher = SemSearcher::new(&mut file, MockEncoder, 10usize);
+    let file = create_test_file(MAIN_DOC, &MockEncoder);
+    let searcher = SemSearcher::new(file, MockEncoder, 10usize);
     let query = String::new();
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.get_at(0), None);
+    assert_eq!(results.next(), None);
 }
 #[test]
 fn searcher_returns_nothing_for_empty_doc() {
-    let mut file = create_test_file("");
-    let searcher = SemSearcher::new(&mut file, MockEncoder, 10usize);
+    let file = create_test_file("", &MockEncoder);
+    let searcher = SemSearcher::new(file, MockEncoder, 10usize);
     let query = QUERY_QUICK_BROWN_FOX.to_string();
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.get_at(0), None);
+    assert_eq!(results.next(), None);
 }
