@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::Arc};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use crate::{
-    config::{FsScanConfig, ScanSearchConfig},
+    config::ScanSearchConfig,
     dir_utils::get_fts_from_paths,
     error::Result,
     file::{FileLoader, TextFile},
