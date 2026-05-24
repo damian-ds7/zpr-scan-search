@@ -4,6 +4,7 @@ use crate::text_cacher::{CacheBackend, LocalCache};
 pub struct ScanSearchConfig {
     pub fs_scan: FsScanConfig,
     pub cache_config: CacheConfig,
+    pub search_config: SearchConfig,
 }
 
 /// Configuration for scanning the filesystem and collecting supported files.
@@ -36,5 +37,16 @@ impl CacheConfig {
         match self {
             CacheConfig::Local => LocalCache,
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct SearchConfig {
+    pub sem_search: bool,
+}
+
+impl Default for SearchConfig {
+    fn default() -> Self {
+        Self { sem_search: true }
     }
 }

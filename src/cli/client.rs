@@ -13,6 +13,7 @@ use crate::{
 
 pub struct Client {
     files: Vec<Arc<TextFile>>,
+    config: ScanSearchConfig,
 }
 
 impl Client {
@@ -23,8 +24,8 @@ impl Client {
         let extractor = UniversalExtractor::new(engine);
         let encoder = FastEmbed;
         let loader = TextFileLoader::new(extractor, cache, encoder);
-        let files = process_files(paths, &config.fs_scan, detector, loader)?;
-        Ok(Self { files })
+        let files = process_files(paths, &config, detector, loader)?;
+        Ok(Self { files, config })
     }
 
     pub fn test(&self) {
