@@ -25,10 +25,6 @@ impl PyClient {
         Ok(Self { inner })
     }
 
-    pub fn test(&self) {
-        self.inner.test();
-    }
-
     pub fn search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<String>)>> {
         let results = self.inner.search(query)?;
         Ok(results

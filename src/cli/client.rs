@@ -36,12 +36,6 @@ impl Client {
         Ok(Self { files, config })
     }
 
-    pub fn test(&self) {
-        for file in self.files.iter() {
-            println!("{}", file.path().display());
-        }
-    }
-
     pub fn search(&self, query: &str) -> Result<Vec<(PathBuf, Vec<Arc<str>>)>> {
         self.files
             .par_iter()
