@@ -8,6 +8,7 @@ mod dir_utils;
 mod error;
 mod file;
 mod ocr;
+mod py_client;
 mod searcher;
 pub mod sem_searcher;
 mod supported_file;
@@ -22,6 +23,9 @@ mod scan_search {
 
     use pyo3::prelude::*;
     use rayon::prelude::*;
+
+    #[pymodule_export]
+    use crate::py_client::PyClient;
 
     use crate::{
         config::FsScanConfig,
