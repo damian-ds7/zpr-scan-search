@@ -27,7 +27,7 @@ impl TextFile {
     }
 
     #[allow(dead_code)] // TODO: check if path can be removed later
-    fn path(&self) -> &Path {
+    pub fn path(&self) -> &Path {
         &self.path
     }
 
