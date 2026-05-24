@@ -25,7 +25,7 @@ use crate::{
 /// # Errors
 /// Returns the first extraction error encountered, or an I/O error from traversal.
 pub fn process_files<D, L>(
-    paths: Vec<String>,
+    paths: Vec<PathBuf>,
     config: &FsScanConfig,
     detector: D,
     loader: L,
@@ -34,9 +34,7 @@ where
     D: MimeDetector,
     L: FileLoader,
 {
-    let path_bufs: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
-
-    let supported_files = get_fts_from_paths(path_bufs, config, &detector);
+    let supported_files = get_fts_from_paths(paths, config, &detector);
 
     supported_files
         .into_par_iter()
