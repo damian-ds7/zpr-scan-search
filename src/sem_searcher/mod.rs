@@ -8,7 +8,6 @@ use crate::text_encoder::TextEncoder;
 use ndarray::Array1;
 use ordered_float::OrderedFloat;
 use std::collections::BinaryHeap;
-use std::rc::Rc;
 use std::string::String;
 use std::sync::Arc;
 
@@ -17,18 +16,21 @@ struct CosinedEmbedding {
     similarity: OrderedFloat<f32>,
     location: i32,
 }
+
 fn cosine_similarity(a: &Array1<f32>, b: &Array1<f32>) -> f32 {
     let dot = a.dot(b);
     let norm = (a.dot(a) * b.dot(b)).sqrt();
     dot / norm
 }
-struct SemSearcher<E: TextEncoder> {
+
+pub struct SemSearcher<E: TextEncoder> {
     file: Arc<TextFile>,
     encoder: E,
     queue_size: usize,
 }
+
 impl<E: TextEncoder> SemSearcher<E> {
-    fn new(file: Arc<TextFile>, encoder: E, queue_size: usize) -> Self {
+    pub fn new(file: Arc<TextFile>, encoder: E, queue_size: usize) -> Self {
         SemSearcher {
             file,
             encoder,
@@ -36,6 +38,7 @@ impl<E: TextEncoder> SemSearcher<E> {
         }
     }
 }
+
 /// SearchableIterator allowing access to most similar lines in the file
 struct SemSearcherIterator {
     file: Arc<TextFile>,
@@ -54,18 +57,18 @@ impl SemSearcherIterator {
 }
 
 impl Iterator for SemSearcherIterator {
-    type Item = Rc<str>;
+    type Item = Arc<str>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let line_index = *self.locations.get(self.pos)? as usize;
         self.pos += 1;
-        self.file.text().lines().nth(line_index).map(Rc::from)
+        self.file.text().lines().nth(line_index).map(Arc::from)
     }
 }
 
 /// Searcher which uses cosine similarity between sentence(line) embeddings
 impl<E: TextEncoder> Search for SemSearcher<E> {
-    fn search(&self, query: &str) -> Result<impl Iterator<Item = Rc<str>>> {
+    fn search(&self, query: &str) -> Result<impl Iterator<Item = Arc<str>>> {
         if query.is_empty() || self.file.text().is_empty() {
             return Ok(SemSearcherIterator::new(self.file.clone(), vec![]));
         }

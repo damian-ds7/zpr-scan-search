@@ -5,7 +5,7 @@ use crate::sem_searcher::tests::{
     QUERY_QUICK_BROWN_FOX, create_test_file,
 };
 use crate::text_encoder::fastembed::FastEmbed;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[test]
 fn searcher_ranks_lines_by_cosine_similarity() {
@@ -15,11 +15,11 @@ fn searcher_ranks_lines_by_cosine_similarity() {
 
     let query = QUERY_QUICK_BROWN_FOX.to_string();
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.next(), Some(Rc::from(doc[LINE_FOX_AND_DOG])));
-    assert_eq!(results.next(), Some(Rc::from(doc[LINE_FOREST])));
+    assert_eq!(results.next(), Some(Arc::from(doc[LINE_FOX_AND_DOG])));
+    assert_eq!(results.next(), Some(Arc::from(doc[LINE_FOREST])));
 
     let query = QUERY_JUMPS_OVER_LAZY_DOG.to_string();
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.next(), Some(Rc::from(doc[LINE_JUMPS])));
-    assert_eq!(results.next(), Some(Rc::from(doc[LINE_FOX_AND_DOG])));
+    assert_eq!(results.next(), Some(Arc::from(doc[LINE_JUMPS])));
+    assert_eq!(results.next(), Some(Arc::from(doc[LINE_FOX_AND_DOG])));
 }

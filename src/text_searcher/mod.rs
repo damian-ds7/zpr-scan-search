@@ -1,7 +1,6 @@
 use crate::error::Result;
 use crate::file::TextFile;
 use crate::searcher::Search;
-use std::rc::Rc;
 use std::sync::Arc;
 #[cfg(test)]
 pub mod tests;
@@ -23,12 +22,12 @@ impl TextSearcherIterator {
 }
 
 impl Iterator for TextSearcherIterator {
-    type Item = Rc<str>;
+    type Item = Arc<str>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let val = *self.locations.get(self.pos)? as usize;
         self.pos += 1;
-        self.file.text().split_whitespace().nth(val).map(Rc::from)
+        self.file.text().split_whitespace().nth(val).map(Arc::from)
     }
 }
 
@@ -42,7 +41,7 @@ impl TextSearcher {
     }
 }
 impl Search for TextSearcher {
-    fn search(&self, query: &str) -> Result<impl Iterator<Item = Rc<str>>> {
+    fn search(&self, query: &str) -> Result<impl Iterator<Item = Arc<str>>> {
         let words: Vec<&str> = query.split_whitespace().collect();
         let mut locations: Vec<i32> = vec![];
 
