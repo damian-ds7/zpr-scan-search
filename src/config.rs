@@ -1,7 +1,11 @@
+use crate::text_cacher::{CacheBackend, LocalCache};
+
 #[derive(Default, Debug)]
 pub struct ScanSearchConfig {
     pub fs_scan: FsScanConfig,
+    pub cache_config: CacheConfig,
 }
+
 /// Configuration for scanning the filesystem and collecting supported files.
 #[derive(Debug)]
 pub struct FsScanConfig {
@@ -17,6 +21,20 @@ impl Default for FsScanConfig {
         Self {
             follow_links: true,
             include_hidden: false,
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub enum CacheConfig {
+    #[default]
+    Local,
+}
+
+impl CacheConfig {
+    pub fn build(&self) -> impl CacheBackend {
+        match self {
+            CacheConfig::Local => LocalCache,
         }
     }
 }
