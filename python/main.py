@@ -7,4 +7,6 @@ filepath = filepath.parent.parent / "resources"
 print(filepath)
 
 client = Client([filepath])
-client.test()
+results = client.sem_search("quick brown fox")
+for path, matches in results:
+    print(f"{path}: {matches}")
