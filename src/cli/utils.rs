@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::Arc};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use crate::{
-    config::FsScanConfig,
+    config::{FsScanConfig, ScanSearchConfig},
     dir_utils::get_fts_from_paths,
     error::Result,
     file::{FileLoader, TextFile},
@@ -26,7 +26,7 @@ use crate::{
 /// Returns the first extraction error encountered, or an I/O error from traversal.
 pub fn process_files<D, L>(
     paths: Vec<PathBuf>,
-    config: &FsScanConfig,
+    config: &ScanSearchConfig,
     detector: D,
     loader: L,
 ) -> Result<Vec<Arc<TextFile>>>
@@ -34,12 +34,12 @@ where
     D: MimeDetector,
     L: FileLoader,
 {
-    let supported_files = get_fts_from_paths(paths, config, &detector);
+    let supported_files = get_fts_from_paths(paths, &config.fs_scan, &detector);
 
     supported_files
         .into_par_iter()
         .map(|file| {
-            let text_file = loader.load(file, true)?;
+            let text_file = loader.load(file, config.search_config.sem_search)?;
             Ok(Arc::new(text_file))
         })
         .collect()
