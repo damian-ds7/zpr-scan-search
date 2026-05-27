@@ -5,6 +5,7 @@ pub struct ScanSearchConfig {
     pub fs_scan: FsScanConfig,
     pub cache_config: CacheConfig,
     pub search_config: SearchConfig,
+    pub ocr_config: OcrConfig,
 }
 
 /// Configuration for scanning the filesystem and collecting supported files.
@@ -48,5 +49,18 @@ pub struct SearchConfig {
 impl Default for SearchConfig {
     fn default() -> Self {
         Self { sem_search: true }
+    }
+}
+
+#[derive(Debug)]
+pub struct OcrConfig {
+    pub languages: Vec<String>,
+}
+
+impl Default for OcrConfig {
+    fn default() -> Self {
+        Self {
+            languages: vec!["eng".into(), "pol".into()],
+        }
     }
 }
