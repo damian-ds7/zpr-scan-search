@@ -3,6 +3,7 @@ use tesseract_rs::TesseractAPI;
 use thread_local::ThreadLocal;
 
 use crate::{
+    config::OcrConfig,
     error::{Result, ScanSearchError},
     ocr::{OcrEngine, utils::get_tessdata_dir},
 };
@@ -22,7 +23,7 @@ pub struct TesseractEngine {
 
 impl TesseractEngine {
     /// Creates a new TesseractEngine for the specified language.
-    pub fn new(lang: &str) -> Result<Self> {
+    pub fn new(config: &OcrConfig) -> Result<Self> {
         let tessdata_path = get_tessdata_dir()
             .into_os_string()
             .into_string()
@@ -31,7 +32,7 @@ impl TesseractEngine {
         Ok(Self {
             tess_pool: ThreadLocal::new(),
             tessdata_path,
-            lang: lang.to_string(),
+            lang: config.languages.join("+"),
         })
     }
 }
