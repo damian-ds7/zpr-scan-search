@@ -20,16 +20,23 @@ mod text_searcher;
 
 #[pymodule]
 mod scan_search {
+    use std::path::PathBuf;
+
     use pyo3::prelude::*;
 
     #[pymodule_export]
     use crate::py_client::{PyClient, PyQuery, PySearchResult};
 
-    use crate::text_cacher::CacheWriter;
+    use crate::{ocr, text_cacher::CacheWriter};
 
     /// Shuts down the background cache writer, ensuring all pending writes are completed.
     #[pyfunction]
     fn _cache_shutdown() {
         CacheWriter::get().shutdown();
+    }
+
+    #[pyfunction]
+    fn get_tessdata_dir() -> PathBuf {
+        ocr::get_tessdata_dir()
     }
 }
