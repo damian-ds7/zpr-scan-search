@@ -13,6 +13,8 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "click>=8.3.3",
+    "requests>=2.34.2",
+    "rich>=15.0.0",
 ]
 
 [tool.maturin]
