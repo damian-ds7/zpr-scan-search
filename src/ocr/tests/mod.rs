@@ -1,3 +1,5 @@
+use crate::config::OcrConfig;
+
 use super::*;
 use image::{Rgb, RgbImage};
 use rayon::prelude::*;
@@ -53,7 +55,10 @@ fn gen_digit_9() -> DynamicImage {
 
 #[test]
 fn test_multithreaded_tesseract_order_and_safety() -> Result<()> {
-    let engine = TesseractEngine::new("eng").unwrap();
+    let config = OcrConfig {
+        languages: vec!["eng".into()],
+    };
+    let engine = TesseractEngine::new(&config).unwrap();
     let mut tasks = Vec::new();
     for _ in 0..15 {
         tasks.push((gen_digit_9(), '9'));

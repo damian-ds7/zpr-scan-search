@@ -45,7 +45,7 @@ impl Client {
     pub fn new(config: ScanSearchConfig, paths: Vec<PathBuf>) -> Result<Self> {
         let detector = InferDetector;
         let cache = config.cache_config.build();
-        let engine = Arc::new(TesseractEngine::new("eng")?);
+        let engine = Arc::new(TesseractEngine::new(&config.ocr_config)?);
         let extractor = UniversalExtractor::new(engine);
         let encoder = FastEmbed;
         let loader = TextFileLoader::new(extractor, cache, encoder);
