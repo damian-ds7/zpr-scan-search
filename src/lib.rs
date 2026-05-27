@@ -20,68 +20,12 @@ mod text_searcher;
 
 #[pymodule]
 mod scan_search {
-    use std::{path::PathBuf, sync::Arc};
-
     use pyo3::prelude::*;
-    use rayon::prelude::*;
 
     #[pymodule_export]
     use crate::py_client::{PyClient, PyQuery, PySearchResult};
 
-    use crate::{
-        config::FsScanConfig,
-        dir_utils::get_fts_from_paths,
-        error::{Result, ScanSearchError},
-        file::{FileLoader, TextFileLoader},
-        ocr::TesseractEngine,
-        supported_file::{FileKind, InferDetector, SupportedFile},
-        text_cacher::{CacheWriter, LocalCache},
-        text_encoder::fastembed::FastEmbed,
-        text_extractor::{PdfExtractor, UniversalExtractor},
-    };
-
-    /// Processes given pdf file and saves data to cache file and returns extracted text
-    #[pyfunction]
-    fn process_file(path: String) -> PyResult<String> {
-        let ocr_engine = Arc::new(TesseractEngine::new("eng")?);
-        let text_extractor = PdfExtractor::new(ocr_engine);
-        let backend = LocalCache;
-        let encoder = FastEmbed {};
-        let loader = TextFileLoader::new(text_extractor, backend, encoder);
-        let file = SupportedFile {
-            path: PathBuf::from(path),
-            kind: FileKind::Pdf,
-        };
-        let file = loader.load(file, false)?;
-        let word_map = serde_json::to_string(file.map()).map_err(ScanSearchError::from)?;
-        Ok(word_map)
-    }
-
-    /// Extracts text from multiple files or directories in parallel.
-    #[pyfunction]
-    #[pyo3(signature = (*paths))]
-    fn process_files(paths: Vec<String>) -> PyResult<Vec<String>> {
-        let path_bufs: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
-        let config = FsScanConfig::default();
-        let detector = InferDetector;
-
-        let supported_files = get_fts_from_paths(path_bufs, &config, &detector);
-
-        let engine = Arc::new(TesseractEngine::new("eng")?);
-        let extractor = UniversalExtractor::new(engine);
-        let encoder = FastEmbed {};
-        let loader = TextFileLoader::new(extractor, LocalCache, encoder);
-
-        let results = supported_files
-            .into_par_iter()
-            .map(|file| {
-                let text_file = loader.load(file, false)?;
-                Ok(text_file.text().to_string())
-            })
-            .collect::<Result<Vec<String>>>();
-
-        Ok(results?)
-    }
+    use crate::text_cacher::CacheWriter;
 
     /// Shuts down the background cache writer, ensuring all pending writes are completed.
     #[pyfunction]
