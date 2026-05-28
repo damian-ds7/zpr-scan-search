@@ -36,7 +36,7 @@ fn test_search_existing_phrase() {
     };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
-    assert_eq!(iter.next().unwrap().matched(), "quick");
+    assert_eq!(iter.next().unwrap().matched(), "quick brown fox");
 }
 
 #[test]
@@ -72,7 +72,7 @@ fn test_search_rare_word_phrase() {
     };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
-    assert_eq!(iter.next().unwrap().matched(), "deep");
+    assert_eq!(iter.next().unwrap().matched(), "deep dark forest");
 }
 
 #[test]
@@ -84,8 +84,8 @@ fn test_search_repeated_phrase() {
     };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
-    assert_eq!(iter.next().unwrap().matched(), "jumps");
-    assert_eq!(iter.next().unwrap().matched(), "jumps");
+    assert_eq!(iter.next().unwrap().matched(), "jumps over the lazy dog");
+    assert_eq!(iter.next().unwrap().matched(), "jumps over the lazy dog");
 }
 
 #[test]

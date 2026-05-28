@@ -10,6 +10,7 @@ pub mod tests;
 struct TextSearcherIterator {
     text: Arc<str>,
     locations: Vec<i32>,
+    query_length: usize,
     pos: usize,
     word_pos: usize,
     byte_pos: usize,
@@ -17,11 +18,17 @@ struct TextSearcherIterator {
 }
 
 impl TextSearcherIterator {
-    fn new(text: Arc<str>, locations: Vec<i32>, context: SearchContext) -> Self {
+    fn new(
+        text: Arc<str>,
+        locations: Vec<i32>,
+        context: SearchContext,
+        query_length: usize,
+    ) -> Self {
         TextSearcherIterator {
             text: text.clone(),
             locations,
             context,
+            query_length,
             pos: 0,
             word_pos: 0,
             byte_pos: 0,
@@ -40,6 +47,7 @@ impl Iterator for TextSearcherIterator {
         let after = self.context.after.unwrap_or(0);
 
         let fetch_from = target_index.saturating_sub(before);
+        let fetch_to = target_index + self.query_length - 1 + after;
 
         if self.word_pos > fetch_from {
             self.word_pos = 0;
@@ -50,13 +58,14 @@ impl Iterator for TextSearcherIterator {
             &self.text,
             self.text[self.byte_pos..].split_whitespace(),
             fetch_from,
-            target_index + after,
+            fetch_to,
             &mut self.word_pos,
             &mut self.byte_pos,
         )?;
 
         let mid = target_index - fetch_from;
-        let (before_range, matched_range, after_range) = build_context_ranges(&words, mid);
+        let (before_range, matched_range, after_range) =
+            build_context_ranges(&words, mid, self.query_length);
 
         Some(SearchResult {
             before: ArcStrSlice::new(Arc::clone(&self.text), before_range),
@@ -80,6 +89,7 @@ impl TextSearcher {
 impl Search for TextSearcher {
     fn search(&self, query: &Query) -> Result<impl Iterator<Item = SearchResult>> {
         let words: Vec<&str> = query.term.split_whitespace().collect();
+        let context = query.context.clone();
         let mut locations: Vec<i32> = vec![];
 
         let word_occur = match words
@@ -100,7 +110,8 @@ impl Search for TextSearcher {
                 let iterator = TextSearcherIterator::new(
                     self.file.text_arc(),
                     locations,
-                    query.context.clone(),
+                    context,
+                    words.len(),
                 );
                 return Ok(iterator);
             }
@@ -121,7 +132,8 @@ impl Search for TextSearcher {
         Ok(TextSearcherIterator::new(
             self.file.text_arc(),
             locations,
-            query.context.clone(),
+            context,
+            words.len(),
         ))
     }
 }
