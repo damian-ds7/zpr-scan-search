@@ -11,6 +11,7 @@ struct TextSearcherIterator {
     locations: Vec<i32>,
     pos: usize,
 }
+
 impl TextSearcherIterator {
     fn new(file: Arc<TextFile>, locations: Vec<i32>) -> Self {
         TextSearcherIterator {

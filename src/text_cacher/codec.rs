@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 /// Serializes the word map, text, and file fingerprint to the provided writer.
 pub(crate) fn serialize_cache_write<W: Write>(
-    text: &Arc<String>,
+    text: &Arc<str>,
     map: &Arc<WordMap>,
     fingerprint: &FileFingerprint,
     writer: &mut W,
@@ -31,9 +31,9 @@ pub(crate) fn write_fingerprint<W: Write>(fingerprint: &FileFingerprint, w: &mut
 }
 
 /// Processes text into a map and triggers a background save to disk.
-pub fn process_text(text: String) -> (Arc<String>, Arc<WordMap>) {
+pub fn process_text(text: String) -> (Arc<str>, Arc<WordMap>) {
     let map = Arc::new(WordMap::from(&text));
-    let text = Arc::new(text);
+    let text = text.into_boxed_str().into();
     (text, map)
 }
 
