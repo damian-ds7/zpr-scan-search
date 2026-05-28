@@ -26,7 +26,7 @@ mod scan_search {
     use rayon::prelude::*;
 
     #[pymodule_export]
-    use crate::py_client::PyClient;
+    use crate::py_client::{PyClient, PyQuery, PySearchResult};
 
     use crate::{
         config::FsScanConfig,
