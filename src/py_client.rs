@@ -8,7 +8,7 @@ use pyo3::{
 use crate::{
     cli::Client,
     config::ScanSearchConfig,
-    searcher::{Query, SearchResult},
+    searcher::{Query, SearchContext, SearchResult},
 };
 
 #[pyclass(name = "Client")]
@@ -29,28 +29,45 @@ impl PyClient {
         Ok(Self { inner })
     }
 
-    pub fn search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<PySearchResult>)>> {
-        let query = Query {
-            term: query.into(),
-            ..Default::default()
-        };
-        let results = self.inner.search(&query)?;
+    pub fn search(&self, query: PyQuery) -> PyResult<Vec<(PathBuf, Vec<PySearchResult>)>> {
+        let results = self.inner.search(&query.into())?;
         Ok(results
             .into_iter()
             .map(|(path, search_res)| (path, search_res.into_iter().map(|s| s.into()).collect()))
             .collect())
     }
 
-    pub fn sem_search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<PySearchResult>)>> {
-        let query = Query {
-            term: query.into(),
-            ..Default::default()
-        };
-        let results = self.inner.sem_search(&query)?;
+    pub fn sem_search(&self, query: PyQuery) -> PyResult<Vec<(PathBuf, Vec<PySearchResult>)>> {
+        let results = self.inner.sem_search(&query.into())?;
         Ok(results
             .into_iter()
             .map(|(path, search_res)| (path, search_res.into_iter().map(|s| s.into()).collect()))
             .collect())
+    }
+}
+
+#[pyclass(name = "Query", from_py_object)]
+#[derive(Clone)]
+pub struct PyQuery {
+    inner: Query,
+}
+
+#[pymethods]
+impl PyQuery {
+    #[new]
+    pub fn new(term: String, before: usize, after: usize) -> Self {
+        Self {
+            inner: Query {
+                term,
+                context: SearchContext { before, after },
+            },
+        }
+    }
+}
+
+impl From<PyQuery> for Query {
+    fn from(value: PyQuery) -> Self {
+        value.inner
     }
 }
 
