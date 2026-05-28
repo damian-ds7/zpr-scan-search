@@ -36,7 +36,7 @@ fn test_search_existing_phrase() {
     };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
-    assert_eq!(iter.next().as_deref(), Some("quick"));
+    assert_eq!(iter.next().unwrap().matched(), "quick");
 }
 
 #[test]
@@ -72,7 +72,7 @@ fn test_search_rare_word_phrase() {
     };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
-    assert_eq!(iter.next().as_deref(), Some("deep"));
+    assert_eq!(iter.next().unwrap().matched(), "deep");
 }
 
 #[test]
@@ -84,8 +84,8 @@ fn test_search_repeated_phrase() {
     };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
-    assert_eq!(iter.next().as_deref(), Some("jumps"));
-    assert_eq!(iter.next().as_deref(), Some("jumps"));
+    assert_eq!(iter.next().unwrap().matched(), "jumps");
+    assert_eq!(iter.next().unwrap().matched(), "jumps");
 }
 
 #[test]

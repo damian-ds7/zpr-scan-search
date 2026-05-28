@@ -3,7 +3,8 @@ pub mod tests;
 use crate::error::Result;
 use crate::error::ScanSearchError::Embedding;
 use crate::file::TextFile;
-use crate::searcher::{Query, Search};
+use crate::searcher::{ArcStrSlice, Query, Search, SearchContext, SearchResult};
+use crate::searcher_utils::{build_context_ranges, collect_context_fragments};
 use crate::text_encoder::TextEncoder;
 use ndarray::Array1;
 use ordered_float::OrderedFloat;
@@ -41,36 +42,74 @@ impl<E: TextEncoder> SemSearcher<E> {
 
 /// SearchableIterator allowing access to most similar lines in the file
 struct SemSearcherIterator {
-    file: Arc<TextFile>,
+    text: Arc<str>,
     locations: Vec<i32>,
     pos: usize,
+    word_pos: usize,
+    byte_pos: usize,
+    context: SearchContext,
 }
 
 impl SemSearcherIterator {
-    fn new(file: Arc<TextFile>, locations: Vec<i32>) -> Self {
+    fn new(text: Arc<str>, locations: Vec<i32>, context: SearchContext) -> Self {
         SemSearcherIterator {
-            file,
+            text,
             locations,
+            context,
             pos: 0,
+            word_pos: 0,
+            byte_pos: 0,
         }
     }
 }
 
 impl Iterator for SemSearcherIterator {
-    type Item = Arc<str>;
+    type Item = SearchResult;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let line_index = *self.locations.get(self.pos)? as usize;
+        let target_index = *self.locations.get(self.pos)? as usize;
         self.pos += 1;
-        self.file.text().lines().nth(line_index).map(Arc::from)
+
+        let before = self.context.before.unwrap_or(0);
+        let after = self.context.after.unwrap_or(0);
+
+        let fetch_from = target_index.saturating_sub(before);
+
+        if self.word_pos > fetch_from {
+            self.word_pos = 0;
+            self.byte_pos = 0;
+        }
+
+        let lines = collect_context_fragments(
+            &self.text,
+            self.text[self.byte_pos..].lines(),
+            fetch_from,
+            target_index + after,
+            &mut self.word_pos,
+            &mut self.byte_pos,
+        )?;
+
+        let mid = target_index - fetch_from;
+        let (before_range, matched_range, after_range) = build_context_ranges(&lines, mid);
+
+        Some(SearchResult {
+            before: ArcStrSlice::new(Arc::clone(&self.text), before_range),
+            matched: ArcStrSlice::new(Arc::clone(&self.text), matched_range),
+            after: ArcStrSlice::new(Arc::clone(&self.text), after_range),
+        })
     }
 }
 
 /// Searcher which uses cosine similarity between sentence(line) embeddings
 impl<E: TextEncoder> Search for SemSearcher<E> {
-    fn search(&self, query: &Query) -> Result<impl Iterator<Item = Arc<str>>> {
+    fn search(&self, query: &Query) -> Result<impl Iterator<Item = SearchResult>> {
+        let context = query.context.clone();
         if query.term.is_empty() || self.file.text().is_empty() {
-            return Ok(SemSearcherIterator::new(self.file.clone(), vec![]));
+            return Ok(SemSearcherIterator::new(
+                self.file.text_arc(),
+                vec![],
+                context,
+            ));
         }
         let mut heap = BinaryHeap::new();
         let encoded = self.encoder.encode(&[&query.term]);
@@ -79,7 +118,13 @@ impl<E: TextEncoder> Search for SemSearcher<E> {
                 let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
                 query_vec
             }
-            Err(_) => return Ok(SemSearcherIterator::new(self.file.clone(), vec![])),
+            Err(_) => {
+                return Ok(SemSearcherIterator::new(
+                    self.file.text_arc(),
+                    vec![],
+                    context,
+                ));
+            }
         };
 
         match self.file.embeddings.as_deref() {
@@ -106,6 +151,10 @@ impl<E: TextEncoder> Search for SemSearcher<E> {
                 break;
             }
         }
-        Ok(SemSearcherIterator::new(self.file.clone(), locations))
+        Ok(SemSearcherIterator::new(
+            self.file.text_arc(),
+            locations,
+            context,
+        ))
     }
 }

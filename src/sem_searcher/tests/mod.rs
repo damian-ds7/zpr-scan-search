@@ -80,23 +80,23 @@ fn searcher_ranks_lines_by_cosine_similarity() {
         ..Default::default()
     };
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.next(), Some(Arc::from(doc[LINE_FOX_AND_DOG])));
-    assert_eq!(results.next(), Some(Arc::from(doc[LINE_FOREST])));
+    assert_eq!(results.next().unwrap().matched(), doc[LINE_FOX_AND_DOG]);
+    assert_eq!(results.next().unwrap().matched(), doc[LINE_FOREST]);
 
     let query = Query {
         term: QUERY_JUMPS_OVER_LAZY_DOG.into(),
         ..Default::default()
     };
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.next(), Some(Arc::from(doc[LINE_JUMPS])));
-    assert_eq!(results.next(), Some(Arc::from(doc[LINE_FOX_AND_DOG])));
+    assert_eq!(results.next().unwrap().matched(), doc[LINE_JUMPS]);
+    assert_eq!(results.next().unwrap().matched(), doc[LINE_FOX_AND_DOG]);
 
     let query = Query {
         term: QUERY_SOME_RARESTWORD.into(),
         ..Default::default()
     };
     let mut results = searcher.search(&query).unwrap();
-    assert_eq!(results.next(), Some(Arc::from(doc[LINE_FOX_AND_DOG])));
+    assert_eq!(results.next().unwrap().matched(), doc[LINE_FOX_AND_DOG]);
 }
 
 #[test]

@@ -33,7 +33,12 @@ impl PyClient {
         let results = self.inner.search(&query)?;
         Ok(results
             .into_iter()
-            .map(|(path, texts)| (path, texts.iter().map(|s| s.to_string()).collect()))
+            .map(|(path, texts)| {
+                (
+                    path,
+                    texts.iter().map(|s| s.matched().to_string()).collect(),
+                )
+            })
             .collect())
     }
 
@@ -45,7 +50,12 @@ impl PyClient {
         let results = self.inner.sem_search(&query)?;
         Ok(results
             .into_iter()
-            .map(|(path, texts)| (path, texts.iter().map(|s| s.to_string()).collect()))
+            .map(|(path, texts)| {
+                (
+                    path,
+                    texts.iter().map(|s| s.matched().to_string()).collect(),
+                )
+            })
             .collect())
     }
 }

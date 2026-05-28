@@ -51,5 +51,5 @@ impl SearchResult {
 
 /// Interface for structs implementing searching of some kind in the document
 pub trait Search {
-    fn search(&self, query: &Query) -> Result<impl Iterator<Item = Arc<str>>>;
+    fn search(&self, query: &Query) -> Result<impl Iterator<Item = SearchResult>>;
 }
