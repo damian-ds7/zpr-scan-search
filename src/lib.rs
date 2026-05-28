@@ -11,6 +11,7 @@ mod ocr;
 mod py_client;
 mod searcher;
 pub mod sem_searcher;
+mod searcher_utils;
 mod supported_file;
 mod text_cacher;
 pub mod text_encoder;
