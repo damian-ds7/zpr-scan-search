@@ -107,8 +107,8 @@ fn test_search_with_context_before() {
     let query = Query {
         term: "quick brown fox".into(),
         context: SearchContext {
-            before: Some(1),
-            after: None,
+            before: 1,
+            after: 0,
         },
     };
     let searcher = TextSearcher::new(file);
@@ -125,8 +125,8 @@ fn test_search_with_context_after() {
     let query = Query {
         term: "quick brown fox".into(),
         context: SearchContext {
-            before: None,
-            after: Some(2),
+            before: 0,
+            after: 2,
         },
     };
     let searcher = TextSearcher::new(file);
@@ -143,8 +143,8 @@ fn test_search_with_context_before_and_after_text_edge() {
     let query = Query {
         term: "quick brown fox".into(),
         context: SearchContext {
-            before: Some(3),
-            after: Some(2),
+            before: 3,
+            after: 2,
         },
     };
     let searcher = TextSearcher::new(file);
@@ -161,8 +161,8 @@ fn test_search_with_context_before_and_after() {
     let query = Query {
         term: "forest filler filler".into(),
         context: SearchContext {
-            before: Some(3),
-            after: Some(2),
+            before: 3,
+            after: 2,
         },
     };
     let searcher = TextSearcher::new(file);

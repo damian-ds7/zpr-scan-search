@@ -4,8 +4,8 @@ use crate::error::Result;
 
 #[derive(Debug, Default, Clone)]
 pub struct SearchContext {
-    pub before: Option<usize>,
-    pub after: Option<usize>,
+    pub before: usize,
+    pub after: usize,
 }
 
 #[derive(Debug, Default, Clone)]

@@ -43,11 +43,8 @@ impl Iterator for TextSearcherIterator {
         let target_index = *self.locations.get(self.pos)? as usize;
         self.pos += 1;
 
-        let before = self.context.before.unwrap_or(0);
-        let after = self.context.after.unwrap_or(0);
-
-        let fetch_from = target_index.saturating_sub(before);
-        let fetch_to = target_index + self.query_length - 1 + after;
+        let fetch_from = target_index.saturating_sub(self.context.before);
+        let fetch_to = target_index + self.query_length - 1 + self.context.after;
 
         if self.word_pos > fetch_from {
             self.word_pos = 0;
