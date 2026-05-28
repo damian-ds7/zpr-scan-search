@@ -11,7 +11,7 @@ use crate::{
     error::Result,
     file::{TextFile, TextFileLoader},
     ocr::TesseractEngine,
-    searcher::{Query, Search},
+    searcher::{Query, Search, SearchResult},
     sem_searcher::SemSearcher,
     supported_file::InferDetector,
     text_encoder::fastembed::FastEmbed,
@@ -36,14 +36,14 @@ impl Client {
         Ok(Self { files, config })
     }
 
-    pub fn search(&self, query: &Query) -> Result<Vec<(PathBuf, Vec<Arc<str>>)>> {
+    pub fn search(&self, query: &Query) -> Result<Vec<(PathBuf, Vec<SearchResult>)>> {
         self.files
             .par_iter()
             .map(|file| collect_search(TextSearcher::new(file.clone()), query, file.path()))
             .collect()
     }
 
-    pub fn sem_search(&self, query: &Query) -> Result<Vec<(PathBuf, Vec<Arc<str>>)>> {
+    pub fn sem_search(&self, query: &Query) -> Result<Vec<(PathBuf, Vec<SearchResult>)>> {
         if !self.config.search_config.sem_search {
             return Ok(vec![]);
         }
@@ -64,6 +64,6 @@ fn collect_search<S: Search>(
     searcher: S,
     query: &Query,
     path: &Path,
-) -> Result<(PathBuf, Vec<Arc<str>>)> {
+) -> Result<(PathBuf, Vec<SearchResult>)> {
     Ok((path.to_owned(), searcher.search(query)?.collect::<Vec<_>>()))
 }

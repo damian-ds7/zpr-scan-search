@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-pub fn collect_context_words<'a>(
+pub fn collect_context_fragments<'a>(
     text: &'a str,
     splitter: impl Iterator<Item = &'a str>,
     fetch_from: usize,
