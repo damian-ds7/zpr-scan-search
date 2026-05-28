@@ -1,6 +1,6 @@
 use super::TextSearcher;
 use crate::file::TextFile;
-use crate::searcher::{Query, Search};
+use crate::searcher::{Query, Search, SearchContext};
 use crate::text_cacher::WordMap;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -99,4 +99,76 @@ fn test_edge_case_rarest_at_beginning() {
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn test_search_with_context_before() {
+    let file = create_test_file(TEST_DOCUMENT);
+    let query = Query {
+        term: "quick brown fox".into(),
+        context: SearchContext {
+            before: Some(1),
+            after: None,
+        },
+    };
+    let searcher = TextSearcher::new(file);
+    let mut iter = searcher.search(&query).unwrap();
+    let res = iter.next().unwrap();
+    assert_eq!(res.matched(), "quick brown fox");
+    assert_eq!(res.before(), "the");
+    assert_eq!(res.after(), "");
+}
+
+#[test]
+fn test_search_with_context_after() {
+    let file = create_test_file(TEST_DOCUMENT);
+    let query = Query {
+        term: "quick brown fox".into(),
+        context: SearchContext {
+            before: None,
+            after: Some(2),
+        },
+    };
+    let searcher = TextSearcher::new(file);
+    let mut iter = searcher.search(&query).unwrap();
+    let res = iter.next().unwrap();
+    assert_eq!(res.matched(), "quick brown fox");
+    assert_eq!(res.before(), "");
+    assert_eq!(res.after(), "jumps over");
+}
+
+#[test]
+fn test_search_with_context_before_and_after_text_edge() {
+    let file = create_test_file(TEST_DOCUMENT);
+    let query = Query {
+        term: "quick brown fox".into(),
+        context: SearchContext {
+            before: Some(3),
+            after: Some(2),
+        },
+    };
+    let searcher = TextSearcher::new(file);
+    let mut iter = searcher.search(&query).unwrap();
+    let res = iter.next().unwrap();
+    assert_eq!(res.matched(), "quick brown fox");
+    assert_eq!(res.before(), "the");
+    assert_eq!(res.after(), "jumps over");
+}
+
+#[test]
+fn test_search_with_context_before_and_after() {
+    let file = create_test_file(TEST_DOCUMENT);
+    let query = Query {
+        term: "forest filler filler".into(),
+        context: SearchContext {
+            before: Some(3),
+            after: Some(2),
+        },
+    };
+    let searcher = TextSearcher::new(file);
+    let mut iter = searcher.search(&query).unwrap();
+    let res = iter.next().unwrap();
+    assert_eq!(res.matched(), "forest filler filler");
+    assert_eq!(res.before(), "into deep dark");
+    assert_eq!(res.after(), "the quick");
 }
