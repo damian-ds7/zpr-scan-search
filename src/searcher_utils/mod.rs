@@ -1,39 +1,58 @@
 use std::ops::Range;
 
+/// Collects byte ranges of fragments (words or lines) from `text` within the window
+/// `[fetch_from, fetch_to]`, using the provided `splitter` iterator.
+///
+/// The splitter can be any iterator yielding `&str` slices pointing into `text`,
+/// such as `split_whitespace()` or `lines()`. Pointer arithmetic is used to derive
+/// byte offsets, so the slices must originate from `text`.
+///
+/// `word_pos` and `byte_pos` act as a cursor, the splitter should be created from
+/// `text[*byte_pos..]` so it resumes from the previous call's position. from zero.
+/// Both are updated to the position of `fetch_from` on each call.
+///
+/// Returns `None` if `fetch_from` is beyond the end of the text.
 pub fn collect_context_fragments<'a>(
     text: &'a str,
-    splitter: impl Iterator<Item = &'a str>,
+    mut splitter: impl Iterator<Item = &'a str>,
     fetch_from: usize,
     fetch_to: usize,
     word_pos: &mut usize,
     byte_pos: &mut usize,
 ) -> Option<Vec<Range<usize>>> {
     let base = text.as_ptr() as usize;
-    let mut words = Vec::new();
-    let mut word_idx = *word_pos;
+    let skip = fetch_from - *word_pos;
 
-    for word in splitter {
+    let first = splitter.nth(skip)?;
+    let first_start = first.as_ptr() as usize - base;
+
+    *word_pos = fetch_from;
+    *byte_pos = first_start;
+
+    let mut words = Vec::with_capacity(fetch_to - fetch_from + 1);
+    words.push(first_start..first_start + first.len());
+
+    for word in splitter.take(fetch_to - fetch_from) {
         let start = word.as_ptr() as usize - base;
-
-        if word_idx == fetch_from {
-            *word_pos = word_idx;
-            *byte_pos = start;
-        }
-
-        if word_idx >= fetch_from {
-            words.push(start..start + word.len());
-        }
-
-        word_idx += 1;
-
-        if word_idx > fetch_to {
-            break;
-        }
+        words.push(start..start + word.len());
     }
 
-    if words.is_empty() { None } else { Some(words) }
+    Some(words)
 }
 
+/// Builds before/matched/after byte ranges from a slice of fragment ranges.
+///
+/// `mid` is the index of the first matched fragment within `words`, and `query_len`
+/// is the number of consecutive fragments the match spans (1 for a single word,
+/// N for a phrase).
+///
+/// - `before` spans from the first fragment up to (but not including) the match.
+///   Empty range at the start of `matched` if there are no fragments before it.
+/// - `matched` spans from `words[mid]` to `words[mid + query_len - 1]`.
+/// - `after` spans from the first fragment after the match to the last fragment.
+///   Empty range at the end of `matched` if there are no fragments after it.
+///
+/// The returned ranges are byte offsets into the original text.
 pub fn build_context_ranges(
     words: &[Range<usize>],
     mid: usize,
