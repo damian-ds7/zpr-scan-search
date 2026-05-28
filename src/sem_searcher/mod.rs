@@ -90,7 +90,7 @@ impl Iterator for SemSearcherIterator {
         )?;
 
         let mid = target_index - fetch_from;
-        let (before_range, matched_range, after_range) = build_context_ranges(&lines, mid);
+        let (before_range, matched_range, after_range) = build_context_ranges(&lines, mid, 1);
 
         Some(SearchResult {
             before: ArcStrSlice::new(Arc::clone(&self.text), before_range),
