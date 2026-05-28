@@ -3,7 +3,7 @@ pub mod tests;
 use crate::error::Result;
 use crate::error::ScanSearchError::Embedding;
 use crate::file::TextFile;
-use crate::searcher::Search;
+use crate::searcher::{Query, Search};
 use crate::text_encoder::TextEncoder;
 use ndarray::Array1;
 use ordered_float::OrderedFloat;
@@ -68,12 +68,12 @@ impl Iterator for SemSearcherIterator {
 
 /// Searcher which uses cosine similarity between sentence(line) embeddings
 impl<E: TextEncoder> Search for SemSearcher<E> {
-    fn search(&self, query: &str) -> Result<impl Iterator<Item = Arc<str>>> {
-        if query.is_empty() || self.file.text().is_empty() {
+    fn search(&self, query: &Query) -> Result<impl Iterator<Item = Arc<str>>> {
+        if query.term.is_empty() || self.file.text().is_empty() {
             return Ok(SemSearcherIterator::new(self.file.clone(), vec![]));
         }
         let mut heap = BinaryHeap::new();
-        let encoded = self.encoder.encode(&[query]);
+        let encoded = self.encoder.encode(&[&query.term]);
         let query_vec = match encoded {
             Ok(encoded) => {
                 let query_vec: Array1<f32> = Array1::from(encoded[0].clone());
