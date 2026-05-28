@@ -9,4 +9,6 @@ print(filepath)
 client = Client([filepath])
 results = client.sem_search("quick brown fox")
 for path, matches in results:
-    print(f"{path}: {matches}")
+    print(path)
+    for match in matches:
+        print("\t", match.matched())

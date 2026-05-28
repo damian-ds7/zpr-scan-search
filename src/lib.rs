@@ -10,13 +10,13 @@ mod file;
 mod ocr;
 mod py_client;
 mod searcher;
-pub mod sem_searcher;
 mod searcher_utils;
+mod sem_searcher;
 mod supported_file;
 mod text_cacher;
-pub mod text_encoder;
+mod text_encoder;
 mod text_extractor;
-pub mod text_searcher;
+mod text_searcher;
 
 #[pymodule]
 mod scan_search {

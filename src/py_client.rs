@@ -5,7 +5,11 @@ use pyo3::{
     types::{PyAnyMethods, PyList, PyListMethods},
 };
 
-use crate::{cli::Client, config::ScanSearchConfig, searcher::Query};
+use crate::{
+    cli::Client,
+    config::ScanSearchConfig,
+    searcher::{Query, SearchResult},
+};
 
 #[pyclass(name = "Client")]
 pub struct PyClient {
@@ -25,7 +29,7 @@ impl PyClient {
         Ok(Self { inner })
     }
 
-    pub fn search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<String>)>> {
+    pub fn search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<PySearchResult>)>> {
         let query = Query {
             term: query.into(),
             ..Default::default()
@@ -33,16 +37,11 @@ impl PyClient {
         let results = self.inner.search(&query)?;
         Ok(results
             .into_iter()
-            .map(|(path, texts)| {
-                (
-                    path,
-                    texts.iter().map(|s| s.matched().to_string()).collect(),
-                )
-            })
+            .map(|(path, search_res)| (path, search_res.into_iter().map(|s| s.into()).collect()))
             .collect())
     }
 
-    pub fn sem_search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<String>)>> {
+    pub fn sem_search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<PySearchResult>)>> {
         let query = Query {
             term: query.into(),
             ..Default::default()
@@ -50,12 +49,31 @@ impl PyClient {
         let results = self.inner.sem_search(&query)?;
         Ok(results
             .into_iter()
-            .map(|(path, texts)| {
-                (
-                    path,
-                    texts.iter().map(|s| s.matched().to_string()).collect(),
-                )
-            })
+            .map(|(path, search_res)| (path, search_res.into_iter().map(|s| s.into()).collect()))
             .collect())
+    }
+}
+
+#[pyclass(name = "SearchResult")]
+pub struct PySearchResult {
+    inner: SearchResult,
+}
+
+#[pymethods]
+impl PySearchResult {
+    pub fn before(&self) -> &str {
+        self.inner.before()
+    }
+    pub fn matched(&self) -> &str {
+        self.inner.matched()
+    }
+    pub fn after(&self) -> &str {
+        self.inner.after()
+    }
+}
+
+impl From<SearchResult> for PySearchResult {
+    fn from(value: SearchResult) -> Self {
+        Self { inner: value }
     }
 }
