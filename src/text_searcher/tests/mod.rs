@@ -1,6 +1,6 @@
 use super::TextSearcher;
 use crate::file::TextFile;
-use crate::searcher::Search;
+use crate::searcher::{Query, Search};
 use crate::text_cacher::WordMap;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -30,7 +30,10 @@ fn create_test_file(content: &str) -> Arc<TextFile> {
 #[test]
 fn test_search_existing_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
-    let query = "quick brown fox".to_string();
+    let query = Query {
+        term: "quick brown fox".into(),
+        ..Default::default()
+    };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next().as_deref(), Some("quick"));
@@ -39,7 +42,10 @@ fn test_search_existing_phrase() {
 #[test]
 fn test_search_non_existent_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
-    let query = "quick red fox".to_string();
+    let query = Query {
+        term: "quick red fox".into(),
+        ..Default::default()
+    };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next(), None);
@@ -48,7 +54,10 @@ fn test_search_non_existent_phrase() {
 #[test]
 fn test_search_non_existent_phrase_with_existing_words() {
     let file = create_test_file(TEST_DOCUMENT);
-    let query = "filler filler forest".to_string();
+    let query = Query {
+        term: "filler filler forest".into(),
+        ..Default::default()
+    };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next(), None);
@@ -57,7 +66,10 @@ fn test_search_non_existent_phrase_with_existing_words() {
 #[test]
 fn test_search_rare_word_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
-    let query = "deep dark forest".to_string();
+    let query = Query {
+        term: "deep dark forest".into(),
+        ..Default::default()
+    };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next().as_deref(), Some("deep"));
@@ -66,7 +78,10 @@ fn test_search_rare_word_phrase() {
 #[test]
 fn test_search_repeated_phrase() {
     let file = create_test_file(TEST_DOCUMENT);
-    let query = "jumps over the lazy dog".to_string();
+    let query = Query {
+        term: "jumps over the lazy dog".into(),
+        ..Default::default()
+    };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next().as_deref(), Some("jumps"));
@@ -77,7 +92,10 @@ fn test_search_repeated_phrase() {
 fn test_edge_case_rarest_at_beginning() {
     let text = "rarestword some some some";
     let file = create_test_file(text);
-    let query = "some rarestword".to_string();
+    let query = Query {
+        term: "some rarestword".into(),
+        ..Default::default()
+    };
     let searcher = TextSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next(), None);

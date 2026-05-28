@@ -1,6 +1,6 @@
 use crate::error::Result;
 use crate::file::TextFile;
-use crate::searcher::Search;
+use crate::searcher::{Query, Search};
 use std::sync::Arc;
 #[cfg(test)]
 pub mod tests;
@@ -41,8 +41,8 @@ impl TextSearcher {
     }
 }
 impl Search for TextSearcher {
-    fn search(&self, query: &str) -> Result<impl Iterator<Item = Arc<str>>> {
-        let words: Vec<&str> = query.split_whitespace().collect();
+    fn search(&self, query: &Query) -> Result<impl Iterator<Item = Arc<str>>> {
+        let words: Vec<&str> = query.term.split_whitespace().collect();
         let mut locations: Vec<i32> = vec![];
 
         let word_occur = match words

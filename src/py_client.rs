@@ -5,7 +5,7 @@ use pyo3::{
     types::{PyAnyMethods, PyList, PyListMethods},
 };
 
-use crate::{cli::Client, config::ScanSearchConfig};
+use crate::{cli::Client, config::ScanSearchConfig, searcher::Query};
 
 #[pyclass(name = "Client")]
 pub struct PyClient {
@@ -26,7 +26,11 @@ impl PyClient {
     }
 
     pub fn search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<String>)>> {
-        let results = self.inner.search(query)?;
+        let query = Query {
+            term: query.into(),
+            ..Default::default()
+        };
+        let results = self.inner.search(&query)?;
         Ok(results
             .into_iter()
             .map(|(path, texts)| (path, texts.iter().map(|s| s.to_string()).collect()))
@@ -34,7 +38,11 @@ impl PyClient {
     }
 
     pub fn sem_search(&self, query: &str) -> PyResult<Vec<(PathBuf, Vec<String>)>> {
-        let results = self.inner.sem_search(query)?;
+        let query = Query {
+            term: query.into(),
+            ..Default::default()
+        };
+        let results = self.inner.sem_search(&query)?;
         Ok(results
             .into_iter()
             .map(|(path, texts)| (path, texts.iter().map(|s| s.to_string()).collect()))
