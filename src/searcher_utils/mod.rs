@@ -56,3 +56,209 @@ pub fn build_context_ranges(
 
     (before, matched, after)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn words_from_ranges<'a>(text: &'a str, ranges: &[Range<usize>]) -> Vec<&'a str> {
+        ranges.iter().map(|r| &text[r.clone()]).collect()
+    }
+
+    fn str_from_range(text: &str, range: Range<usize>) -> &str {
+        &text[range]
+    }
+
+    #[test]
+    fn test_collect_basic() {
+        let text = "one two three four five";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            1,
+            3,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        assert_eq!(
+            words_from_ranges(text, &words),
+            vec!["two", "three", "four"]
+        );
+    }
+
+    #[test]
+    fn test_collect_from_start() {
+        let text = "one two three four five";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            0,
+            2,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        assert_eq!(words_from_ranges(text, &words), vec!["one", "two", "three"]);
+    }
+
+    #[test]
+    fn test_collect_to_end() {
+        let text = "one two three four five";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            3,
+            10,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        assert_eq!(words_from_ranges(text, &words), vec!["four", "five"]);
+    }
+
+    #[test]
+    fn test_collect_returns_none_when_out_of_range() {
+        let text = "one two three";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let result = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            10,
+            12,
+            &mut word_pos,
+            &mut byte_pos,
+        );
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_collect_saves_cursor() {
+        let text = "one two three four five six seven";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+
+        collect_context_fragments(
+            text,
+            text[byte_pos..].split_whitespace(),
+            1,
+            2,
+            &mut word_pos,
+            &mut byte_pos,
+        );
+        assert_eq!(word_pos, 1);
+        assert_eq!(&text[byte_pos..].split_whitespace().next().unwrap(), &"two");
+
+        let words = collect_context_fragments(
+            text,
+            text[byte_pos..].split_whitespace(),
+            4,
+            5,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        assert_eq!(words_from_ranges(text, &words), vec!["five", "six"]);
+    }
+
+    #[test]
+    fn test_collect_with_lines() {
+        let text = "line one\nline two\nline three\nline four";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words =
+            collect_context_fragments(text, text.lines(), 1, 2, &mut word_pos, &mut byte_pos)
+                .unwrap();
+        assert_eq!(
+            words_from_ranges(text, &words),
+            vec!["line two", "line three"]
+        );
+    }
+
+    #[test]
+    fn test_build_middle() {
+        let text = "one two three four five";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            0,
+            4,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        let (before, matched, after) = build_context_ranges(&words, 2);
+        assert_eq!(str_from_range(text, before), "one two");
+        assert_eq!(str_from_range(text, matched), "three");
+        assert_eq!(str_from_range(text, after), "four five");
+    }
+
+    #[test]
+    fn test_build_no_before() {
+        let text = "one two three";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            0,
+            2,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        let (before, matched, after) = build_context_ranges(&words, 0);
+        assert_eq!(str_from_range(text, before), "");
+        assert_eq!(str_from_range(text, matched), "one");
+        assert_eq!(str_from_range(text, after), "two three");
+    }
+
+    #[test]
+    fn test_build_no_after() {
+        let text = "one two three";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            0,
+            2,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        let (before, matched, after) = build_context_ranges(&words, 2);
+        assert_eq!(str_from_range(text, before), "one two");
+        assert_eq!(str_from_range(text, matched), "three");
+        assert_eq!(str_from_range(text, after), "");
+    }
+
+    #[test]
+    fn test_build_single_word() {
+        let text = "hello";
+        let mut word_pos = 0;
+        let mut byte_pos = 0;
+        let words = collect_context_fragments(
+            text,
+            text.split_whitespace(),
+            0,
+            0,
+            &mut word_pos,
+            &mut byte_pos,
+        )
+        .unwrap();
+        let (before, matched, after) = build_context_ranges(&words, 0);
+        assert_eq!(str_from_range(text, before), "");
+        assert_eq!(str_from_range(text, matched), "hello");
+        assert_eq!(str_from_range(text, after), "");
+    }
+}
