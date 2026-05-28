@@ -47,12 +47,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
             ..
         })) = self.backend.try_load(path, &fp)
         {
-            return Ok(TextFile {
-                path: path.to_path_buf(),
-                text: Arc::new(text),
-                map: Arc::new(map),
-                embeddings: Arc::new(embeddings),
-            });
+            return Ok(TextFile::new(path.into(), text, map, embeddings));
         }
         let raw_text = self.extractor.extract_from(&file)?;
         let (text, map) = process_text(raw_text);
@@ -73,7 +68,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
         );
 
         Ok(TextFile {
-            path: path.to_path_buf(),
+            path: path.into(),
             text,
             map,
             embeddings,

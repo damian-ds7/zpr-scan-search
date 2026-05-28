@@ -34,7 +34,7 @@ pub trait CacheBackend: Sync + Send {
 /// Represents the high-level domain data for a cache write task.
 pub enum Job {
     CacheWrite {
-        text: Arc<String>,
+        text: Arc<str>,
         map: Arc<WordMap>,
         fingerprint: FileFingerprint,
         embeddings: Arc<Option<Embeddings>>,

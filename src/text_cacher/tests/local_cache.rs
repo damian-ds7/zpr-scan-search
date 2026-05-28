@@ -19,7 +19,7 @@ fn test_local_cache_valid_cache() {
         size: 999,
     };
 
-    let text = Arc::new("cached content".to_string());
+    let text = Arc::from("cached content".to_string().into_boxed_str());
     let mut map = WordMap::new();
     map.insert("cached".to_string(), vec![0]);
     let map_arc = Arc::new(map);
@@ -79,7 +79,7 @@ fn test_local_cache_fingerprint_mismatch() {
         size: 1,
     };
 
-    let text = Arc::new("old content".to_string());
+    let text = Arc::from("old content".to_string().into_boxed_str());
     let map = Arc::new(WordMap::new());
     let embeddings = Arc::new(Some(Embeddings::from(vec![vec![1.0, 2.0]])));
     // Create cache with old fingerprint

@@ -11,7 +11,7 @@ pub use loader::{FileLoader, TextFileLoader};
 #[allow(dead_code)] // TODO: check if path can be removed later
 pub struct TextFile {
     path: PathBuf,
-    text: Arc<String>,
+    text: Arc<str>,
     map: Arc<WordMap>,
     pub(crate) embeddings: Arc<Option<Embeddings>>,
 }
@@ -20,7 +20,7 @@ impl TextFile {
     pub fn new(path: PathBuf, text: String, map: WordMap, embeddings: Option<Embeddings>) -> Self {
         Self {
             path,
-            text: Arc::new(text),
+            text: text.into_boxed_str().into(),
             map: Arc::new(map),
             embeddings: Arc::new(embeddings),
         }
@@ -42,6 +42,10 @@ impl TextFile {
 
     pub fn text(&self) -> &str {
         &self.text
+    }
+
+    pub fn text_arc(&self) -> Arc<str> {
+        Arc::clone(&self.text)
     }
 
     pub fn embeddings(&self) -> &Arc<Option<Embeddings>> {
