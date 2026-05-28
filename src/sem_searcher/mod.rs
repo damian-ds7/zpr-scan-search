@@ -70,10 +70,8 @@ impl Iterator for SemSearcherIterator {
         let target_index = *self.locations.get(self.pos)? as usize;
         self.pos += 1;
 
-        let before = self.context.before.unwrap_or(0);
-        let after = self.context.after.unwrap_or(0);
-
-        let fetch_from = target_index.saturating_sub(before);
+        let fetch_from = target_index.saturating_sub(self.context.before);
+        let fetch_to = target_index + self.context.after;
 
         if self.word_pos > fetch_from {
             self.word_pos = 0;
@@ -84,7 +82,7 @@ impl Iterator for SemSearcherIterator {
             &self.text,
             self.text[self.byte_pos..].lines(),
             fetch_from,
-            target_index + after,
+            fetch_to,
             &mut self.word_pos,
             &mut self.byte_pos,
         )?;
