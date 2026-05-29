@@ -73,11 +73,13 @@ def download_train_data(tessdata_path: Path, langs: list[str]) -> None:
 
 
 def download_missing_traineddata(tessdata_path: Path, langs: list[str]) -> None:
-    langs_set = set(langs)
+    downloaded_langs = set()
     missing: list[str] = []
     for file in tessdata_path.glob("*.traineddata"):
-        lang: str = file.stem
-        if lang not in langs_set:
+        downloaded_langs.add(file.stem)
+
+    for lang in langs:
+        if lang not in downloaded_langs:
             missing.append(lang)
 
     download_train_data(tessdata_path, missing)
