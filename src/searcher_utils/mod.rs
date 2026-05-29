@@ -7,9 +7,8 @@ use std::ops::Range;
 /// such as `split_whitespace()` or `lines()`. Pointer arithmetic is used to derive
 /// byte offsets, so the slices must originate from `text`.
 ///
-/// `word_pos` and `byte_pos` act as a cursor, the splitter should be created from
-/// `text[*byte_pos..]` so it resumes from the previous call's position. from zero.
-/// Both are updated to the position of `fetch_from` on each call.
+/// `item_pos` and `byte_pos` act as a cursor, the splitter should be created from
+/// `text[*byte_pos..]` so it resumes from the previous call's position.
 ///
 /// Returns `None` if `fetch_from` is beyond the end of the text.
 pub fn collect_context_fragments<'a>(
@@ -17,27 +16,36 @@ pub fn collect_context_fragments<'a>(
     mut splitter: impl Iterator<Item = &'a str>,
     fetch_from: usize,
     fetch_to: usize,
-    word_pos: &mut usize,
+    item_pos: &mut usize,
     byte_pos: &mut usize,
 ) -> Option<Vec<Range<usize>>> {
+    // The base address of `text` in memory, used to convert raw pointers back
+    // into byte offsets relative to the start of the string.
     let base = text.as_ptr() as usize;
-    let skip = fetch_from - *word_pos;
 
-    let first = splitter.nth(skip)?;
-    let first_start = first.as_ptr() as usize - base;
+    // Skip ahead to `fetch_from` by advancing past items already behind the cursor.
+    // `item_pos` tracks how far we've consumed, so only the delta needs to be skipped.
+    let skip = fetch_from - *item_pos;
+    let first_item = splitter.nth(skip)?;
 
-    *word_pos = fetch_from;
-    *byte_pos = first_start;
+    // Derive the byte offset of the first fetched item by subtracting the base address.
+    let first_item_byte_pos = first_item.as_ptr() as usize - base;
 
-    let mut words = Vec::with_capacity(fetch_to - fetch_from + 1);
-    words.push(first_start..first_start + first.len());
+    // Advance both cursors to reflect the item we just landed on.
+    *item_pos = fetch_from;
+    *byte_pos = first_item_byte_pos;
 
-    for word in splitter.take(fetch_to - fetch_from) {
-        let start = word.as_ptr() as usize - base;
-        words.push(start..start + word.len());
+    let mut items = Vec::with_capacity(fetch_to - fetch_from + 1);
+    items.push(first_item_byte_pos..first_item_byte_pos + first_item.len());
+
+    // Collect the remaining items in [fetch_from+1, fetch_to], computing each
+    // one's byte range the same way as the first.
+    for item in splitter.take(fetch_to - fetch_from) {
+        let start = item.as_ptr() as usize - base;
+        items.push(start..start + item.len());
     }
 
-    Some(words)
+    Some(items)
 }
 
 /// Builds before/matched/after byte ranges from a slice of fragment ranges.
