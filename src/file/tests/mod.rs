@@ -65,7 +65,7 @@ fn test_loader_cache_hit() {
     let extractor = MockExtractor;
     let backend = SpyCache::new(true);
     let submit_called = backend.submit_called.clone();
-    let encoder = FastEmbed {};
+    let encoder = FastEmbed::default();
     let loader = TextFileLoader::new(extractor, backend, encoder);
 
     let file = SupportedFile {
@@ -88,7 +88,7 @@ fn test_loader_cache_miss_triggers_extraction_and_cache() {
     let extractor = MockExtractor;
     let backend = SpyCache::new(false);
     let submit_called = backend.submit_called.clone();
-    let encoder = FastEmbed {};
+    let encoder = FastEmbed::default();
     let loader = TextFileLoader::new(extractor, backend, encoder);
 
     let file = SupportedFile {

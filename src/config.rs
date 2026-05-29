@@ -1,3 +1,5 @@
+use fastembed::EmbeddingModel;
+
 use crate::text_cacher::{CacheBackend, LocalCache};
 
 #[derive(Default, Debug)]
@@ -6,6 +8,7 @@ pub struct ScanSearchConfig {
     pub cache_config: CacheConfig,
     pub search_config: SearchConfig,
     pub ocr_config: OcrConfig,
+    pub sem_search_config: SemSearchConfig,
 }
 
 /// Configuration for scanning the filesystem and collecting supported files.
@@ -63,4 +66,9 @@ impl Default for OcrConfig {
             languages: vec!["eng".into(), "pol".into()],
         }
     }
+}
+
+#[derive(Debug, Default)]
+pub struct SemSearchConfig {
+    pub model: EmbeddingModel,
 }
