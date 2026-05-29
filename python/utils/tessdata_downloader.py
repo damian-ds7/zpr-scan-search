@@ -27,7 +27,7 @@ def handle_sigint(_signum, _frame):
 signal.signal(signal.SIGINT, handle_sigint)
 
 
-def download(url: str, filename: Path, dest: Path, task_id: TaskID, progress: Progress):
+def download(url: str, filename: Path, dest: Path, task_id: TaskID, progress: Progress) -> None:
     file_path = dest / filename
 
     with requests.get(url, stream=True) as r:
@@ -47,7 +47,7 @@ def get_content_length(url: str) -> int:
     return int(r.headers.get("Content-Length", 0))
 
 
-def download_train_data(tessdata_path: Path, langs: list[str]):
+def download_train_data(tessdata_path: Path, langs: list[str]) -> None:
     urls = [f"{URL}/{lang}.traineddata" for lang in langs]
 
     with ThreadPoolExecutor(max_workers=4) as ex:
@@ -70,3 +70,14 @@ def download_train_data(tessdata_path: Path, langs: list[str]):
         for url in urls:
             filename = Path(url.split("/")[-1])
             ex.submit(download, url, Path(filename), tessdata_path, task_id, progress)
+
+
+def download_missing_traineddata(tessdata_path: Path, langs: list[str]) -> None:
+    langs_set = set(langs)
+    missing: list[str] = []
+    for file in tessdata_path.glob("*.traineddata"):
+        lang: str = file.stem
+        if lang not in langs_set:
+            missing.append(lang)
+
+    download_train_data(tessdata_path, missing)
