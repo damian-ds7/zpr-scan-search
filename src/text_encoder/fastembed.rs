@@ -3,12 +3,16 @@ use crate::error::ScanSearchError;
 use crate::text_cacher::Embeddings;
 use crate::text_encoder::TextEncoder;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
+
 /// Encoder using the fastembed lib
-pub struct FastEmbed;
+#[derive(Default)]
+pub struct FastEmbed {
+    pub model: EmbeddingModel,
+}
 
 impl TextEncoder for FastEmbed {
     fn encode(&self, text: &[&str]) -> Result<Embeddings> {
-        let mut model = TextEmbedding::try_new(InitOptions::new(EmbeddingModel::AllMiniLML6V2))?;
+        let mut model = TextEmbedding::try_new(InitOptions::new(self.model.clone()))?;
 
         let embeddings: Vec<Vec<f32>> = model.embed(text, None)?;
 

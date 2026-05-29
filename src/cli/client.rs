@@ -47,7 +47,9 @@ impl Client {
         let cache = config.cache_config.build();
         let engine = Arc::new(TesseractEngine::new(&config.ocr_config)?);
         let extractor = UniversalExtractor::new(engine);
-        let encoder = FastEmbed;
+        let encoder = FastEmbed {
+            model: config.sem_search_config.model.clone(),
+        };
         let loader = TextFileLoader::new(extractor, cache, encoder);
         let files = process_files(paths, &config, detector, loader)?;
         Ok(Self { files, config })
@@ -86,7 +88,13 @@ impl Client {
             .par_iter()
             .map(|file| {
                 collect_search(
-                    SemSearcher::new(file.clone(), FastEmbed {}, 10),
+                    SemSearcher::new(
+                        file.clone(),
+                        FastEmbed {
+                            model: self.config.sem_search_config.model.clone(),
+                        },
+                        100,
+                    ),
                     query,
                     file.path(),
                 )

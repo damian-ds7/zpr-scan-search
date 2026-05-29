@@ -8,8 +8,8 @@ use crate::text_encoder::fastembed::FastEmbed;
 
 #[test]
 fn searcher_ranks_lines_by_cosine_similarity() {
-    let file = create_test_file(MAIN_DOC, &FastEmbed);
-    let searcher = SemSearcher::new(file, FastEmbed, 10usize);
+    let file = create_test_file(MAIN_DOC, &FastEmbed::default());
+    let searcher = SemSearcher::new(file, FastEmbed::default(), 10usize);
     let doc = MAIN_DOC.lines().collect::<Vec<_>>();
 
     let query = Query {
