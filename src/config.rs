@@ -71,4 +71,5 @@ impl Default for OcrConfig {
 #[derive(Debug, Default)]
 pub struct SemSearchConfig {
     pub model: EmbeddingModel,
+    pub queue_size: usize,
 }

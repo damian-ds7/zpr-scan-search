@@ -93,7 +93,7 @@ impl Client {
                         FastEmbed {
                             model: self.config.sem_search_config.model.clone(),
                         },
-                        100,
+                        self.config.sem_search_config.queue_size,
                     ),
                     query,
                     file.path(),
