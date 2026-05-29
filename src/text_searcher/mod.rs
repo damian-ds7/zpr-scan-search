@@ -113,6 +113,7 @@ impl Search for TextSearcher {
                 return Ok(iterator);
             }
         };
+
         let rarest = word_occur[0];
         for location in rarest.2 {
             let location_usize = *location as usize;
@@ -122,10 +123,12 @@ impl Search for TextSearcher {
                     occurrences.binary_search(&expected_pos).is_ok()
                 });
                 if is_match {
-                    locations.push(*location)
+                    let phrase_start = (location_usize - rarest.0) as i32;
+                    locations.push(phrase_start)
                 }
             }
         }
+
         Ok(TextSearcherIterator::new(
             self.file.text_arc(),
             locations,
