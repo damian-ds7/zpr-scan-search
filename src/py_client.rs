@@ -55,6 +55,7 @@ pub struct PyQuery {
 #[pymethods]
 impl PyQuery {
     #[new]
+    #[pyo3(signature = (term, before=0, after=0))]
     pub fn new(term: String, before: usize, after: usize) -> Self {
         Self {
             inner: Query {

@@ -17,3 +17,15 @@ for path, matches in results:
         print("\t", match.matched())
         print("After")
         print("\t", match.after())
+
+
+results = client.search(Query("quick brown fox"))
+for path, matches in results:
+    print(path)
+    for match in matches:
+        print("Before")
+        print("\t", match.before())
+        print("Matched")
+        print("\t", match.matched())
+        print("After")
+        print("\t", match.after())
