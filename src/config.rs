@@ -28,9 +28,19 @@ impl Default for FsScanConfig {
     }
 }
 
-#[derive(Debug, FromPyObject)]
+#[derive(Debug)]
 pub struct SearchConfig {
     pub sem_search: bool,
+}
+
+impl FromPyObject<'_, '_> for SearchConfig {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, '_, PyAny>) -> Result<Self, Self::Error> {
+        Ok(Self {
+            sem_search: obj.getattr("sem_search")?.extract()?,
+        })
+    }
 }
 
 impl Default for SearchConfig {
