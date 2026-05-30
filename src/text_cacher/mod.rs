@@ -42,6 +42,7 @@ pub enum Job {
 }
 
 /// Represents a document loaded from the cache.
+#[derive(Clone, Debug)]
 pub struct CachedDocument {
     pub text: String,
     pub map: WordMap,

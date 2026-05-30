@@ -16,14 +16,14 @@ impl MimeDetector for InferDetector {
 }
 
 /// Supported file kinds for text extraction.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum FileKind {
     Pdf,
     Image,
 }
 
 /// Represents a file that is supported for text extraction.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct SupportedFile {
     pub path: PathBuf,
     pub kind: FileKind,

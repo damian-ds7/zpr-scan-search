@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 
 /// A map that stores words and their occurrences (indices) in a document.
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct WordMap(HashMap<String, Vec<i32>>);
 
 impl WordMap {
