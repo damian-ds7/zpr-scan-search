@@ -1,18 +1,16 @@
 use fastembed::EmbeddingModel;
+use pyo3::{Borrowed, FromPyObject, PyAny, PyErr, exceptions::PyValueError, types::PyAnyMethods};
 
-use crate::text_cacher::{CacheBackend, LocalCache};
-
-#[derive(Default, Debug)]
+#[derive(Default, Debug, FromPyObject)]
 pub struct ScanSearchConfig {
     pub fs_scan: FsScanConfig,
-    pub cache_config: CacheConfig,
-    pub search_config: SearchConfig,
-    pub ocr_config: OcrConfig,
-    pub sem_search_config: SemSearchConfig,
+    pub search: SearchConfig,
+    pub ocr: OcrConfig,
+    pub sem_search: SemSearchConfig,
 }
 
 /// Configuration for scanning the filesystem and collecting supported files.
-#[derive(Debug)]
+#[derive(Debug, FromPyObject)]
 pub struct FsScanConfig {
     /// Follow symbolic links when walking the filesystem tree.
     pub follow_links: bool,
@@ -30,21 +28,7 @@ impl Default for FsScanConfig {
     }
 }
 
-#[derive(Debug, Default)]
-pub enum CacheConfig {
-    #[default]
-    Local,
-}
-
-impl CacheConfig {
-    pub fn build(&self) -> impl CacheBackend {
-        match self {
-            CacheConfig::Local => LocalCache,
-        }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, FromPyObject)]
 pub struct SearchConfig {
     pub sem_search: bool,
 }
@@ -55,7 +39,7 @@ impl Default for SearchConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, FromPyObject)]
 pub struct OcrConfig {
     pub languages: Vec<String>,
 }
@@ -72,4 +56,16 @@ impl Default for OcrConfig {
 pub struct SemSearchConfig {
     pub model: EmbeddingModel,
     pub queue_size: usize,
+}
+
+impl FromPyObject<'_, '_> for SemSearchConfig {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, '_, PyAny>) -> Result<Self, Self::Error> {
+        let model_str: String = obj.getattr("model")?.extract()?;
+        Ok(Self {
+            model: model_str.parse().map_err(PyValueError::new_err)?,
+            queue_size: obj.getattr("queue_size")?.extract()?,
+        })
+    }
 }

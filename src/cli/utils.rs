@@ -39,7 +39,7 @@ where
     supported_files
         .into_par_iter()
         .map(|file| {
-            let text_file = loader.load(file, config.search_config.sem_search)?;
+            let text_file = loader.load(file, config.search.sem_search)?;
             Ok(Arc::new(text_file))
         })
         .collect()
