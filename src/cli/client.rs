@@ -14,6 +14,7 @@ use crate::{
     searcher::{Query, Search, SearchResult},
     sem_searcher::SemSearcher,
     supported_file::InferDetector,
+    text_cacher::LocalCache,
     text_encoder::fastembed::FastEmbed,
     text_extractor::UniversalExtractor,
     text_searcher::TextSearcher,
@@ -44,11 +45,11 @@ impl Client {
     /// cannot be loaded or encoded.
     pub fn new(config: ScanSearchConfig, paths: Vec<PathBuf>) -> Result<Self> {
         let detector = InferDetector;
-        let cache = config.cache_config.build();
-        let engine = Arc::new(TesseractEngine::new(&config.ocr_config)?);
+        let cache = LocalCache;
+        let engine = Arc::new(TesseractEngine::new(&config.ocr)?);
         let extractor = UniversalExtractor::new(engine);
         let encoder = FastEmbed {
-            model: config.sem_search_config.model.clone(),
+            model: config.sem_search.model.clone(),
         };
         let loader = TextFileLoader::new(extractor, cache, encoder);
         let files = process_files(paths, &config, detector, loader)?;
@@ -81,7 +82,7 @@ impl Client {
     /// # Errors
     /// Propagates any encoding or search error encountered while processing a file.
     pub fn sem_search(&self, query: &Query) -> Result<Vec<(PathBuf, Vec<SearchResult>)>> {
-        if !self.config.search_config.sem_search {
+        if !self.config.search.sem_search {
             return Ok(vec![]);
         }
         self.files
@@ -91,9 +92,9 @@ impl Client {
                     SemSearcher::new(
                         file.clone(),
                         FastEmbed {
-                            model: self.config.sem_search_config.model.clone(),
+                            model: self.config.sem_search.model.clone(),
                         },
-                        self.config.sem_search_config.queue_size,
+                        self.config.sem_search.queue_size,
                     ),
                     query,
                     file.path(),
