@@ -101,3 +101,81 @@ fn test_loader_cache_miss_triggers_extraction_and_cache() {
     assert_eq!(text_file.text(), "extracted text");
     assert!(*submit_called.lock().unwrap());
 }
+
+struct MockEncoder;
+impl crate::text_encoder::TextEncoder for MockEncoder {
+    fn encode(&self, _text: &[&str]) -> Result<crate::text_cacher::Embeddings> {
+        Ok(crate::text_cacher::Embeddings::from(vec![vec![1.0, 2.0]]))
+    }
+}
+
+#[derive(Clone)]
+struct InMemoryCache {
+    data: Arc<Mutex<Option<CachedDocument>>>,
+}
+
+impl InMemoryCache {
+    fn new() -> Self {
+        Self {
+            data: Arc::new(Mutex::new(None)),
+        }
+    }
+}
+
+impl CacheBackend for InMemoryCache {
+    fn try_load(
+        &self,
+        _path: &Path,
+        _fingerprint: &FileFingerprint,
+    ) -> Result<Option<CachedDocument>> {
+        let data = self.data.lock().unwrap();
+        Ok(data.clone())
+    }
+
+    fn submit_job(&self, _path: PathBuf, job: Job) {
+        let Job::CacheWrite {
+            text,
+            map,
+            fingerprint,
+            embeddings,
+        } = job;
+
+        let mut data = self.data.lock().unwrap();
+        *data = Some(CachedDocument {
+            text: text.to_string(),
+            map: (*map).clone(),
+            fingerprint,
+            embeddings: (*embeddings).clone(),
+        });
+    }
+}
+
+#[test]
+fn test_loader_recreates_embeddings_if_missing() {
+    let dir = tempdir().unwrap();
+    let file_path = dir.path().join("test.pdf");
+    let _file = fs::File::create(&file_path).unwrap();
+
+    let extractor = MockExtractor;
+    let backend = InMemoryCache::new();
+    let encoder = MockEncoder;
+    let loader = TextFileLoader::new(extractor, backend.clone(), encoder);
+
+    let file = SupportedFile {
+        path: file_path,
+        kind: FileKind::Pdf,
+    };
+
+    let text_file = loader.load(file.clone(), false).unwrap();
+    assert!(text_file.embeddings.is_none());
+
+    let text_file_with_embeddings = loader.load(file, true).unwrap();
+    assert!(text_file_with_embeddings.embeddings.is_some());
+
+    let fp = FileFingerprint::from_path(&text_file_with_embeddings.path).unwrap();
+    let cached = backend
+        .try_load(&text_file_with_embeddings.path, &fp)
+        .unwrap()
+        .unwrap();
+    assert!(cached.embeddings.is_some());
+}
