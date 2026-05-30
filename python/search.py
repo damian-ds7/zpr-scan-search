@@ -1,7 +1,7 @@
 import click
+from interactive_search_page import InteractiveSearchPagerApp, render_content_blocks
 from rich.console import Console
 from scan_search import Client, Query, process_files
-from interactive_search_page import render_content_blocks, InteractiveSearchPagerApp
 
 
 def create_cache(file_names: tuple[str, ...]):
@@ -10,6 +10,7 @@ def create_cache(file_names: tuple[str, ...]):
 
 
 console = Console()
+
 
 @click.command()
 @click.argument("file_names", type=click.Path(exists=True), nargs=-1)
@@ -22,8 +23,18 @@ console = Console()
 @click.option("-ih", "--include-hidden", is_flag=True, help="Include hidden links")
 @click.option("-m", "--model", type=str, help="Encoder ML model for semsearch")
 @click.option("-l", "--languages", type=tuple[str], help="Models to used for ocr")
-def cli(file_names: tuple[str, ...], reload: bool, search: str | None, semsearch: str | None, interactive: bool,
-        context: int | None, follow_links: bool, include_hidden: bool, model: str | None, languages: tuple[str] | None):
+def cli(
+    file_names: tuple[str, ...],
+    reload: bool,
+    search: str | None,
+    semsearch: str | None,
+    interactive: bool,
+    context: int | None,
+    follow_links: bool,
+    include_hidden: bool,
+    model: str | None,
+    languages: tuple[str] | None,
+):
 
     console.print("[bold green]Loading files...[/bold green]")
     with console.status("[bold green]Creating cache...[/bold green]", spinner="dots"):
@@ -56,7 +67,7 @@ def cli(file_names: tuple[str, ...], reload: bool, search: str | None, semsearch
         view_interactive(client, context, mode=search_mode, initial_query=initial_query)
 
 
-def view_results(results: list, context=True):
+def view_results(results: list):
     content = render_content_blocks(results)
     with console.pager(styles=True):
         console.print(content)
@@ -66,6 +77,7 @@ def view_interactive(client, context: int, mode="normal", initial_query=None):
 
     pager = InteractiveSearchPagerApp("", client=client, context=context, mode=mode, initial_query=initial_query)
     pager.run()
+
 
 if __name__ == "__main__":
     cli()
