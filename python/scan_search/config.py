@@ -12,6 +12,8 @@ class FsScanConfig:
 @configclass
 class SearchConfig:
     sem_search: bool = True
+    context_before: int = 5
+    context_after = 5
 
 
 @configclass

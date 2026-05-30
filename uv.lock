@@ -380,6 +380,7 @@ source = { editable = "." }
 dependencies = [
     { name = "classconf" },
     { name = "click" },
+    { name = "platformdirs" },
     { name = "requests" },
     { name = "rich" },
     { name = "textual" },
@@ -397,6 +398,7 @@ dev = [
 requires-dist = [
     { name = "classconf", specifier = ">=0.3.1" },
     { name = "click", specifier = ">=8.3.3" },
+    { name = "platformdirs", specifier = ">=4.10.0" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "rich", specifier = ">=15.0.0" },
     { name = "textual", specifier = ">=8.2.7" },

@@ -17,6 +17,7 @@ dependencies = [
     "textual>=8.2.7",
     "requests>=2.34.2",
     "rich>=15.0.0",
+    "platformdirs>=4.10.0",
 ]
 
 [tool.maturin]
