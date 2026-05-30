@@ -1,5 +1,6 @@
 import atexit
 
+from .config import ScanSearchConfig as ScanSearchConfig
 from .scan_search import *  # noqa: F403
 
 __doc__ = scan_search.__doc__  # noqa: F405
