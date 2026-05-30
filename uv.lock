@@ -86,14 +86,14 @@ wheels = [
 
 [[package]]
 name = "classconf"
-version = "0.3.1"
+version = "0.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "rtoml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4b/01/37b4c7ad85a6ff13d67eef51d5609dfab706e90f484a248ee8c542970208/classconf-0.3.1.tar.gz", hash = "sha256:fee54ebbdee13f552670aa6d670a9f39a7a4bbcd30ec36ef8b7eb81ccd9d6413", size = 23384, upload-time = "2026-02-27T22:14:54.494Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/01/9a/be38338ed0b29f529936f022bccb38c007b07e8072df7db0f68ec1042926/classconf-0.3.2.tar.gz", hash = "sha256:63eba235a702927f747ae833d5008c2c4cc9c757a6abaaa5c08967b58b5e7d2b", size = 23438, upload-time = "2026-05-30T15:52:31.764Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/53/34/5107da48ee3b4ac3deb249609dba8d1aafe507003bf43f508f0bfb21a656/classconf-0.3.1-py3-none-any.whl", hash = "sha256:1ab1179a98dc0033216f46d6d24897e5251741527f401f9b0078f690c2e703d4", size = 9417, upload-time = "2026-02-27T22:14:53.449Z" },
+    { url = "https://files.pythonhosted.org/packages/11/8d/41e3a39c287fc022a72d229a8df99e0af232ceb3ed47f161694388d0b0e8/classconf-0.3.2-py3-none-any.whl", hash = "sha256:9b8c63940150f73a1977c29edc4fb6b7bd9eb2b42eb158ef09a7b1df761cd6c0", size = 9464, upload-time = "2026-05-30T15:52:30.967Z" },
 ]
 
 [[package]]
@@ -396,7 +396,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "classconf", specifier = ">=0.3.1" },
+    { name = "classconf", specifier = ">=0.3.2" },
     { name = "click", specifier = ">=8.3.3" },
     { name = "platformdirs", specifier = ">=4.10.0" },
     { name = "requests", specifier = ">=2.34.2" },
