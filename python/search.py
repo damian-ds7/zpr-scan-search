@@ -1,13 +1,8 @@
 import click
 from interactive_search_page import InteractiveSearchPagerApp, render_content_blocks
 from rich.console import Console
-from scan_search import Client, Query, process_files
-
-
-def create_cache(file_names: tuple[str, ...]):
-    word_map = process_files(*file_names)
-    click.echo(word_map)
-
+from scan_search import Client, Query
+from scan_search.config import ScanSearchConfig
 
 console = Console()
 
@@ -22,7 +17,7 @@ console = Console()
 @click.option("-fl", "--follow-links", is_flag=True, help="Follow links for search")
 @click.option("-ih", "--include-hidden", is_flag=True, help="Include hidden links")
 @click.option("-m", "--model", type=str, help="Encoder ML model for semsearch")
-@click.option("-l", "--languages", type=tuple[str], help="Models to used for ocr")
+@click.option("-l", "--languages", type=tuple[str], help="Languages to used for ocr")
 def cli(
     file_names: tuple[str, ...],
     reload: bool,
@@ -35,14 +30,16 @@ def cli(
     model: str | None,
     languages: tuple[str] | None,
 ):
+    config = ScanSearchConfig()
 
     console.print("[bold green]Loading files...[/bold green]")
+
     with console.status("[bold green]Creating cache...[/bold green]", spinner="dots"):
-        client = Client(list(file_names))
+        client = Client(config, list(file_names))
+
     if reload:
         click.echo("Text extraction reloaded")
         if not any([search, semsearch, interactive]):
-            create_cache(file_names)
             return
     if context is None:
         context = 5
