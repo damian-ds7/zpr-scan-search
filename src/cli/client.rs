@@ -86,7 +86,7 @@ impl Client {
             .par_iter()
             .map(|file| {
                 collect_search(
-                    SemSearcher::new(file.clone(), FastEmbed {}, 100),
+                    SemSearcher::new(file.clone(), FastEmbed {}, 10),
                     query,
                     file.path(),
                 )
