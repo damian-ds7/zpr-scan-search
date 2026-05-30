@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from classconf import ConfigParser
+from constants import APP_NAME
 from platformdirs import user_config_path
 from scan_search.config import ScanSearchConfig
 
@@ -17,7 +18,7 @@ def resolve_config(
     config_path: Path | None,
 ) -> ScanSearchConfig:
     if config_path is None:
-        config_path = user_config_path("scan-search") / "config.toml"
+        config_path = user_config_path(APP_NAME) / "config.toml"
     if not config_path.exists():
         config = ScanSearchConfig()
     else:
