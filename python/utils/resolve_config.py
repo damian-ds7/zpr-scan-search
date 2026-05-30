@@ -14,7 +14,7 @@ def resolve_config(
     follow_links: bool | None,
     include_hidden: bool | None,
     model: str | None,
-    languages: tuple[str],
+    languages: tuple[str, ...],
     config_path: Path | None,
 ) -> ScanSearchConfig:
     if config_path is None:

@@ -5,9 +5,16 @@ use crate::text_encoder::TextEncoder;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 
 /// Encoder using the fastembed lib
-#[derive(Default)]
 pub struct FastEmbed {
     pub model: EmbeddingModel,
+}
+
+impl Default for FastEmbed {
+    fn default() -> Self {
+        Self {
+            model: EmbeddingModel::AllMiniLML6V2,
+        }
+    }
 }
 
 impl TextEncoder for FastEmbed {
