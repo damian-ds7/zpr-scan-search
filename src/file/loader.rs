@@ -39,7 +39,6 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
     fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile> {
         let path = &file.path;
         let fp = FileFingerprint::from_path(path)?;
-
         if let Ok(Some(CachedDocument {
             text,
             map,
@@ -47,8 +46,32 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
             ..
         })) = self.backend.try_load(path, &fp)
         {
-            return Ok(TextFile::new(path.into(), text, map, embeddings));
+            let text: Arc<str> = text.into_boxed_str().into();
+            let map = Arc::new(map);
+            let embeddings = if embed && embeddings.is_none() {
+                let lines: Vec<&str> = text.lines().collect();
+                let embeddings = Arc::new(Some(self.encoder.encode(&lines)?));
+                self.backend.submit_job(
+                    path.clone(),
+                    Job::CacheWrite {
+                        text: Arc::clone(&text),
+                        map: Arc::clone(&map),
+                        fingerprint: fp,
+                        embeddings: Arc::clone(&embeddings),
+                    },
+                );
+                embeddings
+            } else {
+                Arc::new(embeddings)
+            };
+            return Ok(TextFile {
+                path: path.into(),
+                text,
+                map,
+                embeddings,
+            });
         }
+
         let raw_text = self.extractor.extract_from(&file)?;
         let (text, map) = process_text(raw_text);
         let embeddings = if embed {
@@ -66,7 +89,6 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
                 embeddings: Arc::clone(&embeddings),
             },
         );
-
         Ok(TextFile {
             path: path.into(),
             text,
