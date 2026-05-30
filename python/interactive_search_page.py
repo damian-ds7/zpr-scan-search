@@ -32,7 +32,7 @@ def render_content_blocks(results):
 
     return output
 
-class SearchablePagerApp(App):
+class InteractiveSearchPagerApp(App):
     CSS = """
     Screen {
         background: $background;
