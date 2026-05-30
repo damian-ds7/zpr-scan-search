@@ -1,5 +1,5 @@
 from rich.text import Text
-from scan_search import Query
+from scan_search import Client, Query
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll
 from textual.widgets import Input, Static
@@ -69,13 +69,22 @@ class InteractiveSearchPagerApp(App):
         ("escape", "normal_mode", "Cancel Search"),
     ]
 
-    def __init__(self, initial_text: str, client=None, context=5, mode="normal", initial_query=None):
+    def __init__(
+        self,
+        initial_text: str,
+        client: Client,
+        context_before: int,
+        context_after: int,
+        mode="normal",
+        initial_query: str | None = None,
+    ):
         super().__init__()
         self.initial_text = (
             initial_text if initial_text else "[dim]Pager workspace empty. Press [/] to start a new search...[/dim]"
         )
         self.client = client
-        self.context = context
+        self.context_before = context_before
+        self.context_after = context_after
         self.mode = mode
         self.initial_query = initial_query
 
@@ -91,7 +100,7 @@ class InteractiveSearchPagerApp(App):
         self.query_one("#scroll-view").focus()
 
         if self.initial_query:
-            self.perform_search(self.initial_query)
+            self.search(self.initial_query)
 
     def action_search_mode(self) -> None:
         search_bar = self.query_one("#search-bar", Input)
@@ -127,9 +136,9 @@ class InteractiveSearchPagerApp(App):
             return
 
         if self.mode == "semantic":
-            results = self.client.sem_search(Query(search_phrase, before=self.context, after=self.context))
+            results = self.client.sem_search(Query(search_phrase, before=self.context_before, after=self.context_after))
         else:
-            results = self.client.search(Query(search_phrase, before=self.context, after=self.context))
+            results = self.client.search(Query(search_phrase, before=self.context_before, after=self.context_after))
 
         content = render_content_blocks(results)
         viewer.update(content)

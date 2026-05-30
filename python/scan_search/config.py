@@ -1,6 +1,9 @@
 from dataclasses import field
 
 from classconf import configclass
+from classconf.parser import ConfigParser
+from constants import APP_NAME
+from platformdirs import user_config_path
 
 
 @configclass(top_level=True)
@@ -36,3 +39,7 @@ class ScanSearchConfig:
     search: SearchConfig = field(default_factory=SearchConfig)
     ocr: OcrConfig = field(default_factory=OcrConfig)
     sem_search: SemSearchConfig = field(default_factory=SemSearchConfig)
+
+
+def generate_default_config():
+    ConfigParser(user_config_path(APP_NAME, ensure_exists=True) / "config.toml", ScanSearchConfig, create_noexist=True)
