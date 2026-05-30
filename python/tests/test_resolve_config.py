@@ -16,6 +16,7 @@ def call_resolve(
     languages: tuple[str] | None = None,
     config_path: Path | None = None,
 ) -> ScanSearchConfig:
+    languages: list[str] = [] if languages is None else list(languages)
     return resolve_config(
         sem_search=sem_search,
         context_after=context_after,
@@ -24,7 +25,7 @@ def call_resolve(
         follow_links=follow_links,
         include_hidden=include_hidden,
         model=model,
-        languages=languages,
+        languages=tuple(languages),
         config_path=config_path,
     )
 
@@ -102,7 +103,7 @@ def test_model_overrides():
 
 def test_model_none_leaves_default():
     config = call_resolve(model=None)
-    assert config.sem_search.model == "BGESmallENV15"
+    assert config.sem_search.model == "AllMiniLML6V2"
 
 
 def test_languages_overrides():

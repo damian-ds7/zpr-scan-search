@@ -27,7 +27,7 @@ class OcrConfig:
 @configclass
 class SemSearchConfig:
     # Supported models: https://docs.rs/fastembed/5.13.4/fastembed/enum.EmbeddingModel.html
-    model: str = "BGESmallENV15"
+    model: str = "AllMiniLML6V2"
     queue_size: int = 10
 
 
