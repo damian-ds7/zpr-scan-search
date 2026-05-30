@@ -19,12 +19,16 @@ pub struct PyClient {
 #[pymethods]
 impl PyClient {
     #[new]
-    pub fn new(config: ScanSearchConfig, paths: &Bound<'_, PyList>) -> PyResult<Self> {
+    pub fn new(
+        config: ScanSearchConfig,
+        paths: &Bound<'_, PyList>,
+        reload_cache: bool,
+    ) -> PyResult<Self> {
         let paths = paths
             .iter()
             .map(|p| p.extract::<PathBuf>())
             .collect::<PyResult<Vec<PathBuf>>>()?;
-        let inner = Client::new(config, paths)?;
+        let inner = Client::new(config, paths, reload_cache)?;
         Ok(Self { inner })
     }
 

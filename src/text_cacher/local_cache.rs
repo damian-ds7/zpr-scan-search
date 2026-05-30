@@ -10,7 +10,9 @@ use crate::text_cacher::{CacheBackend, CacheWriter, CachedDocument, FileFingerpr
 /// A local file-system based cache backend.
 /// It stores cache files in the same directory as the original file, appending `.cache` to the filename.
 #[derive(Default)]
-pub struct LocalCache;
+pub struct LocalCache {
+    pub reload: bool,
+}
 
 impl CacheBackend for LocalCache {
     fn try_load(
@@ -18,6 +20,10 @@ impl CacheBackend for LocalCache {
         path: &Path,
         fingerprint: &FileFingerprint,
     ) -> Result<Option<CachedDocument>> {
+        if self.reload {
+            return Ok(None);
+        }
+
         let mut cache_path = path.to_path_buf();
 
         if let Some(file_name) = cache_path.file_name().and_then(|f| f.to_str()) {

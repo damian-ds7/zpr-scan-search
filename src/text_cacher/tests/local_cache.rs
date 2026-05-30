@@ -31,7 +31,7 @@ fn test_local_cache_valid_cache() {
     ])));
     serialize_cache_write(&text, &map_arc, &fp, &mut file, &embeddings).unwrap();
 
-    let backend = LocalCache;
+    let backend = LocalCache { reload: false };
     let result = backend.try_load(&file_path, &fp).unwrap();
 
     assert!(result.is_some());
@@ -56,7 +56,7 @@ fn test_local_cache_no_cache() {
         size: 999,
     };
 
-    let backend = LocalCache;
+    let backend = LocalCache { reload: false };
     let result = backend.try_load(&file_path, &fp).unwrap();
 
     assert!(result.is_none());
@@ -86,7 +86,7 @@ fn test_local_cache_fingerprint_mismatch() {
     let mut file = File::create(&cache_path).unwrap();
     serialize_cache_write(&text, &map, &fp_old, &mut file, &embeddings).unwrap();
 
-    let backend = LocalCache;
+    let backend = LocalCache { reload: false };
     // Try to load with new fingerprint
     let result = backend.try_load(&file_path, &fp_new).unwrap();
 
@@ -113,7 +113,7 @@ fn test_local_cache_round_trip() {
         vec![1.0, 1.1, 1.2],
         vec![1.3, 1.4, 1.5],
     ])));
-    let backend = LocalCache;
+    let backend = LocalCache { reload: false };
 
     backend.submit_job(
         file_path.clone(),
@@ -139,4 +139,32 @@ fn test_local_cache_round_trip() {
     assert_eq!(emb[0], vec![0.7, 0.8, 0.9]);
     assert_eq!(emb[1], vec![1.0, 1.1, 1.2]);
     assert_eq!(emb[2], vec![1.3, 1.4, 1.5]);
+}
+
+#[test]
+fn test_local_cache_reload_true() {
+    let dir = tempdir().unwrap();
+    let file_path = dir.path().join("document.pdf");
+    let cache_path = dir.path().join("document.pdf.cache");
+
+    let fp = FileFingerprint {
+        mtime_secs: 1234,
+        mtime_nanos: 5678,
+        size: 999,
+    };
+
+    let text = Arc::from("cached content".to_string().into_boxed_str());
+    let map = Arc::new(WordMap::new());
+    // Create a valid cache file
+    let mut file = File::create(&cache_path).unwrap();
+    let embeddings = Arc::new(Some(Embeddings::from(vec![vec![0.1, 0.2, 0.3]])));
+    serialize_cache_write(&text, &map, &fp, &mut file, &embeddings).unwrap();
+
+    let backend = LocalCache { reload: true };
+    let result = backend.try_load(&file_path, &fp).unwrap();
+
+    assert!(
+        result.is_none(),
+        "Should return None if reload is set to true"
+    );
 }

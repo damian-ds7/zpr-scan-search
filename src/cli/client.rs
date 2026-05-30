@@ -43,9 +43,11 @@ impl Client {
     /// # Errors
     /// Returns an error if Tesseract fails to initialise, or if any file
     /// cannot be loaded or encoded.
-    pub fn new(config: ScanSearchConfig, paths: Vec<PathBuf>) -> Result<Self> {
+    pub fn new(config: ScanSearchConfig, paths: Vec<PathBuf>, reload_cache: bool) -> Result<Self> {
         let detector = InferDetector;
-        let cache = LocalCache;
+        let cache = LocalCache {
+            reload: reload_cache,
+        };
         let engine = Arc::new(TesseractEngine::new(&config.ocr)?);
         let extractor = UniversalExtractor::new(engine);
         let encoder = FastEmbed {
