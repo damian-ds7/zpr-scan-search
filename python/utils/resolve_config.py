@@ -14,7 +14,7 @@ def resolve_config(
     follow_links: bool | None,
     include_hidden: bool | None,
     model: str | None,
-    languages: tuple[str] | None,
+    languages: tuple[str],
     config_path: Path | None,
 ) -> ScanSearchConfig:
     if config_path is None:
@@ -41,7 +41,7 @@ def resolve_config(
 
     if model is not None:
         config.sem_search.model = model
-    if languages is not None:
+    if languages:
         config.ocr.languages = list(languages)
 
     return config
