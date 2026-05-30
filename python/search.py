@@ -3,9 +3,9 @@ from pathlib import Path
 import click
 from interactive_search_page import InteractiveSearchPagerApp, render_content_blocks
 from rich.console import Console
-from scan_search import Client, Query
+from scan_search import Client, Query, get_tessdata_dir
 from scan_search.config import generate_default_config
-from utils.resolve_config import resolve_config
+from utils import download_missing_traineddata, resolve_config
 
 console = Console()
 
@@ -22,7 +22,7 @@ console = Console()
 @click.option("-fl", "--follow-links", is_flag=True, default=None, help="Follow links for search")
 @click.option("-ih", "--include-hidden", is_flag=True, default=None, help="Include hidden links")
 @click.option("-m", "--model", type=str, help="Encoder ML model for semsearch")
-@click.option("-l", "--languages", type=tuple[str], help="Languages to used for ocr")
+@click.option("-l", "--lang", "languages", type=str, multiple=True, help="Language for OCR")
 @click.option("--default-config", is_flag=True, default=None, help="Generate default config")
 @click.option(
     "--config",
@@ -42,7 +42,7 @@ def cli(
     follow_links: bool | None,
     include_hidden: bool | None,
     model: str | None,
-    languages: tuple[str] | None,
+    languages: tuple[str],
     default_config: bool,
     config_path: Path | None,
 ):
@@ -61,15 +61,18 @@ def cli(
         config_path,
     )
 
-    console.print("[bold green]Loading files...[/bold green]")
+    download_missing_traineddata(Path(get_tessdata_dir()), config.ocr.languages)
 
-    with console.status("[bold green]Creating cache...[/bold green]", spinner="dots"):
-        client = Client(config, list(file_names))
+    console.print("[bold green]Loading files...[/bold green]")
 
     if reload:
         click.echo("Text extraction reloaded")
         if not any([search, semsearch, interactive]):
             return
+
+    with console.status("[bold green]Creating cache...[/bold green]", spinner="dots"):
+        client = Client(config, list(file_names))
+
     if search and not interactive:
         click.echo(f"Search phrase: {search}")
         with console.status("[bold green]Searching...[/bold green]", spinner="dots"):
