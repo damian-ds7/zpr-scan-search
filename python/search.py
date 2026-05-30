@@ -1,7 +1,7 @@
 import click
 from rich.console import Console
 from scan_search import Client, Query, process_files
-from interactive_search_page import render_content_blocks, SearchablePagerApp
+from interactive_search_page import render_content_blocks, InteractiveSearchPagerApp
 
 
 def create_cache(file_names: tuple[str, ...]):
@@ -64,7 +64,7 @@ def view_results(results: list, context=True):
 
 def view_interactive(client, context: int, mode="normal", initial_query=None):
 
-    pager = SearchablePagerApp("", client=client, context=context, mode=mode, initial_query=initial_query)
+    pager = InteractiveSearchPagerApp("", client=client, context=context, mode=mode, initial_query=initial_query)
     pager.run()
 
 if __name__ == "__main__":
