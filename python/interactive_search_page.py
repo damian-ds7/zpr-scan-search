@@ -1,9 +1,9 @@
+from rich.text import Text
 from scan_search import Query
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll
 from textual.widgets import Input, Static
 
-from rich.text import Text
 
 def render_content_blocks(results):
     content_blocks = []
@@ -31,6 +31,7 @@ def render_content_blocks(results):
         output.append_text(block)
 
     return output
+
 
 class InteractiveSearchPagerApp(App):
     CSS = """
@@ -70,7 +71,9 @@ class InteractiveSearchPagerApp(App):
 
     def __init__(self, initial_text: str, client=None, context=5, mode="normal", initial_query=None):
         super().__init__()
-        self.initial_text = initial_text if initial_text else "[dim]Pager workspace empty. Press [/] to start a new search...[/dim]"
+        self.initial_text = (
+            initial_text if initial_text else "[dim]Pager workspace empty. Press [/] to start a new search...[/dim]"
+        )
         self.client = client
         self.context = context
         self.mode = mode
@@ -130,8 +133,3 @@ class InteractiveSearchPagerApp(App):
 
         content = render_content_blocks(results)
         viewer.update(content)
-
-
-
-
-
