@@ -38,6 +38,7 @@ impl CacheBackend for SpyCache {
         &self,
         _path: &Path,
         fingerprint: &FileFingerprint,
+        _reload_cache: bool,
     ) -> Result<Option<CachedDocument>> {
         if self.should_hit {
             Ok(Some(CachedDocument {
@@ -74,7 +75,7 @@ fn test_loader_cache_hit() {
         kind: FileKind::Pdf,
     };
 
-    let text_file = loader.load(file, false).unwrap();
+    let text_file = loader.load(file, false, false).unwrap();
 
     assert_eq!(text_file.text(), "cached text");
     assert!(!*submit_called.lock().unwrap());
@@ -97,7 +98,7 @@ fn test_loader_cache_miss_triggers_extraction_and_cache() {
         kind: FileKind::Pdf,
     };
 
-    let text_file = loader.load(file, false).unwrap();
+    let text_file = loader.load(file, false, false).unwrap();
 
     assert_eq!(text_file.text(), "extracted text");
     assert!(*submit_called.lock().unwrap());
@@ -128,6 +129,7 @@ impl CacheBackend for InMemoryCache {
         &self,
         _path: &Path,
         _fingerprint: &FileFingerprint,
+        _reload: bool,
     ) -> Result<Option<CachedDocument>> {
         let data = self.data.lock().unwrap();
         Ok(data.clone())
@@ -167,15 +169,15 @@ fn test_loader_recreates_embeddings_if_missing() {
         kind: FileKind::Pdf,
     };
 
-    let text_file = loader.load(file.clone(), false).unwrap();
+    let text_file = loader.load(file.clone(), false, false).unwrap();
     assert!(text_file.embeddings.is_none());
 
-    let text_file_with_embeddings = loader.load(file, true).unwrap();
+    let text_file_with_embeddings = loader.load(file, true, false).unwrap();
     assert!(text_file_with_embeddings.embeddings.is_some());
 
     let fp = FileFingerprint::from_path(&text_file_with_embeddings.path).unwrap();
     let cached = backend
-        .try_load(&text_file_with_embeddings.path, &fp)
+        .try_load(&text_file_with_embeddings.path, &fp, false)
         .unwrap()
         .unwrap();
     assert!(cached.embeddings.is_some());

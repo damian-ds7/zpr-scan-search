@@ -10,17 +10,16 @@ use crate::error::Result;
 /// A local file-system based cache backend.
 /// It stores cache files in the same directory as the original file, appending `.cache` to the filename.
 #[derive(Default)]
-pub struct LocalCache {
-    pub reload: bool,
-}
+pub struct LocalCache;
 
 impl CacheBackend for LocalCache {
     fn try_load(
         &self,
         path: &Path,
         fingerprint: &FileFingerprint,
+        reload_cache: bool,
     ) -> Result<Option<CachedDocument>> {
-        if self.reload {
+        if reload_cache {
             return Ok(None);
         }
 

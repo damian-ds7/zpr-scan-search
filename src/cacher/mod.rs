@@ -1,6 +1,7 @@
 mod cache_writer;
 pub(crate) mod codec;
 mod file_fingerprint;
+mod global_cache;
 mod local_cache;
 #[cfg(test)]
 mod tests;
@@ -25,6 +26,7 @@ pub trait CacheBackend: Sync + Send {
         &self,
         path: &Path,
         fingerprint: &FileFingerprint,
+        reload_cache: bool,
     ) -> Result<Option<CachedDocument>>;
 
     /// Submits a background job to the cache backend.

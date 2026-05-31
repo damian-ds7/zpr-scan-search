@@ -29,6 +29,7 @@ pub fn process_files<D, L>(
     config: &ScanSearchConfig,
     detector: D,
     loader: L,
+    reload_cache: bool,
 ) -> Result<Vec<Arc<TextFile>>>
 where
     D: MimeDetector,
@@ -39,7 +40,7 @@ where
     supported_files
         .into_par_iter()
         .map(|file| {
-            let text_file = loader.load(file, config.search.sem_search)?;
+            let text_file = loader.load(file, config.search.sem_search, reload_cache)?;
             Ok(Arc::new(text_file))
         })
         .collect()
