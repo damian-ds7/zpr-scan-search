@@ -45,16 +45,14 @@ impl Client {
     /// cannot be loaded or encoded.
     pub fn new(config: ScanSearchConfig, paths: Vec<PathBuf>, reload_cache: bool) -> Result<Self> {
         let detector = InferDetector;
-        let cache = LocalCache {
-            reload: reload_cache,
-        };
+        let cache = LocalCache;
         let engine = Arc::new(TesseractEngine::new(&config.ocr)?);
         let extractor = UniversalExtractor::new(engine);
         let encoder = FastEmbed {
             model: config.sem_search.model.clone(),
         };
         let loader = TextFileLoader::new(extractor, cache, encoder);
-        let files = process_files(paths, &config, detector, loader)?;
+        let files = process_files(paths, &config, detector, loader, reload_cache)?;
         Ok(Self { files, config })
     }
 

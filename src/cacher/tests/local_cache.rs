@@ -33,8 +33,8 @@ fn test_local_cache_valid_cache() {
     ])));
     serialize_cache_write(&text, &map_arc, &fp, &mut file, &embeddings).unwrap();
 
-    let backend = LocalCache { reload: false };
-    let result = backend.try_load(&file_path, &fp).unwrap();
+    let backend = LocalCache;
+    let result = backend.try_load(&file_path, &fp, false).unwrap();
 
     assert!(result.is_some());
     let doc = result.unwrap();
@@ -58,8 +58,8 @@ fn test_local_cache_no_cache() {
         size: 999,
     };
 
-    let backend = LocalCache { reload: false };
-    let result = backend.try_load(&file_path, &fp).unwrap();
+    let backend = LocalCache;
+    let result = backend.try_load(&file_path, &fp, false).unwrap();
 
     assert!(result.is_none());
 }
@@ -88,9 +88,9 @@ fn test_local_cache_fingerprint_mismatch() {
     let mut file = File::create(&cache_path).unwrap();
     serialize_cache_write(&text, &map, &fp_old, &mut file, &embeddings).unwrap();
 
-    let backend = LocalCache { reload: false };
+    let backend = LocalCache;
     // Try to load with new fingerprint
-    let result = backend.try_load(&file_path, &fp_new).unwrap();
+    let result = backend.try_load(&file_path, &fp_new, false).unwrap();
 
     assert!(
         result.is_none(),
@@ -115,7 +115,7 @@ fn test_local_cache_round_trip() {
         vec![1.0, 1.1, 1.2],
         vec![1.3, 1.4, 1.5],
     ])));
-    let backend = LocalCache { reload: false };
+    let backend = LocalCache;
 
     backend.submit_job(
         file_path.clone(),
@@ -129,7 +129,7 @@ fn test_local_cache_round_trip() {
 
     CacheWriter::get().shutdown();
 
-    let result = backend.try_load(&file_path, &fp).unwrap();
+    let result = backend.try_load(&file_path, &fp, false).unwrap();
 
     assert!(result.is_some());
     let doc = result.unwrap();
@@ -162,8 +162,8 @@ fn test_local_cache_reload_true() {
     let embeddings = Arc::new(Some(Embeddings::from(vec![vec![0.1, 0.2, 0.3]])));
     serialize_cache_write(&text, &map, &fp, &mut file, &embeddings).unwrap();
 
-    let backend = LocalCache { reload: true };
-    let result = backend.try_load(&file_path, &fp).unwrap();
+    let backend = LocalCache;
+    let result = backend.try_load(&file_path, &fp, true).unwrap();
 
     assert!(
         result.is_none(),

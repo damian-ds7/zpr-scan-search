@@ -10,7 +10,7 @@ use crate::{
 };
 
 pub trait FileLoader: Sync + Send {
-    fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile>;
+    fn load(&self, file: SupportedFile, embed: bool, reload_cache: bool) -> Result<TextFile>;
 }
 
 /// A loader that handles the process of loading a TextFile, either from cache or by extracting text.
@@ -40,7 +40,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
     ///
     /// It first tries to load from the cache backend. If not found or stale, it uses the extractor
     /// and then saves the result to the cache.
-    fn load(&self, file: SupportedFile, embed: bool) -> Result<TextFile> {
+    fn load(&self, file: SupportedFile, embed: bool, reload_cache: bool) -> Result<TextFile> {
         let path = &file.path;
         let fp = FileFingerprint::from_path(path)?;
         if let Ok(Some(CachedDocument {
@@ -48,7 +48,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileL
             map,
             embeddings,
             ..
-        })) = self.backend.try_load(path, &fp)
+        })) = self.backend.try_load(path, &fp, reload_cache)
         {
             let text: Arc<str> = text.into_boxed_str().into();
             let map = Arc::new(map);
