@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import click
+import scan_search
 from interactive_search_page import InteractiveSearchPagerApp, render_content_blocks
 from rich.console import Console
 from scan_search import Client, Query, get_tessdata_dir
@@ -23,6 +24,15 @@ console = Console()
 @click.option("-ih", "--include-hidden", is_flag=True, default=None, help="Include hidden links")
 @click.option("-m", "--model", type=str, help="Encoder ML model for semsearch")
 @click.option("-l", "--lang", "languages", type=str, multiple=True, help="Language for OCR")
+@click.option(
+    "--clear-cache",
+    "clear_old_cache",
+    default=0,
+    type=int,
+    is_flag=False,
+    flag_value=30,
+    help="Delete cache entries that weren't used for given amount of days",
+)
 @click.option("--default-config", is_flag=True, default=None, help="Generate default config")
 @click.option(
     "--config",
@@ -45,7 +55,9 @@ def cli(
     languages: tuple[str],
     default_config: bool,
     config_path: Path | None,
+    clear_old_cache: int,
 ):
+
     if default_config:
         generate_default_config()
 
@@ -60,6 +72,9 @@ def cli(
         languages,
         config_path,
     )
+
+    if clear_old_cache:
+        scan_search.clear_old_cache(config, clear_old_cache)
 
     download_missing_traineddata(Path(get_tessdata_dir()), config.ocr.languages)
 
