@@ -13,6 +13,7 @@ use std::sync::Arc;
 pub use cache_writer::CacheWriter;
 pub use embeddings::Embeddings;
 pub use file_fingerprint::FileFingerprint;
+pub use global_cache::GlobalCache;
 pub use local_cache::LocalCache;
 pub use word_map::WordMap;
 
