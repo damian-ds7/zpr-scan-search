@@ -3,10 +3,8 @@ use std::sync::Arc;
 use tempfile::tempdir;
 
 use crate::cacher::{
-    CacheBackend, CacheWriter, Embeddings, FileFingerprint,
-    Job::CacheWrite,
-    LocalCache, WordMap,
-    codec::{process_text, serialize_cache_write},
+    CacheBackend, CacheWriter, Embeddings, FileFingerprint, Job::CacheWrite, LocalCache, WordMap,
+    process_text,
 };
 
 #[test]
@@ -31,7 +29,7 @@ fn test_local_cache_valid_cache() {
         vec![0.1, 0.2, 0.3],
         vec![0.4, 0.5, 0.6],
     ])));
-    serialize_cache_write(&text, &map_arc, &fp, &mut file, &embeddings).unwrap();
+    LocalCache::serialize(&text, &map_arc, &fp, &mut file, &embeddings).unwrap();
 
     let backend = LocalCache;
     let result = backend.try_load(&file_path, &fp, false).unwrap();
@@ -86,7 +84,7 @@ fn test_local_cache_fingerprint_mismatch() {
     let embeddings = Arc::new(Some(Embeddings::from(vec![vec![1.0, 2.0]])));
     // Create cache with old fingerprint
     let mut file = File::create(&cache_path).unwrap();
-    serialize_cache_write(&text, &map, &fp_old, &mut file, &embeddings).unwrap();
+    LocalCache::serialize(&text, &map, &fp_old, &mut file, &embeddings).unwrap();
 
     let backend = LocalCache;
     // Try to load with new fingerprint
@@ -160,7 +158,7 @@ fn test_local_cache_reload_true() {
     // Create a valid cache file
     let mut file = File::create(&cache_path).unwrap();
     let embeddings = Arc::new(Some(Embeddings::from(vec![vec![0.1, 0.2, 0.3]])));
-    serialize_cache_write(&text, &map, &fp, &mut file, &embeddings).unwrap();
+    LocalCache::serialize(&text, &map, &fp, &mut file, &embeddings).unwrap();
 
     let backend = LocalCache;
     let result = backend.try_load(&file_path, &fp, true).unwrap();
