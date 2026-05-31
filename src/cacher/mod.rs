@@ -1,13 +1,10 @@
 mod cache_writer;
-pub(crate) mod codec;
+mod embeddings;
 mod file_fingerprint;
-mod global_cache;
 mod local_cache;
 #[cfg(test)]
 mod tests;
 mod word_map;
-
-mod embeddings;
 
 use crate::error::Result;
 use std::path::{Path, PathBuf};
@@ -18,6 +15,13 @@ pub use embeddings::Embeddings;
 pub use file_fingerprint::FileFingerprint;
 pub use local_cache::LocalCache;
 pub use word_map::WordMap;
+
+/// Processes text into a map and triggers a background save to disk.
+pub(crate) fn process_text(text: String) -> (Arc<str>, Arc<WordMap>) {
+    let map = Arc::new(WordMap::from(&text));
+    let text = text.into_boxed_str().into();
+    (text, map)
+}
 
 /// Interface for cache backends that store and retrieve processed document data.
 pub trait CacheBackend: Sync + Send {

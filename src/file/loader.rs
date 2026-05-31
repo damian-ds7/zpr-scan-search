@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, codec::process_text},
+    cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, process_text},
     encoder::TextEncoder,
     error::Result,
     extractor::TextExtractor,
