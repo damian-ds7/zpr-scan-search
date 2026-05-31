@@ -65,7 +65,7 @@ fn test_loader_cache_hit() {
     let _file = fs::File::create(&file_path).unwrap();
 
     let extractor = MockExtractor;
-    let backend = SpyCache::new(true);
+    let backend = Box::new(SpyCache::new(true));
     let submit_called = backend.submit_called.clone();
     let encoder = FastEmbed::default();
     let loader = TextFileLoader::new(extractor, backend, encoder);
@@ -88,7 +88,7 @@ fn test_loader_cache_miss_triggers_extraction_and_cache() {
     let _file = fs::File::create(&file_path).unwrap();
 
     let extractor = MockExtractor;
-    let backend = SpyCache::new(false);
+    let backend = Box::new(SpyCache::new(false));
     let submit_called = backend.submit_called.clone();
     let encoder = FastEmbed::default();
     let loader = TextFileLoader::new(extractor, backend, encoder);
@@ -162,7 +162,7 @@ fn test_loader_recreates_embeddings_if_missing() {
     let extractor = MockExtractor;
     let backend = InMemoryCache::new();
     let encoder = MockEncoder;
-    let loader = TextFileLoader::new(extractor, backend.clone(), encoder);
+    let loader = TextFileLoader::new(extractor, Box::new(backend.clone()), encoder);
 
     let file = SupportedFile {
         path: file_path,

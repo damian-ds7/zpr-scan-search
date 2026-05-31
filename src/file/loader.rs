@@ -18,15 +18,15 @@ pub trait FileLoader: Sync + Send {
 /// The TextFile is purely a dataclass and the loader handles creating the TextFile.
 /// It a TextExtractor, for extracting text from the pdf, a Cache Backend for processing cache
 /// and a Text Encoder for generating embeddings used later by Semantic Search
-pub struct TextFileLoader<E: TextExtractor, B: CacheBackend, C: TextEncoder> {
+pub struct TextFileLoader<E: TextExtractor, C: TextEncoder> {
     extractor: E,
-    backend: B,
+    backend: Box<dyn CacheBackend>,
     encoder: C,
 }
 
-impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> TextFileLoader<E, B, C> {
+impl<E: TextExtractor, C: TextEncoder> TextFileLoader<E, C> {
     /// Creates a new TextFileLoader with the given extractor and cache backend.
-    pub fn new(extractor: E, backend: B, encoder: C) -> Self {
+    pub fn new(extractor: E, backend: Box<dyn CacheBackend>, encoder: C) -> Self {
         Self {
             extractor,
             backend,
@@ -35,7 +35,7 @@ impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> TextFileLoader<E, B, C> 
     }
 }
 
-impl<E: TextExtractor, B: CacheBackend, C: TextEncoder> FileLoader for TextFileLoader<E, B, C> {
+impl<E: TextExtractor, C: TextEncoder> FileLoader for TextFileLoader<E, C> {
     /// Loads a TextFile from the given `SupportedFile`.
     ///
     /// It first tries to load from the cache backend. If not found or stale, it uses the extractor

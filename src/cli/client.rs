@@ -6,7 +6,6 @@ use std::{
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{
-    cacher::LocalCache,
     cli::utils::process_files,
     config::ScanSearchConfig,
     encoder::fastembed::FastEmbed,
@@ -45,7 +44,7 @@ impl Client {
     /// cannot be loaded or encoded.
     pub fn new(config: ScanSearchConfig, paths: Vec<PathBuf>, reload_cache: bool) -> Result<Self> {
         let detector = InferDetector;
-        let cache = LocalCache;
+        let cache = config.cache.build();
         let engine = Arc::new(TesseractEngine::new(&config.ocr)?);
         let extractor = UniversalExtractor::new(engine);
         let encoder = FastEmbed {

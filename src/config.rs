@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use fastembed::EmbeddingModel;
 use pyo3::{Borrowed, FromPyObject, PyAny, PyErr, exceptions::PyValueError, types::PyAnyMethods};
 
-use crate::text_cacher::{CacheBackend, GlobalCache, LocalCache};
+use crate::cacher::{CacheBackend, GlobalCache, LocalCache};
 
 #[derive(Default, Debug, FromPyObject)]
 pub struct ScanSearchConfig {
