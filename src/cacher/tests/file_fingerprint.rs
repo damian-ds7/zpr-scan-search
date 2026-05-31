@@ -1,4 +1,4 @@
-use crate::text_cacher::{
+use crate::cacher::{
     FileFingerprint,
     codec::{read_fingerprint, write_fingerprint},
 };

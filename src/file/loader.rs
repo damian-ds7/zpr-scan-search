@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use crate::{
+    cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, codec::process_text},
+    encoder::TextEncoder,
     error::Result,
+    extractor::TextExtractor,
     file::TextFile,
     supported_file::SupportedFile,
-    text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, codec::process_text},
-    text_encoder::TextEncoder,
-    text_extractor::TextExtractor,
 };
 
 pub trait FileLoader: Sync + Send {
@@ -14,6 +14,10 @@ pub trait FileLoader: Sync + Send {
 }
 
 /// A loader that handles the process of loading a TextFile, either from cache or by extracting text.
+///
+/// The TextFile is purely a dataclass and the loader handles creating the TextFile.
+/// It a TextExtractor, for extracting text from the pdf, a Cache Backend for processing cache
+/// and a Text Encoder for generating embeddings used later by Semantic Search
 pub struct TextFileLoader<E: TextExtractor, B: CacheBackend, C: TextEncoder> {
     extractor: E,
     backend: B,

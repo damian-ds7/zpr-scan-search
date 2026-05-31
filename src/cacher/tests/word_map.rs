@@ -1,4 +1,4 @@
-use crate::text_cacher::WordMap;
+use crate::cacher::WordMap;
 
 #[test]
 fn test_word_map_from_str() {

@@ -1,7 +1,7 @@
+use crate::cacher::Embeddings;
+use crate::encoder::TextEncoder;
 use crate::error::Result;
 use crate::error::ScanSearchError;
-use crate::text_cacher::Embeddings;
-use crate::text_encoder::TextEncoder;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 
 /// Encoder using the fastembed lib

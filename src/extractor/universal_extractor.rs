@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use crate::{
     error::Result,
+    extractor::{PdfExtractor, TextExtractor, image_extractor::ImageTextExtractor},
     ocr::OcrEngine,
     supported_file::{FileKind, SupportedFile},
-    text_extractor::{PdfExtractor, TextExtractor, image_extractor::ImageTextExtractor},
 };
 
 /// A universal text extractor that supports multiple file formats.

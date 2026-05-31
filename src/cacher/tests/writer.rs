@@ -1,6 +1,6 @@
+use crate::cacher::CacheWriter;
+use crate::cacher::cache_writer::{self, Msg, WriteTask};
 use crate::error::ScanSearchError;
-use crate::text_cacher::CacheWriter;
-use crate::text_cacher::cache_writer::{self, Msg, WriteTask};
 use std::fs;
 use std::path::PathBuf;
 use tempfile::tempdir;

@@ -34,6 +34,10 @@ def render_content_blocks(results):
 
 
 class InteractiveSearchPagerApp(App):
+    """
+    This custom pager is used for interactive search, both normal and semantic
+    It provides a search bar and a pager like scroll
+    """
     CSS = """
     Screen {
         background: $background;

@@ -1,8 +1,8 @@
 use crate::{
     error::{Result, ScanSearchError},
+    extractor::{TextExtractor, universal_extractor::UniversalExtractor},
     ocr::OcrEngine,
     supported_file::{FileKind, SupportedFile},
-    text_extractor::{TextExtractor, universal_extractor::UniversalExtractor},
 };
 use image::DynamicImage;
 use std::{path::PathBuf, sync::Arc};

@@ -1,11 +1,11 @@
 mod fastembed_tests;
 
 use super::SemSearcher;
+use crate::cacher::{Embeddings, WordMap};
+use crate::encoder::TextEncoder;
 use crate::error::Result;
 use crate::file::TextFile;
 use crate::searcher::{Query, Search};
-use crate::text_cacher::{Embeddings, WordMap};
-use crate::text_encoder::TextEncoder;
 use std::path::PathBuf;
 use std::sync::Arc;
 

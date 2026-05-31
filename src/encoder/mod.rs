@@ -2,7 +2,7 @@ pub mod fastembed;
 #[cfg(test)]
 pub mod tests;
 
-use crate::{error::Result, text_cacher::Embeddings};
+use crate::{cacher::Embeddings, error::Result};
 
 /// Interface for text encoders
 pub trait TextEncoder: Sync + Send {
