@@ -1,22 +1,22 @@
 #![allow(dead_code)]
 use pyo3::prelude::*;
 
+mod cacher;
 mod cli;
 mod config;
 mod constants;
 mod dir_utils;
+mod encoder;
 mod error;
+mod extractor;
 mod file;
+mod index_searcher;
 mod ocr;
 mod py_client;
 mod searcher;
 mod searcher_utils;
 mod sem_searcher;
 mod supported_file;
-mod text_cacher;
-mod text_encoder;
-mod text_extractor;
-mod text_searcher;
 
 #[pymodule]
 mod scan_search {
@@ -27,7 +27,7 @@ mod scan_search {
     #[pymodule_export]
     use crate::py_client::{PyClient, PyQuery, PySearchResult};
 
-    use crate::{ocr, text_cacher::CacheWriter};
+    use crate::{cacher::CacheWriter, ocr};
 
     /// Shuts down the background cache writer, ensuring all pending writes are completed.
     #[pyfunction]

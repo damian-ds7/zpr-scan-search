@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use crate::{
     error::{Result, ScanSearchError},
+    extractor::TextExtractor,
     ocr::OcrEngine,
     supported_file::SupportedFile,
-    text_extractor::TextExtractor,
 };
 
 /// Extractor that uses an OCR engine to extract text from image files.

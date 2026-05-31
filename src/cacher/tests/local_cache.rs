@@ -2,8 +2,10 @@ use std::fs::File;
 use std::sync::Arc;
 use tempfile::tempdir;
 
-use crate::text_cacher::{
-    CacheBackend, Embeddings, FileFingerprint, LocalCache, WordMap,
+use crate::cacher::{
+    CacheBackend, CacheWriter, Embeddings, FileFingerprint,
+    Job::CacheWrite,
+    LocalCache, WordMap,
     codec::{process_text, serialize_cache_write},
 };
 
@@ -117,7 +119,7 @@ fn test_local_cache_round_trip() {
 
     backend.submit_job(
         file_path.clone(),
-        crate::text_cacher::Job::CacheWrite {
+        CacheWrite {
             text: text_arc.clone(),
             map: map_arc.clone(),
             fingerprint: fp.clone(),
@@ -125,7 +127,7 @@ fn test_local_cache_round_trip() {
         },
     );
 
-    crate::text_cacher::CacheWriter::get().shutdown();
+    CacheWriter::get().shutdown();
 
     let result = backend.try_load(&file_path, &fp).unwrap();
 

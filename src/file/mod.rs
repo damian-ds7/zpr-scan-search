@@ -1,13 +1,15 @@
 mod loader;
 #[cfg(test)]
 mod tests;
-use crate::text_cacher::{Embeddings, WordMap};
+use crate::cacher::{Embeddings, WordMap};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 pub use loader::{FileLoader, TextFileLoader};
 
-/// Represents a processed document containing its text content and a word occurrence map.
+/// Represents a processed document containing its text content, word map and optionally embeddings
+///
+/// It is purely a data class, loading functionality is done by the Loader
 #[allow(dead_code)] // TODO: check if path can be removed later
 pub struct TextFile {
     path: PathBuf,

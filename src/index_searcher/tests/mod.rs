@@ -1,7 +1,7 @@
-use super::TextSearcher;
+use super::IndexSearcher;
+use crate::cacher::WordMap;
 use crate::file::TextFile;
 use crate::searcher::{Query, Search, SearchContext};
-use crate::text_cacher::WordMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -34,7 +34,7 @@ fn test_search_existing_phrase() {
         term: "quick brown fox".into(),
         ..Default::default()
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next().unwrap().matched(), "quick brown fox");
 }
@@ -46,7 +46,7 @@ fn test_search_non_existent_phrase() {
         term: "quick red fox".into(),
         ..Default::default()
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next(), None);
 }
@@ -58,7 +58,7 @@ fn test_search_non_existent_phrase_with_existing_words() {
         term: "filler filler forest".into(),
         ..Default::default()
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next(), None);
 }
@@ -70,7 +70,7 @@ fn test_search_rare_word_phrase() {
         term: "deep dark forest".into(),
         ..Default::default()
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next().unwrap().matched(), "deep dark forest");
 }
@@ -82,7 +82,7 @@ fn test_search_repeated_phrase() {
         term: "jumps over the lazy dog".into(),
         ..Default::default()
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next().unwrap().matched(), "jumps over the lazy dog");
     assert_eq!(iter.next().unwrap().matched(), "jumps over the lazy dog");
@@ -96,7 +96,7 @@ fn test_edge_case_rarest_at_beginning() {
         term: "some rarestword".into(),
         ..Default::default()
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     assert_eq!(iter.next(), None);
 }
@@ -111,7 +111,7 @@ fn test_search_with_context_before() {
             after: 0,
         },
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     let res = iter.next().unwrap();
     assert_eq!(res.matched(), "quick brown fox");
@@ -129,7 +129,7 @@ fn test_search_with_context_after() {
             after: 2,
         },
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     let res = iter.next().unwrap();
     assert_eq!(res.matched(), "quick brown fox");
@@ -147,7 +147,7 @@ fn test_search_with_context_before_and_after_text_edge() {
             after: 2,
         },
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     let res = iter.next().unwrap();
     assert_eq!(res.matched(), "quick brown fox");
@@ -165,7 +165,7 @@ fn test_search_with_context_before_and_after() {
             after: 2,
         },
     };
-    let searcher = TextSearcher::new(file);
+    let searcher = IndexSearcher::new(file);
     let mut iter = searcher.search(&query).unwrap();
     let res = iter.next().unwrap();
     assert_eq!(res.matched(), "forest filler filler");

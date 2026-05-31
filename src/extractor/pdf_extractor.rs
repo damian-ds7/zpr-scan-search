@@ -1,4 +1,4 @@
-use crate::{error::ScanSearchError, supported_file::SupportedFile, text_extractor::TextExtractor};
+use crate::{error::ScanSearchError, extractor::TextExtractor, supported_file::SupportedFile};
 use pdf_oxide::PdfDocument;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;

@@ -1,9 +1,10 @@
+use crate::cacher::{CacheBackend, CachedDocument, Embeddings, FileFingerprint, Job, WordMap};
+use crate::encoder::TextEncoder;
+use crate::encoder::fastembed::FastEmbed;
 use crate::error::Result;
+use crate::extractor::TextExtractor;
 use crate::file::{FileLoader, TextFileLoader};
 use crate::supported_file::{FileKind, SupportedFile};
-use crate::text_cacher::{CacheBackend, CachedDocument, FileFingerprint, Job, WordMap};
-use crate::text_encoder::fastembed::FastEmbed;
-use crate::text_extractor::TextExtractor;
 use std::fs;
 use std::path::{Path, PathBuf};
 use tempfile::tempdir;
@@ -103,9 +104,9 @@ fn test_loader_cache_miss_triggers_extraction_and_cache() {
 }
 
 struct MockEncoder;
-impl crate::text_encoder::TextEncoder for MockEncoder {
-    fn encode(&self, _text: &[&str]) -> Result<crate::text_cacher::Embeddings> {
-        Ok(crate::text_cacher::Embeddings::from(vec![vec![1.0, 2.0]]))
+impl TextEncoder for MockEncoder {
+    fn encode(&self, _text: &[&str]) -> Result<Embeddings> {
+        Ok(Embeddings::from(vec![vec![1.0, 2.0]]))
     }
 }
 

@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-
+/// Fetches the default directory for tessdata
 fn get_default_tessdata_dir() -> PathBuf {
     if cfg!(target_os = "macos") {
         let home_dir = std::env::var("HOME").expect("HOME environment variable not set");

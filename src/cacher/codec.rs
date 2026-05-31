@@ -1,6 +1,6 @@
+use crate::cacher::{CachedDocument, Embeddings, FileFingerprint, WordMap};
 use crate::constants::DELIMITER;
 use crate::error::Result;
-use crate::text_cacher::{CachedDocument, Embeddings, FileFingerprint, WordMap};
 use std::io::{self, BufRead, Write};
 use std::sync::Arc;
 

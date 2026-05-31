@@ -1,10 +1,10 @@
 use super::super::SemSearcher;
+use crate::encoder::fastembed::FastEmbed;
 use crate::searcher::{Query, Search};
 use crate::sem_searcher::tests::{
     LINE_FOREST, LINE_FOX_AND_DOG, LINE_JUMPS, MAIN_DOC, QUERY_JUMPS_OVER_LAZY_DOG,
     QUERY_QUICK_BROWN_FOX, create_test_file,
 };
-use crate::text_encoder::fastembed::FastEmbed;
 
 #[test]
 fn searcher_ranks_lines_by_cosine_similarity() {

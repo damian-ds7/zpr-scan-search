@@ -1,17 +1,22 @@
 #[cfg(test)]
 pub mod tests;
+use crate::encoder::TextEncoder;
 use crate::error::Result;
 use crate::error::ScanSearchError::Embedding;
 use crate::file::TextFile;
 use crate::searcher::{ArcStrSlice, Query, Search, SearchContext, SearchResult};
 use crate::searcher_utils::{build_context_ranges, collect_context_fragments};
-use crate::text_encoder::TextEncoder;
 use ndarray::Array1;
 use ordered_float::OrderedFloat;
 use std::collections::BinaryHeap;
 use std::string::String;
 use std::sync::Arc;
-
+/// This struct represents cosine similarity between a sentence
+/// and a `query` embedding.
+///
+/// It holds a similarity score and a location
+/// of the compared sentence. It is later used in a max heap to get
+/// sentences most similar to the query
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct CosinedEmbedding {
     similarity: OrderedFloat<f32>,
@@ -23,7 +28,11 @@ fn cosine_similarity(a: &Array1<f32>, b: &Array1<f32>) -> f32 {
     let norm = (a.dot(a) * b.dot(b)).sqrt();
     dot / norm
 }
-
+/// Implements semantic search functionality.
+///
+/// The query is embeded using an encoder model and then
+/// is compared to all the lines in the file. The similarities are
+/// put in a max heap. The size of the heap is determined by `queue_size`
 pub struct SemSearcher<E: TextEncoder> {
     file: Arc<TextFile>,
     encoder: E,

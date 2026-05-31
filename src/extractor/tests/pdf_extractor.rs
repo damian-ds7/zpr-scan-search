@@ -1,9 +1,9 @@
 use std::{path::Path, sync::Arc};
 
 use crate::{
+    extractor::{PdfExtractor, Result, TextExtractor},
     ocr::OcrEngine,
     supported_file::{FileKind, SupportedFile},
-    text_extractor::{PdfExtractor, Result, TextExtractor},
 };
 use image::DynamicImage;
 

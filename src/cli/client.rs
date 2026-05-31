@@ -6,18 +6,18 @@ use std::{
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{
+    cacher::LocalCache,
     cli::utils::process_files,
     config::ScanSearchConfig,
+    encoder::fastembed::FastEmbed,
     error::Result,
+    extractor::UniversalExtractor,
     file::{TextFile, TextFileLoader},
+    index_searcher::IndexSearcher,
     ocr::TesseractEngine,
     searcher::{Query, Search, SearchResult},
     sem_searcher::SemSearcher,
     supported_file::InferDetector,
-    text_cacher::LocalCache,
-    text_encoder::fastembed::FastEmbed,
-    text_extractor::UniversalExtractor,
-    text_searcher::TextSearcher,
 };
 
 /// Client for running searches across a collection of files.
@@ -70,7 +70,7 @@ impl Client {
     pub fn search(&self, query: &Query) -> Result<Vec<(PathBuf, Vec<SearchResult>)>> {
         self.files
             .par_iter()
-            .map(|file| collect_search(TextSearcher::new(file.clone()), query, file.path()))
+            .map(|file| collect_search(IndexSearcher::new(file.clone()), query, file.path()))
             .collect()
     }
 

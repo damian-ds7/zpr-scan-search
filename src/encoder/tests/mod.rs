@@ -1,5 +1,5 @@
 use super::TextEncoder;
-use crate::{error::Result, text_cacher::Embeddings};
+use crate::{cacher::Embeddings, error::Result};
 
 struct MockEncoder {}
 

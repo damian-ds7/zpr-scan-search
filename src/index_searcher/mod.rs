@@ -7,7 +7,7 @@ use std::sync::Arc;
 pub mod tests;
 
 /// SearchableIterator with search results being words in the file
-struct TextSearcherIterator {
+struct IndexSearcherIterator {
     text: Arc<str>,
     locations: Vec<i32>,
     query_length: usize,
@@ -17,14 +17,14 @@ struct TextSearcherIterator {
     context: SearchContext,
 }
 
-impl TextSearcherIterator {
+impl IndexSearcherIterator {
     fn new(
         text: Arc<str>,
         locations: Vec<i32>,
         context: SearchContext,
         query_length: usize,
     ) -> Self {
-        TextSearcherIterator {
+        IndexSearcherIterator {
             text: text.clone(),
             locations,
             context,
@@ -36,7 +36,7 @@ impl TextSearcherIterator {
     }
 }
 
-impl Iterator for TextSearcherIterator {
+impl Iterator for IndexSearcherIterator {
     type Item = SearchResult;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -72,18 +72,21 @@ impl Iterator for TextSearcherIterator {
     }
 }
 
-pub(crate) struct TextSearcher {
+/// A searcher matching by exact word matches in the reversed index map
+///
+/// It uses the reverse index to achieve much faster performance than linear search.
+/// Starts searching from the rarest word in the query in order to minimize the number of checks
+pub(crate) struct IndexSearcher {
     file: Arc<TextFile>,
 }
 
-/// A simple searcher looking for exact matches
-impl TextSearcher {
+impl IndexSearcher {
     pub fn new(file: Arc<TextFile>) -> Self {
-        TextSearcher { file }
+        IndexSearcher { file }
     }
 }
 
-impl Search for TextSearcher {
+impl Search for IndexSearcher {
     fn search(&self, query: &Query) -> Result<impl Iterator<Item = SearchResult>> {
         let words: Vec<&str> = query.term.split_whitespace().collect();
         let context = query.context.clone();
@@ -104,7 +107,7 @@ impl Search for TextSearcher {
                 valid_words
             }
             None => {
-                let iterator = TextSearcherIterator::new(
+                let iterator = IndexSearcherIterator::new(
                     self.file.text_arc(),
                     locations,
                     context,
@@ -129,7 +132,7 @@ impl Search for TextSearcher {
             }
         }
 
-        Ok(TextSearcherIterator::new(
+        Ok(IndexSearcherIterator::new(
             self.file.text_arc(),
             locations,
             context,
