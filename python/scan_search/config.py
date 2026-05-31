@@ -1,9 +1,41 @@
 from dataclasses import field
+from pathlib import Path
+from typing import ClassVar, Protocol, runtime_checkable
 
 from classconf import configclass
 from classconf.parser import ConfigParser
 from constants import APP_NAME
-from platformdirs import user_config_path
+from platformdirs import user_cache_path, user_config_path
+
+
+@runtime_checkable
+class CacheConfig(Protocol):
+    typ: ClassVar[str]
+
+
+@configclass
+class LocalCacheConfig:
+    typ: ClassVar[str] = "local"
+
+
+@configclass(name="cache")
+class GlobalCacheConfig:
+    typ: ClassVar[str] = "global"
+    path: Path = field(default_factory=lambda: user_cache_path(APP_NAME))
+
+
+def resolve_cache(name: str, parser: ConfigParser) -> CacheConfig:
+    match name:
+        case "local":
+            return LocalCacheConfig()
+        case "global":
+            return parser.get(GlobalCacheConfig)
+        case _:
+            raise ValueError(f"Unknown cache type: {name}")
+
+
+def serialize_cache(cfg: CacheConfig) -> str:
+    return cfg.typ
 
 
 @configclass(top_level=True)
@@ -33,13 +65,22 @@ class SemSearchConfig:
 
 @configclass(
     top_level=True,
+    field_name_mappings={"cache": "cache_type"},
+    field_deserialzers={"cache": resolve_cache},
+    field_serializers={"cache": serialize_cache},
 )
 class ScanSearchConfig:
     fs_scan: FsScanConfig = field(default_factory=FsScanConfig)
     search: SearchConfig = field(default_factory=SearchConfig)
     ocr: OcrConfig = field(default_factory=OcrConfig)
     sem_search: SemSearchConfig = field(default_factory=SemSearchConfig)
+    cache: CacheConfig = field(default_factory=GlobalCacheConfig)
 
 
 def generate_default_config():
-    ConfigParser(user_config_path(APP_NAME, ensure_exists=True) / "config.toml", ScanSearchConfig, create_noexist=True)
+    ConfigParser(
+        user_config_path(APP_NAME, ensure_exists=True) / "config.toml",
+        ScanSearchConfig,
+        GlobalCacheConfig,
+        create_noexist=True,
+    )

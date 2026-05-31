@@ -3,7 +3,7 @@ from pathlib import Path
 from classconf import ConfigParser
 from constants import APP_NAME
 from platformdirs import user_config_path
-from scan_search.config import ScanSearchConfig
+from scan_search.config import GlobalCacheConfig, ScanSearchConfig
 
 
 def resolve_config(
@@ -22,7 +22,7 @@ def resolve_config(
     if not config_path.exists():
         config = ScanSearchConfig()
     else:
-        parser = ConfigParser(config_path, ScanSearchConfig)
+        parser = ConfigParser(config_path, ScanSearchConfig, GlobalCacheConfig)
         config = parser.get(ScanSearchConfig)
 
     if follow_links:
