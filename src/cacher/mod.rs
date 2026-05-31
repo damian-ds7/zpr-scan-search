@@ -1,6 +1,7 @@
 mod cache_writer;
 mod embeddings;
 mod file_fingerprint;
+mod global_cache;
 mod local_cache;
 #[cfg(test)]
 mod tests;

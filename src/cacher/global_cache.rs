@@ -5,9 +5,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use walkdir::WalkDir;
 
 use crate::{
+    cacher::cache_writer::{Msg, WriteTask},
+    cacher::{CacheBackend, CacheWriter},
     error::{Result, ScanSearchError},
-    text_cacher::cache_writer::{Msg, WriteTask},
-    text_cacher::{CacheBackend, CacheWriter},
 };
 
 use super::{CachedDocument, FileFingerprint, Job};
