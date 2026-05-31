@@ -78,15 +78,11 @@ def cli(
 
     download_missing_traineddata(Path(get_tessdata_dir()), config.ocr.languages)
 
-    console.print("[bold green]Loading files...[/bold green]")
-
     if reload:
         with console.status("[bold green]Reloading cache...[/bold green]", spinner="dots"):
             client = Client(config, list(file_names), True)
-        if not any([search, semsearch, interactive]):
-            return
     else:
-        with console.status("[bold green]Creating cache...[/bold green]", spinner="dots"):
+        with console.status("[bold green]Loading cache...[/bold green]", spinner="dots"):
             client = Client(config, list(file_names), False)
 
     if search and not interactive:
