@@ -27,7 +27,11 @@ mod scan_search {
     #[pymodule_export]
     use crate::py_client::{PyClient, PyQuery, PySearchResult};
 
-    use crate::{cacher::CacheWriter, ocr};
+    use crate::{
+        cacher::{CacheWriter, GlobalCache},
+        config::{CacheConfig, ScanSearchConfig},
+        ocr,
+    };
 
     /// Shuts down the background cache writer, ensuring all pending writes are completed.
     #[pyfunction]
@@ -38,5 +42,19 @@ mod scan_search {
     #[pyfunction]
     fn get_tessdata_dir() -> PathBuf {
         ocr::get_tessdata_dir()
+    }
+
+    #[pyfunction]
+    fn clear_old_cache(config: ScanSearchConfig, days: u64) -> PyResult<()> {
+        match config.cache {
+            CacheConfig::Local => {
+                eprintln!("Clearing cache is supported only for global cache");
+            }
+            CacheConfig::Global { path } => {
+                let cache = GlobalCache::new(path);
+                cache.cleanup_unused(days)?;
+            }
+        }
+        Ok(())
     }
 }
