@@ -2,8 +2,7 @@ from dataclasses import field
 from pathlib import Path
 from typing import ClassVar, Protocol, runtime_checkable
 
-from classconf import configclass
-from classconf.parser import ConfigParser
+from classconf import ConfigParser, configclass
 from constants import APP_NAME
 from platformdirs import user_cache_path, user_config_path
 
@@ -18,7 +17,20 @@ class LocalCacheConfig:
     typ: ClassVar[str] = "local"
 
 
-@configclass(name="cache")
+def serialize_path(path: Path) -> str:
+    home = Path.home()
+    try:
+        path = Path("~") / path.relative_to(home)
+    except ValueError:
+        pass
+    return str(path)
+
+
+def deserialize_path(path: str) -> Path:
+    return Path(path).expanduser()
+
+
+@configclass(name="cache", field_serializers={"path": serialize_path}, field_deserialzers={"path": deserialize_path})
 class GlobalCacheConfig:
     typ: ClassVar[str] = "global"
     path: Path = field(default_factory=lambda: user_cache_path(APP_NAME))
