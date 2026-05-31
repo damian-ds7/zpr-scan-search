@@ -1,5 +1,9 @@
+use std::path::PathBuf;
+
 use fastembed::EmbeddingModel;
 use pyo3::{Borrowed, FromPyObject, PyAny, PyErr, exceptions::PyValueError, types::PyAnyMethods};
+
+use crate::text_cacher::{CacheBackend, GlobalCache, LocalCache};
 
 #[derive(Default, Debug, FromPyObject)]
 pub struct ScanSearchConfig {
@@ -7,6 +11,7 @@ pub struct ScanSearchConfig {
     pub search: SearchConfig,
     pub ocr: OcrConfig,
     pub sem_search: SemSearchConfig,
+    pub cache: CacheConfig,
 }
 
 /// Configuration for scanning the filesystem and collecting supported files.
@@ -77,5 +82,41 @@ impl FromPyObject<'_, '_> for SemSearchConfig {
             model: model_str.parse().map_err(PyValueError::new_err)?,
             queue_size: obj.getattr("queue_size")?.extract()?,
         })
+    }
+}
+
+#[derive(Debug, Default)]
+pub enum CacheConfig {
+    #[default]
+    Local,
+    Global {
+        path: PathBuf,
+    },
+}
+
+impl CacheConfig {
+    pub fn build(&self) -> Box<dyn CacheBackend> {
+        match self {
+            CacheConfig::Local => Box::new(LocalCache),
+            CacheConfig::Global { path } => Box::new(GlobalCache { path: path.clone() }),
+        }
+    }
+}
+
+impl FromPyObject<'_, '_> for CacheConfig {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, '_, PyAny>) -> Result<Self, Self::Error> {
+        let cache_type: String = obj.getattr("typ")?.extract()?;
+        match cache_type.as_str() {
+            "local" => Ok(CacheConfig::Local),
+            "global" => {
+                let path: PathBuf = obj.getattr("path")?.extract()?;
+                Ok(CacheConfig::Global { path })
+            }
+            other => Err(PyValueError::new_err(format!(
+                "Unknown cache type: {other}"
+            ))),
+        }
     }
 }
