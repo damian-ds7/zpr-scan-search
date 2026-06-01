@@ -47,3 +47,15 @@ Diagramy architektury znajdują się w plikach `architecture_uml.html/pdf`, do i
 - Aplikacja jest napisana w sposób który bardzo ułatwia dodawanie nowych funkcjonalności, np. stworzenie systemu trzymającego cache na jakimś serwerze byłoby bardzo proste dzięki traitowi `CacheBackend`, a dodanie nowego rodzaju wyszukiwania (np. naiwnego, liniowego) też wymagałoby tylko implementację traita `Search`
 
 - Duża część aplikacji jest napisana w sposób `thread-safe`, zapisywanie cachu do pliku jest tego przykładem. 
+
+- Podczas tworzenia projektu korzystaliśmy z narzędzi takich jak:
+
+- - ci/cd
+  
+  - feature branche
+  
+  - code review oraz mergowanie tylko bo "approvie" drugiej osoby
+  
+  - conventional commits
+
+- Wszystkie bardzo nam ułatwiły życie, ale są też oczywiście bardzo dobrymi praktykami programistycznymi
