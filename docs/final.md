@@ -83,6 +83,8 @@ Można wygenerować domyślny plik konfiguracji używając flagi `--default-conf
 ### Przykładowy plik konfiguracyjny
 
 ```toml
+cache_type = "global"
+
 [fs_scan]
 follow_links = true
 include_hidden = false
@@ -98,10 +100,14 @@ languages = ["eng", "pol"]
 [sem_search]
 model = "AllMiniLML6V2"
 queue_size = 10
+
+[cache]
+path = "~/.cache/scan-search"
 ```
 
 ### Opis sekcji:
 
+- **`cache_type`**: Określa rodzaj używanego cache'u. Dostępne opcje to `local` oraz `global`.
 - **`[fs_scan]`**: Kontroluje sposób skanowania katalogów (podążanie za linkami
   symbolicznymi, uwzględnianie ukrytych plików).
 - **`[search]`**: Definiuje ilość linii kontekstu wyświetlanych wokół trafienia
@@ -112,6 +118,20 @@ queue_size = 10
   tekstu.
 - **`[sem_search]`**: Konfiguracja wyszukiwania semantycznego – wybór modelu ML
   oraz rozmiar kolejki przetwarzania.
+- **`[cache]`**: Konfiguracja dla globalnego cache'u, pozwalająca określić
+  ścieżkę (`path`), w której przechowywane będą pliki cache'u.
+
+### Rodzaje cache:
+
+- **`local`**: Pliki cache są tworzone w tym samym katalogu co pliki źródłowe, z
+  rozszerzeniem `.cache`. Jest to przydatne, gdy chcemy mieć cache blisko danych
+  i nie przeszkadza nam obecność dodatkowych plików w strukturze projektów.
+- **`global`**: Pliki cache są przechowywane w centralnym katalogu (domyślnie
+  `~/.cache/scan-search`). Pozwala to na utrzymanie czystości w katalogach z
+  dokumentami. Globalny cache identyfikuje unikalne pliki na podstawie ich
+  sygnatury (fingerprint), która składa się z: czasu modyfikacji (mtime w
+  sekundach i nanosekundach) oraz rozmiaru pliku. Dzięki temu ten sam plik
+  przechowywany w różnych miejscach może współdzielić te same dane w cache'u.
 
 # Architektura
 

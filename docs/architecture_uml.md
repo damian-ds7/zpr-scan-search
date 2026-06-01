@@ -63,7 +63,8 @@ classDiagram
     class CacheConfig {
         <<enum>>
         Local
-        +build() impl CacheBackend
+        Global(path: PathBuf)
+        +build() Box~dyn CacheBackend~
     }
 
     class SearchConfig {
@@ -285,16 +286,23 @@ classDiagram
 
     class CacheBackend {
         <<trait>>
-        +try_load(path, fingerprint) Result~Option~CachedDocument~~
+        +try_load(path, fingerprint, reload_cache) Result~Option~CachedDocument~~
         +submit_job(path, job)
     }
 
     class LocalCache {
-        +try_load(path, fingerprint) Result~Option~CachedDocument~~
+        +try_load(path, fingerprint, reload_cache) Result~Option~CachedDocument~~
+        +submit_job(path, job)
+    }
+
+    class GlobalCache {
+        +path: PathBuf
+        +try_load(path, fingerprint, reload_cache) Result~Option~CachedDocument~~
         +submit_job(path, job)
     }
 
     LocalCache ..|> CacheBackend : implements
+    GlobalCache ..|> CacheBackend : implements
 
     class CacheWriter {
         -tx: Sender~Msg~
@@ -403,7 +411,7 @@ flowchart TB
         A["Receive file paths"] --> B["Scan directories (dir_utils)"]
         B --> C["Detect supported files (InferDetector)"]
         C --> D{"For each SupportedFile"}
-        D --> E["Check cache (LocalCache)"]
+        D --> E["Check cache (LocalCache / GlobalCache)"]
         E -->|Cache hit| F["Load TextFile from cache"]
         E -->|Cache miss| G["Extract text (UniversalExtractor)"]
         G --> G1{"FileKind?"}
