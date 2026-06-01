@@ -60,6 +60,59 @@ Aby wygenerować i otworzyć dokumentację biblioteki oraz modułów wewnętrzny
 cargo doc --no-deps --document-private-items --open
 ```
 
+# Konfiguracja
+
+Aplikacja pozwala na dostosowanie działania poprzez plik konfiguracyjny w
+formacie TOML.
+
+### Lokalizacja i priorytety
+
+Program poszukuje konfiguracji w następującej kolejności, korzystając ze
+standardowych lokalizacji systemowych dla danego środowiska:
+
+1. **Flaga `--config <ścieżka>`**: Pozwala na wskazanie dowolnego pliku
+   konfiguracyjnego podczas uruchamiania.
+1. **Lokalizacja systemowa**: Jeśli flaga nie zostanie użyta, aplikacja szuka
+   pliku w domyślnych folderach konfiguracyjnych użytkownika (np.
+   `~/.config/scan-search/config.toml` w systemie Linux).
+1. **Wartości domyślne**: W przypadku braku powyższych, używane są wbudowane w
+   program wartości domyślne.
+
+Można wygenerować domyślny plik konfiguracji używając flagi `--default-config`.
+
+### Przykładowy plik konfiguracyjny
+
+```toml
+[fs_scan]
+follow_links = true
+include_hidden = false
+
+[search]
+sem_search = false
+context_before = 5
+context_after = 5
+
+[ocr]
+languages = ["eng", "pol"]
+
+[sem_search]
+model = "AllMiniLML6V2"
+queue_size = 10
+```
+
+### Opis sekcji:
+
+- **`[fs_scan]`**: Kontroluje sposób skanowania katalogów (podążanie za linkami
+  symbolicznymi, uwzględnianie ukrytych plików).
+- **`[search]`**: Definiuje ilość linii kontekstu wyświetlanych wokół trafienia
+  oraz czy zanurzenia mają być generowane automatycznie przy pierwszym
+  skanowaniu pliku (pole `sem_search`). Domyślnie zanurzenia są tworzone tylko w
+  momencie wywołania wyszukiwania semantycznego.
+- **`[ocr]`**: Lista języków używanych przez silnik Tesseract do rozpoznawania
+  tekstu.
+- **`[sem_search]`**: Konfiguracja wyszukiwania semantycznego – wybór modelu ML
+  oraz rozmiar kolejki przetwarzania.
+
 # Architektura
 
 Diagramy architektury znajdują się w plikach `architecture_uml.html/pdf`, do ich
