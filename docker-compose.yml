@@ -4,9 +4,9 @@ services:
     volumes:
       - .:/app
       - /app/target
-      - /app/.venv
     environment:
-      - CXX=clang
+      - VIRTUAL_ENV=/venv
     working_dir: /app
     stdin_open: true
     tty: true
+    entrypoint: sh -c "maturin develop --release && bash"
