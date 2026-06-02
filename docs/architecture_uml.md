@@ -323,6 +323,7 @@ classDiagram
     }
 
     LocalCache ..> CacheWriter : submits via
+    GlobalCache ..> CacheWriter : submits via
 
     CacheWriter ..> WriteTask : processes
 
