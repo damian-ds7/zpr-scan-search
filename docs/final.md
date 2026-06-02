@@ -5,7 +5,8 @@ Damian D'Souza
 
 # Uruchomienie
 
-Uwaga: w konsoli mogą pojawić się wiadomości od silnika OCR o tym, że na przykład podane zdjęcie jest za małe. Nie należy się nimi przejmować.
+Uwaga: w konsoli mogą pojawić się wiadomości od silnika OCR o tym, że na
+przykład podane zdjęcie jest za małe. Nie należy się nimi przejmować.
 
 ### Środowisko Docker
 
@@ -54,14 +55,6 @@ W przypadku pracy lokalnej należy użyć skryptu `python/search.py` przez `uv`.
   uv run python/search.py resources -r -s "fox"
   ```
 
-# Generowanie dokumentacji
-
-Aby wygenerować i otworzyć dokumentację biblioteki oraz modułów wewnętrznych:
-
-```bash
-cargo doc --no-deps --document-private-items --open
-```
-
 # Konfiguracja
 
 Aplikacja pozwala na dostosowanie działania poprzez plik konfiguracyjny w
@@ -109,7 +102,8 @@ path = "~/.cache/scan-search"
 
 ### Opis sekcji:
 
-- **`cache_type`**: Określa rodzaj używanego cache'u. Dostępne opcje to `local` oraz `global`.
+- **`cache_type`**: Określa rodzaj używanego cache'u. Dostępne opcje to `local`
+  oraz `global`.
 - **`[fs_scan]`**: Kontroluje sposób skanowania katalogów (podążanie za linkami
   symbolicznymi, uwzględnianie ukrytych plików).
 - **`[search]`**: Definiuje ilość linii kontekstu wyświetlanych wokół trafienia
@@ -209,3 +203,67 @@ wygenerowania użyliśmy wtyczki mermaid do `.md`
 
 - Wszystkie bardzo nam ułatwiły życie, ale są też oczywiście bardzo dobrymi
   praktykami programistycznymi
+
+# Narzędzia developerskie
+
+W projekcie wykorzystujemy `Makefile` do automatyzacji typowych zadań
+deweloperskich. Większość komend obsługuje opcjonalne flagi `rust=true` lub
+`python=true` (domyślnie obie są aktywne), co pozwala na uruchamianie narzędzi
+tylko dla wybranej części projektu.
+
+### Dostępne komendy:
+
+- **Instalacja:**
+
+  ```bash
+  make dev
+  ```
+
+  Kompiluje kod Rust i instaluje go w środowisku Python za pomocą
+  `maturin develop`.
+
+- **Budowanie wersji produkcyjnej:**
+
+  ```bash
+  make build
+  ```
+
+  Tworzy zoptymalizowane wydanie (release) biblioteki.
+
+- **Lintowanie kodu:**
+
+  ```bash
+  make lint
+  ```
+
+  Uruchamia `clippy` dla Rusta oraz `ruff check` dla Pythona. Można na przykład
+  ograniczyć tylko do Rusta: `make lint rust=true`.
+
+- **Formatowanie kodu:**
+
+  ```bash
+  make fmt
+  ```
+
+  Uruchamia `cargo fmt` oraz `ruff format`.
+
+- **Testowanie:**
+
+  ```bash
+  make test
+  ```
+
+  Uruchamia testy jednostkowe i integracyjne dla obu części projektu
+  (`cargo test` oraz `pytest`).
+
+# Generowanie dokumentacji
+
+Aplikacja posiada dokumentację kodu źródłowego. Aby wygenerować i otworzyć
+dokumentację biblioteki Rust:
+
+```bash
+cargo doc --no-deps --document-private-items --open
+```
+
+Pozwala to na wygodne przeglądanie struktury modułów, traitów i implementacji
+bezpośrednio w przeglądarce.
