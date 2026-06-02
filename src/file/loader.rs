@@ -68,12 +68,7 @@ impl<E: TextExtractor, C: TextEncoder> FileLoader for TextFileLoader<E, C> {
             } else {
                 Arc::new(embeddings)
             };
-            return Ok(TextFile {
-                path: path.into(),
-                text,
-                map,
-                embeddings,
-            });
+            return Ok(TextFile::new(path.into(), text, map, embeddings));
         }
 
         let raw_text = self.extractor.extract_from(&file)?;
@@ -93,11 +88,6 @@ impl<E: TextExtractor, C: TextEncoder> FileLoader for TextFileLoader<E, C> {
                 embeddings: Arc::clone(&embeddings),
             },
         );
-        Ok(TextFile {
-            path: path.into(),
-            text,
-            map,
-            embeddings,
-        })
+        Ok(TextFile::new(path.into(), text, map, embeddings))
     }
 }

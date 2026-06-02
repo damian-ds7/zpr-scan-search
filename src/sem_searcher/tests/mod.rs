@@ -42,9 +42,9 @@ pub(crate) fn create_test_file<E: TextEncoder>(content: &str, encoder: &E) -> Ar
     let embeddings = encoder.encode(&lines).ok();
     Arc::new(TextFile::new(
         PathBuf::from("test.txt"),
-        content.to_string(),
-        map,
-        embeddings,
+        content.to_string().into(),
+        map.into(),
+        embeddings.into(),
     ))
 }
 

@@ -21,9 +21,9 @@ fn create_test_file(content: &str) -> Arc<TextFile> {
 
     Arc::new(TextFile::new(
         PathBuf::from("test.txt"),
-        String::from(content),
-        map,
-        None,
+        String::from(content).into(),
+        map.into(),
+        None.into(),
     ))
 }
 
