@@ -3,14 +3,18 @@ from scan_search import Client, Query
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll
 from textual.widgets import Input, Static
+from pathlib import Path
 
 
-def render_content_blocks(results):
+def render_content_blocks(results: list[tuple[Path, list[SearchResult]]]):
     content_blocks = []
 
     for result in results:
         search_results = result[1]
+        if len(search_results) == 0:
+            continue
         block = Text()
+        block.append(f"\n---{result[0].name}---\n", style="bold violet")
 
         for search_result in search_results:
             block.append("...", style="bold red")
