@@ -10,7 +10,6 @@ pub use loader::{FileLoader, TextFileLoader};
 /// Represents a processed document containing its text content, word map and optionally embeddings
 ///
 /// It is purely a data class, loading functionality is done by the Loader
-#[allow(dead_code)] // TODO: check if path can be removed later
 pub struct TextFile {
     path: PathBuf,
     text: Arc<str>,
@@ -19,16 +18,20 @@ pub struct TextFile {
 }
 
 impl TextFile {
-    pub fn new(path: PathBuf, text: String, map: WordMap, embeddings: Option<Embeddings>) -> Self {
+    pub fn new(
+        path: PathBuf,
+        text: Arc<str>,
+        map: Arc<WordMap>,
+        embeddings: Arc<Option<Embeddings>>,
+    ) -> Self {
         Self {
             path,
-            text: text.into_boxed_str().into(),
-            map: Arc::new(map),
-            embeddings: Arc::new(embeddings),
+            text,
+            map,
+            embeddings,
         }
     }
 
-    #[allow(dead_code)] // TODO: check if path can be removed later
     pub fn path(&self) -> &Path {
         &self.path
     }
@@ -37,20 +40,11 @@ impl TextFile {
         self.map.get(key)
     }
 
-    // TODO: can probably be removed after preview python function is not needed
-    pub fn map(&self) -> &WordMap {
-        &self.map
-    }
-
     pub fn text(&self) -> &str {
         &self.text
     }
 
     pub fn text_arc(&self) -> Arc<str> {
         Arc::clone(&self.text)
-    }
-
-    pub fn embeddings(&self) -> &Arc<Option<Embeddings>> {
-        &self.embeddings
     }
 }
