@@ -1,9 +1,10 @@
+from pathlib import Path
+
 from rich.text import Text
-from scan_search import Client, Query
+from scan_search import Client, Query, SearchResult
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll
 from textual.widgets import Input, Static
-from pathlib import Path
 
 
 def render_content_blocks(results: list[tuple[Path, list[SearchResult]]]):
