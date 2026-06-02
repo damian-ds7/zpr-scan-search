@@ -5,6 +5,8 @@ Damian D'Souza
 
 # Uruchomienie
 
+Uwaga: w konsoli mogą pojawić się wiadomości od silnika OCR o tym, że na przykład podane zdjęcie jest za małe. Nie należy się nimi przejmować.
+
 ### Środowisko Docker
 
 Wszystkie zależności systemowe (Tesseract OCR, nagłówki Python, kompilator C++)
